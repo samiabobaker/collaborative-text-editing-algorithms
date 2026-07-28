@@ -1,5 +1,7 @@
 \documentclass[sigplan]{acmart}
 
+\usepackage{makecell}
+
 \acmConference[EuroSys'27]{European Conference on Computer Systems}{April 19--23, 2027}{Rabat, Morocco}
 
 
@@ -29,6 +31,55 @@
 \section{Introduction}
 
 ...
+
+
+
+\begin{table*}
+  \caption{Various collabarative text-editing algorithms and their properties. Key: $\checkmark$=The checker could not find violations for this property. $\square$=The checker
+    found violations for this property.}
+  \label{tab:algorithmproperties}
+    \begin{tabular}{lccccc}
+        \toprule
+        Algorithm & Convergence & \makecell{Weak List \\ Specification \cite{}} & \makecell{Strong List \\ Specification \cite{}} & \makecell{Forward \\ non-interleaving \cite{} }& \makecell{Maximal \\ non-interleaving \cite{}} \\
+        \midrule
+        Jupiter \cite{} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
+        Fugue \cite{} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ \\
+        FugueMax \cite{} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+        TIBOT \cite{} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
+        AdOPTed \cite{} + Ellis \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + Ressel \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + IMOR  \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + Suleiman \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + TM1.1 \cite{} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + Tombstone \cite{} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+        Yjs \cite{} \\
+        YjsMod \cite{} \\
+        Sync9 \cite{} \\
+        ProseMirror \cite{} \\
+        GOT \cite{} \\
+        COT \cite{} \\
+        POT  \cite{} \\
+        GOTO \cite{} \\
+        RGA \cite{} \\
+        Non-interleaving RGA \cite{} \\
+        SOCT2 \cite{} \\
+        SOCT3 \cite{} \\
+        SOCT4 \cite{} \\
+        TIBOT 2.0 \cite{} \\
+        LOGOOT \cite{} \\
+        LSEQ \cite{} \\
+        WOOT \cite{} \\
+        WOOTO \cite{} \\
+        WOOTH \cite{} \\
+        TreeDoc \cite{} \\
+        dOPT \cite{} \\
+        NICE \cite{} \\
+        Google OT \cite{} \\
+
+
+        \bottomrule
+    \end{tabular}   
+\end{table*}
 
 
 %% Bibliography
