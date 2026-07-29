@@ -30,15 +30,6 @@ year = {1995},
 doi = {10.1145/215585.215706}
 }
 
-@inproceedings{Sun1996,
-author = {Sun, Chengzheng and Yang, Yun and Zhang, Yanchun and Chen, David},
-title = {Distributed Concurrency Control in Real-time Cooperative Editing Systems},
-booktitle = {Annual Asian Computing Science Conference},
-pages = {84--95},
-year = {1996},
-doi = {10.1007/bfb0027782}
-}
-
 %% adOPTed algorithm for OT, which supports undo
 @inproceedings{Ressel1996,
 author = {Ressel, Matthias and Nitsche-Ruhland, Doris and Gunzenhäuser, Rul},
@@ -48,6 +39,15 @@ series = {CSCW},
 pages = {288--297},
 year = {1996},
 doi = {10.1145/240080.240305}
+}
+
+@inproceedings{Sun1996,
+author = {Sun, Chengzheng and Yang, Yun and Zhang, Yanchun and Chen, David},
+title = {Distributed Concurrency Control in Real-time Cooperative Editing Systems},
+booktitle = {Annual Asian Computing Science Conference},
+pages = {84--95},
+year = {1996},
+doi = {10.1007/bfb0027782}
 }
 
 %% Cited as source for SOCT2, even though that name does not appear in the
@@ -151,17 +151,6 @@ month = mar,
 doi = {10.1145/505151.505152}
 }
 
-%% OT algorithm for trees, supports move, based on SOCT4 (requires a global sequencer that orders all operations)
-%% https://www.lri.fr/~mbl/ENS/CSCW/2014/papers/Molli-GROUP03.pdf
-@inproceedings{Molli2003,
-author = {Molli, Pascal and Oster, Gérald and Skaf-Molli, Hala and Imine, Abdessamad},
-title = {Using the transformational approach to build a safe and generic data synchronizer},
-booktitle = {International ACM SIGGROUP Conference on Supporting Group Work},
-pages = {212--220},
-year = {2003},
-doi = {10.1145/958160.958194}
-}
-
 @inproceedings{Ignat2003,
 author = {Ignat, Claudia-Lavinia and Norrie, Moira C},
 title = {Customizable Collaborative Editor Relying on {treeOPT} Algorithm},
@@ -186,6 +175,17 @@ series = {ECSCW},
 pages = {277--293},
 year = {2003},
 doi = {10.1007/978-94-010-0068-0_15}
+}
+
+%% OT algorithm for trees, supports move, based on SOCT4 (requires a global sequencer that orders all operations)
+%% https://www.lri.fr/~mbl/ENS/CSCW/2014/papers/Molli-GROUP03.pdf
+@inproceedings{Molli2003,
+author = {Molli, Pascal and Oster, Gérald and Skaf-Molli, Hala and Imine, Abdessamad},
+title = {Using the transformational approach to build a safe and generic data synchronizer},
+booktitle = {International ACM SIGGROUP Conference on Supporting Group Work},
+pages = {212--220},
+year = {2003},
+doi = {10.1145/958160.958194}
 }
 
 %% TIBOT (timestamp-based total ordering for OT)
@@ -362,6 +362,29 @@ publisher = {ACM},
 doi = {10.1145/1600193.1600198}
 }
 
+%% Treedoc CRDT
+%% https://hal.inria.fr/inria-00445975/document
+@inproceedings{Preguica2009,
+author = {Preguiça, Nuno and Marques, Joan Manuel and Shapiro, Marc and Letia, Mihai},
+title = {A Commutative Replicated Data Type for Cooperative Editing},
+booktitle = {29th IEEE International Conference on Distributed Computing Systems},
+series = {ICDCS},
+pages = {395--403},
+year = {2009},
+doi = {10.1109/icdcs.2009.20}
+}
+
+%% Extended version of RGA paper, with proofs
+@techreport{Roh2009,
+author = {Roh, Hyun-Gul and Kim, Jin-Soo and Lee, Joonwon and Maeng, Seungryoul},
+title = {Optimistic Operations for Replicated Abstract Data Types},
+institution = {KAIST Department of Computer Science},
+number = {CS/TR-2009-318},
+year = {2009},
+month = sep,
+url = {https://cs.kaist.ac.kr/upload_files/report/1254967150.pdf}
+}
+
 %% Context-based OT (COT) provides both consistency maintenance and undo.
 @article{Sun2009,
 author = {Sun, David and Sun, Chengzheng},
@@ -384,27 +407,23 @@ year = {2009},
 doi = {10.1109/icdcs.2009.75}
 }
 
-%% Extended version of RGA paper, with proofs
-@techreport{Roh2009,
-author = {Roh, Hyun-Gul and Kim, Jin-Soo and Lee, Joonwon and Maeng, Seungryoul},
-title = {Optimistic Operations for Replicated Abstract Data Types},
-institution = {KAIST Department of Computer Science},
-number = {CS/TR-2009-318},
-year = {2009},
+@misc{DayRichter2010,
+author = {Day-Richter, John},
+title = {What's different about the new {Google Docs}: Making collaboration fast},
+year = {2010},
 month = sep,
-url = {https://cs.kaist.ac.kr/upload_files/report/1254967150.pdf}
+url = {https://drive.googleblog.com/2010/09/whats-different-about-new-google-docs.html}
 }
 
-%% Treedoc CRDT
-%% https://hal.inria.fr/inria-00445975/document
-@inproceedings{Preguica2009,
-author = {Preguiça, Nuno and Marques, Joan Manuel and Shapiro, Marc and Letia, Mihai},
-title = {A Commutative Replicated Data Type for Cooperative Editing},
-booktitle = {29th IEEE International Conference on Distributed Computing Systems},
-series = {ICDCS},
-pages = {395--403},
-year = {2009},
-doi = {10.1109/icdcs.2009.20}
+%% Causal Trees
+@inproceedings{Grishchenko2010,
+author = {Grishchenko, Victor},
+title = {Deep hypertext with embedded revision control implemented in regular expressions},
+booktitle = {6th International Symposium on Wikis and Open Collaboration},
+series = {WikiSym},
+year = {2010},
+publisher = {ACM},
+doi = {10.1145/1832772.1832777}
 }
 
 @techreport{Martin2010report,
@@ -433,25 +452,6 @@ title = {Understanding and Applying {Operational Transformation}},
 year = {2010},
 month = may,
 url = {https://web.archive.org/web/20111105125314/http://www.codecommit.com/blog/java/understanding-and-applying-operational-transformation}
-}
-
-@misc{DayRichter2010,
-author = {Day-Richter, John},
-title = {What's different about the new {Google Docs}: Making collaboration fast},
-year = {2010},
-month = sep,
-url = {https://drive.googleblog.com/2010/09/whats-different-about-new-google-docs.html}
-}
-
-%% Causal Trees
-@inproceedings{Grishchenko2010,
-author = {Grishchenko, Victor},
-title = {Deep hypertext with embedded revision control implemented in regular expressions},
-booktitle = {6th International Symposium on Wikis and Open Collaboration},
-series = {WikiSym},
-year = {2010},
-publisher = {ACM},
-doi = {10.1145/1832772.1832777}
 }
 
 %% https://www.researchgate.net/profile/Pascal_Urso/publication/233882440_Logoot-Undo_Distributed_Collaborative_Editing_System/links/0fcfd50c84f5194937000000.pdf
@@ -561,6 +561,16 @@ year = {2012},
 doi = {10.4204/eptcs.107.5}
 }
 
+%% Includes a move operation for text documents
+@inproceedings{AhmedNacer2013,
+author = {Ahmed-Nacer, Mehdi and Urso, Pascal and Balegas, Valter and Preguiça, Nuno},
+title = {Concurrency Control and Awareness Support for Multi-synchronous Collaborative Editing},
+booktitle = {9th IEEE International Conference on Collaborative Computing},
+series = {CollaborateCom},
+year = {2013},
+doi = {10.4108/icst.collaboratecom.2013.254113}
+}
+
 %% https://hal.inria.fr/hal-00903813/document
 @inproceedings{Andre2013,
 author = {André, Luc and Martin, Stéphane and Oster, Gérald and Ignat, Claudia-Lavinia},
@@ -573,16 +583,6 @@ publisher = {ICST},
 doi = {10.4108/icst.collaboratecom.2013.254123}
 }
 
-%% Includes a move operation for text documents
-@inproceedings{AhmedNacer2013,
-author = {Ahmed-Nacer, Mehdi and Urso, Pascal and Balegas, Valter and Preguiça, Nuno},
-title = {Concurrency Control and Awareness Support for Multi-synchronous Collaborative Editing},
-booktitle = {9th IEEE International Conference on Collaborative Computing},
-series = {CollaborateCom},
-year = {2013},
-doi = {10.4108/icst.collaboratecom.2013.254113}
-}
-
 %% Another ordered list CRDT, refinement of Logoot?
 %% https://hal.science/file/index/docid/921633/filename/fp025-nedelec.pdf
 @inproceedings{Nedelec2013,
@@ -593,6 +593,25 @@ series = {DocEng},
 pages = {37--46},
 year = {2013},
 doi = {10.1145/2494266.2494278}
+}
+
+%% https://inria.hal.science/file/index/docid/957167/filename/main.pdf
+@inproceedings{AhmedNacer2014,
+author = {Ahmed-Nacer, Mehdi and Urso, Pascal and Balegas, Valter and Preguiça, Nuno},
+title = {Merging {OT} and {CRDT} algorithms},
+booktitle = {1st Workshop on Principles and Practice of Eventual Consistency},
+series = {PaPEC},
+year = {2014},
+doi = {10.1145/2596631.2596636}
+}
+
+@inproceedings{Grishchenko2014,
+author = {Grishchenko, Victor},
+title = {{Citrea} and {Swarm}: Partially ordered op logs in the browser},
+booktitle = {1st Workshop on Principles and Practice of Eventual Consistency},
+series = {PaPEC},
+year = {2014},
+doi = {10.1145/2596631.2596641}
 }
 
 @inproceedings{Liu2014,
@@ -617,31 +636,29 @@ publisher = {ACM},
 doi = {10.1145/2531602.2531629}
 }
 
-@inproceedings{Grishchenko2014,
-author = {Grishchenko, Victor},
-title = {{Citrea} and {Swarm}: Partially ordered op logs in the browser},
-booktitle = {1st Workshop on Principles and Practice of Eventual Consistency},
-series = {PaPEC},
-year = {2014},
-doi = {10.1145/2596631.2596641}
-}
-
-%% https://inria.hal.science/file/index/docid/957167/filename/main.pdf
-@inproceedings{AhmedNacer2014,
-author = {Ahmed-Nacer, Mehdi and Urso, Pascal and Balegas, Valter and Preguiça, Nuno},
-title = {Merging {OT} and {CRDT} algorithms},
-booktitle = {1st Workshop on Principles and Practice of Eventual Consistency},
-series = {PaPEC},
-year = {2014},
-doi = {10.1145/2596631.2596636}
-}
-
 @misc{Haverbeke2015,
 author = {Haverbeke, Marijn},
 title = {Collaborative Editing in {ProseMirror}},
 year = {2015},
 month = jul,
 url = {https://marijnhaverbeke.nl/blog/collaborative-editing.html}
+}
+
+@misc{Jungnickel2015,
+author = {Jungnickel, Tim and Herb, Tobias},
+title = {{TP1}-valid Transformation Functions for Operations on ordered {n}-ary Trees},
+year = {2015},
+month = dec,
+url = {https://arxiv.org/abs/1512.05949}
+}
+
+@inproceedings{Nicolaescu2015,
+author = {Nicolaescu, Petru and Jahns, Kevin and Derntl, Michael and Klamma, Ralf},
+title = {{Yjs}: A Framework for Near Real-Time {P2P} Shared Editing on Arbitrary Data Types},
+booktitle = {15th International Conference on Web Engineering},
+series = {ICWE},
+year = {2015},
+doi = {10.1007/978-3-319-19890-3_55}
 }
 
 %% https://www.academia.edu/26094865/On_Synthesizing_a_Consistent_Operational_Transformation_Approach
@@ -656,14 +673,6 @@ year = {2015},
 doi = {10.1109/tc.2014.2308203}
 }
 
-@misc{Jungnickel2015,
-author = {Jungnickel, Tim and Herb, Tobias},
-title = {{TP1}-valid Transformation Functions for Operations on ordered {n}-ary Trees},
-year = {2015},
-month = dec,
-url = {https://arxiv.org/abs/1512.05949}
-}
-
 @techreport{Wang2015,
 author = {Wang, David and Mah, Alex and Lassen, Soren and Thorogood, Sam},
 title = {{Apache Wave} (incubating) Protocol Documentation, Release 0.4},
@@ -671,15 +680,6 @@ institution = {The Apache Wave Foundation},
 year = {2015},
 month = aug,
 url = {https://web.archive.org/web/20221218021957/https://people.apache.org/~al/wave_docs/ApacheWaveProtocol-0.4.pdf}
-}
-
-@inproceedings{Nicolaescu2015,
-author = {Nicolaescu, Petru and Jahns, Kevin and Derntl, Michael and Klamma, Ralf},
-title = {{Yjs}: A Framework for Near Real-Time {P2P} Shared Editing on Arbitrary Data Types},
-booktitle = {15th International Conference on Web Engineering},
-series = {ICWE},
-year = {2015},
-doi = {10.1007/978-3-319-19890-3_55}
 }
 
 %% https://members.loria.fr/CIgnat/files/pdf/YuDAIS15.pdf
@@ -693,16 +693,26 @@ year = {2015},
 doi = {10.1007/978-3-319-19129-4_16}
 }
 
-%% POT algorithm claims TP2 avoidance
-@article{Xu2016,
-author = {Xu, Yi and Sun, Chengzheng},
-title = {Conditions and Patterns for Achieving Convergence in {OT}-Based Co-Editors},
-journal = {IEEE Transactions on Parallel and Distributed Systems},
-volume = {27},
-number = {3},
-pages = {695--709},
+%% https://www.microsoft.com/en-us/research/wp-content/uploads/2016/07/podc16-complete.pdf
+@inproceedings{Attiya2016,
+author = {Attiya, Hagit and Burckhardt, Sebastian and Gotsman, Alexey and Morrison, Adam and Yang, Hongseok and Zawirski, Marek},
+title = {Specification and Complexity of Collaborative Text Editing},
+booktitle = {ACM Symposium on Principles of Distributed Computing},
+series = {PODC},
+pages = {259--268},
 year = {2016},
-doi = {10.1109/tpds.2015.2412938}
+doi = {10.1145/2933057.2933090}
+}
+
+%% https://hal.inria.fr/hal-01343941/document
+@inproceedings{Briot2016,
+author = {Briot, Loïck and Urso, Pascal and Shapiro, Marc},
+title = {High Responsiveness for Group Editing {CRDTs}},
+booktitle = {19th International Conference on Supporting Group Work},
+series = {GROUP},
+pages = {51--60},
+year = {2016},
+doi = {10.1145/2957276.2957300}
 }
 
 @inproceedings{Jungnickel2016,
@@ -722,29 +732,6 @@ month = jul,
 url = {https://medium.com/@raphlinus/towards-a-unified-theory-of-operational-transformation-and-crdt-70485876f72f#.zagw0ah6n}
 }
 
-%% About Yjs
-%% https://www.researchgate.net/publication/310212186_Near_Real-Time_Peer-to-Peer_Shared_Editing_on_Extensible_Data_Types
-@inproceedings{Nicolaescu2016,
-author = {Nicolaescu, Petru and Jahns, Kevin and Derntl, Michael and Klamma, Ralf},
-title = {Near Real-Time Peer-to-Peer Shared Editing on Extensible Data Types},
-booktitle = {19th International Conference on Supporting Group Work},
-series = {GROUP},
-pages = {39--49},
-year = {2016},
-doi = {10.1145/2957276.2957310}
-}
-
-%% https://hal.inria.fr/hal-01343941/document
-@inproceedings{Briot2016,
-author = {Briot, Loïck and Urso, Pascal and Shapiro, Marc},
-title = {High Responsiveness for Group Editing {CRDTs}},
-booktitle = {19th International Conference on Supporting Group Work},
-series = {GROUP},
-pages = {51--60},
-year = {2016},
-doi = {10.1145/2957276.2957300}
-}
-
 @inproceedings{Lv2016,
 author = {Lv, Xiao and He, Fazhi and Cai, Weiwei and Cheng, Yuan},
 title = {An efficient collaborative editing algorithm supporting string-based operations},
@@ -753,26 +740,6 @@ series = {CSCWD},
 pages = {45--50},
 year = {2016},
 doi = {10.1109/cscwd.2016.7565961}
-}
-
-%% https://www.microsoft.com/en-us/research/wp-content/uploads/2016/07/podc16-complete.pdf
-@inproceedings{Attiya2016,
-author = {Attiya, Hagit and Burckhardt, Sebastian and Gotsman, Alexey and Morrison, Adam and Yang, Hongseok and Zawirski, Marek},
-title = {Specification and Complexity of Collaborative Text Editing},
-booktitle = {ACM Symposium on Principles of Distributed Computing},
-series = {PODC},
-pages = {259--268},
-year = {2016},
-doi = {10.1145/2933057.2933090}
-}
-
-@inproceedings{Sinchuk2016,
-author = {Sinchuk, Sergey and Chuprikov, Pavel and Solomatov, Konstantin},
-title = {Verified Operational Transformation for Trees},
-booktitle = {7th International Conference on Interactive Theorem Proving},
-series = {ITP},
-year = {2016},
-doi = {10.1007/978-3-319-43144-4_22}
 }
 
 %% CRDT collaborative text editor in the browser using WebRTC
@@ -788,17 +755,48 @@ year = {2016},
 doi = {10.1145/2872518.2890539}
 }
 
-%% Claims to satisfy TP1+TP2
-%% Appendix: https://web.archive.org/web/20250715211753/https://www3.ntu.edu.sg/scse/staff/czsun/cscw2017_337_Appendix.pdf
-@inproceedings{Sun2017,
-author = {Sun, Chengzheng and Xu, Yi and Ng, Agustina},
-title = {Exhaustive Search and Resolution of Puzzles in {OT} Systems Supporting String-Wise Operations},
-booktitle = {ACM Conference on Computer Supported Cooperative Work and Social Computing},
-series = {CSCW},
-pages = {2504--2517},
+%% About Yjs
+%% https://www.researchgate.net/publication/310212186_Near_Real-Time_Peer-to-Peer_Shared_Editing_on_Extensible_Data_Types
+@inproceedings{Nicolaescu2016,
+author = {Nicolaescu, Petru and Jahns, Kevin and Derntl, Michael and Klamma, Ralf},
+title = {Near Real-Time Peer-to-Peer Shared Editing on Extensible Data Types},
+booktitle = {19th International Conference on Supporting Group Work},
+series = {GROUP},
+pages = {39--49},
+year = {2016},
+doi = {10.1145/2957276.2957310}
+}
+
+@inproceedings{Sinchuk2016,
+author = {Sinchuk, Sergey and Chuprikov, Pavel and Solomatov, Konstantin},
+title = {Verified Operational Transformation for Trees},
+booktitle = {7th International Conference on Interactive Theorem Proving},
+series = {ITP},
+year = {2016},
+doi = {10.1007/978-3-319-43144-4_22}
+}
+
+%% POT algorithm claims TP2 avoidance
+@article{Xu2016,
+author = {Xu, Yi and Sun, Chengzheng},
+title = {Conditions and Patterns for Achieving Convergence in {OT}-Based Co-Editors},
+journal = {IEEE Transactions on Parallel and Distributed Systems},
+volume = {27},
+number = {3},
+pages = {695--709},
+year = {2016},
+doi = {10.1109/tpds.2015.2412938}
+}
+
+%% https://arxiv.org/abs/1707.01747
+@article{Gomes2017,
+author = {Gomes, Victor B F and Kleppmann, Martin and Mulligan, Dominic P and Beresford, Alastair R},
+title = {Verifying strong eventual consistency in distributed systems},
+journal = {Proceedings of the ACM on Programming Languages},
+volume = {1},
+number = {OOPSLA},
 year = {2017},
-publisher = {ACM},
-doi = {10.1145/2998181.2998252}
+doi = {10.1145/3133933}
 }
 
 %% https://hal.inria.fr/hal-01404024/document
@@ -813,15 +811,17 @@ month = mar,
 doi = {10.1002/cpe.4110}
 }
 
-%% https://arxiv.org/abs/1707.01747
-@article{Gomes2017,
-author = {Gomes, Victor B F and Kleppmann, Martin and Mulligan, Dominic P and Beresford, Alastair R},
-title = {Verifying strong eventual consistency in distributed systems},
-journal = {Proceedings of the ACM on Programming Languages},
-volume = {1},
-number = {OOPSLA},
+%% Claims to satisfy TP1+TP2
+%% Appendix: https://web.archive.org/web/20250715211753/https://www3.ntu.edu.sg/scse/staff/czsun/cscw2017_337_Appendix.pdf
+@inproceedings{Sun2017,
+author = {Sun, Chengzheng and Xu, Yi and Ng, Agustina},
+title = {Exhaustive Search and Resolution of Puzzles in {OT} Systems Supporting String-Wise Operations},
+booktitle = {ACM Conference on Computer Supported Cooperative Work and Social Computing},
+series = {CSCW},
+pages = {2504--2517},
 year = {2017},
-doi = {10.1145/3133933}
+publisher = {ACM},
+doi = {10.1145/2998181.2998252}
 }
 
 @inproceedings{Yu2017,
@@ -832,6 +832,19 @@ series = {CDVE},
 pages = {39--47},
 year = {2017},
 doi = {10.1007/978-3-319-66805-5_5}
+}
+
+@inproceedings{Hall2018,
+author = {Hall, Aaron and Nelson, Grant and Thiesen, Mike and Woods, Nate},
+title = {The Causal Graph {CRDT} for Complex Document Structure},
+booktitle = {18th ACM Symposium on Document Engineering},
+series = {DocEng},
+articleno = {34},
+numpages = {4},
+year = {2018},
+month = aug,
+publisher = {ACM},
+doi = {10.1145/3209280.3229110}
 }
 
 @misc{Sun2018,
@@ -850,32 +863,6 @@ booktitle = {22nd International Conference on Principles of Distributed Systems}
 series = {OPODIS},
 year = {2018},
 doi = {10.4230/lipics.opodis.2018.12}
-}
-
-@inproceedings{Hall2018,
-author = {Hall, Aaron and Nelson, Grant and Thiesen, Mike and Woods, Nate},
-title = {The Causal Graph {CRDT} for Complex Document Structure},
-booktitle = {18th ACM Symposium on Document Engineering},
-series = {DocEng},
-articleno = {34},
-numpages = {4},
-year = {2018},
-month = aug,
-publisher = {ACM},
-doi = {10.1145/3209280.3229110}
-}
-
-%% https://martin.kleppmann.com/papers/interleaving-papoc19.pdf
-@inproceedings{Kleppmann2019interleaving,
-author = {Kleppmann, Martin and Gomes, Victor B F and Mulligan, Dominic P and Beresford, Alastair R},
-title = {Interleaving Anomalies in Collaborative Text Editors},
-booktitle = {6th Workshop on Principles and Practice of Consistency for Distributed Data},
-series = {PaPoC},
-articleno = {6},
-year = {2019},
-month = mar,
-publisher = {ACM},
-doi = {10.1145/3301419.3323972}
 }
 
 %% http://soft.vub.ac.be/Publications/2019/vub-soft-tr-19-08.pdf
@@ -903,6 +890,19 @@ publisher = {Springer},
 doi = {10.1007/978-3-030-22496-7_3}
 }
 
+%% https://martin.kleppmann.com/papers/interleaving-papoc19.pdf
+@inproceedings{Kleppmann2019interleaving,
+author = {Kleppmann, Martin and Gomes, Victor B F and Mulligan, Dominic P and Beresford, Alastair R},
+title = {Interleaving Anomalies in Collaborative Text Editors},
+booktitle = {6th Workshop on Principles and Practice of Consistency for Distributed Data},
+series = {PaPoC},
+articleno = {6},
+year = {2019},
+month = mar,
+publisher = {ACM},
+doi = {10.1145/3301419.3323972}
+}
+
 @misc{Lord2019,
 author = {Lord, Robert},
 title = {Notes on Splicing {CRDTs} for Structured Hypertext},
@@ -917,6 +917,41 @@ title = {How {Figma}'s multiplayer technology works},
 year = {2019},
 month = oct,
 url = {https://www.figma.com/blog/how-figmas-multiplayer-technology-works/}
+}
+
+@inproceedings{Grishchenko2020,
+author = {Grishchenko, Victor and Patrakeev, Mikhail},
+title = {{Chronofold}: A Data Structure for Versioned Text},
+booktitle = {7th Workshop on Principles and Practice of Consistency for Distributed Data},
+series = {PaPoC},
+articleno = {7},
+year = {2020},
+month = apr,
+publisher = {ACM},
+doi = {10.1145/3380787.3393680}
+}
+
+%% https://martin.kleppmann.com/papers/list-move-papoc20.pdf
+@inproceedings{Kleppmann2020,
+author = {Kleppmann, Martin},
+title = {Moving Elements in List {CRDTs}},
+booktitle = {7th Workshop on Principles and Practice of Consistency for Distributed Data},
+series = {PaPoC},
+year = {2020},
+doi = {10.1145/3380787.3393677}
+}
+
+%% https://hal.inria.fr/hal-02526724/document
+@inproceedings{Nicolas2020,
+author = {Nicolas, Matthieu and Oster, Gérald and Perrin, Olivier},
+title = {Efficient Renaming in Sequence {CRDTs}},
+booktitle = {7th Workshop on Principles and Practice of Consistency for Distributed Data},
+series = {PaPoC},
+articleno = {9},
+year = {2020},
+month = apr,
+publisher = {ACM},
+doi = {10.1145/3380787.3393682}
 }
 
 @article{Sun2020GROUP,
@@ -961,39 +996,18 @@ year = {2020},
 doi = {10.1007/s11390-020-0516-0}
 }
 
-%% https://martin.kleppmann.com/papers/list-move-papoc20.pdf
-@inproceedings{Kleppmann2020,
-author = {Kleppmann, Martin},
-title = {Moving Elements in List {CRDTs}},
-booktitle = {7th Workshop on Principles and Practice of Consistency for Distributed Data},
-series = {PaPoC},
-year = {2020},
-doi = {10.1145/3380787.3393677}
-}
-
-%% https://hal.inria.fr/hal-02526724/document
-@inproceedings{Nicolas2020,
-author = {Nicolas, Matthieu and Oster, Gérald and Perrin, Olivier},
-title = {Efficient Renaming in Sequence {CRDTs}},
-booktitle = {7th Workshop on Principles and Practice of Consistency for Distributed Data},
-series = {PaPoC},
-articleno = {9},
-year = {2020},
-month = apr,
+%% https://www.inkandswitch.com/peritext/static/cscw-publication.pdf
+@article{Litt2022peritext,
+author = {Litt, Geoffrey and Lim, Sarah and Kleppmann, Martin and van Hardenberg, Peter},
+title = {{Peritext}: A {CRDT} for Collaborative Rich Text Editing},
+journal = {Proceedings of the ACM on Human-Computer Interaction},
+volume = {6},
+number = {CSCW2},
+articleno = {531},
+year = {2022},
+month = nov,
 publisher = {ACM},
-doi = {10.1145/3380787.3393682}
-}
-
-@inproceedings{Grishchenko2020,
-author = {Grishchenko, Victor and Patrakeev, Mikhail},
-title = {{Chronofold}: A Data Structure for Versioned Text},
-booktitle = {7th Workshop on Principles and Practice of Consistency for Distributed Data},
-series = {PaPoC},
-articleno = {7},
-year = {2020},
-month = apr,
-publisher = {ACM},
-doi = {10.1145/3380787.3393680}
+doi = {10.1145/3555644}
 }
 
 %% http://soft.vub.ac.be/Publications/2022/vub-tr-soft-22-17.pdf
@@ -1007,20 +1021,6 @@ year = {2022},
 month = jul,
 publisher = {SciTePress},
 doi = {10.5220/0011278800003266}
-}
-
-%% https://www.inkandswitch.com/peritext/static/cscw-publication.pdf
-@article{Litt2022peritext,
-author = {Litt, Geoffrey and Lim, Sarah and Kleppmann, Martin and van Hardenberg, Peter},
-title = {{Peritext}: A {CRDT} for Collaborative Rich Text Editing},
-journal = {Proceedings of the ACM on Human-Computer Interaction},
-volume = {6},
-number = {CSCW2},
-articleno = {531},
-year = {2022},
-month = nov,
-publisher = {ACM},
-doi = {10.1145/3555644}
 }
 
 @inproceedings{Bauwens2023,
@@ -1051,25 +1051,6 @@ month = apr,
 url = {https://mattweidner.com/2024/04/29/list-positions.html}
 }
 
-@misc{Weidner2025without,
-author = {Weidner, Matthew},
-title = {Collaborative Text Editing without {CRDTs} or {OT}},
-year = {2025},
-month = may,
-url = {https://mattweidner.com/2025/05/21/text-without-crdts.html}
-}
-
-@article{Weidner2025Fugue,
-author = {Weidner, Matthew and Kleppmann, Martin},
-title = {The Art of the {Fugue}: Minimizing Interleaving in Collaborative Text Editing},
-journal = {IEEE Transactions on Parallel and Distributed Systems},
-volume = {36},
-number = {11},
-pages = {2425--2437},
-year = {2025},
-doi = {10.1109/TPDS.2025.3611880}
-}
-
 @inproceedings{Gentle2025,
 author = {Gentle, Joseph and Kleppmann, Martin},
 title = {Collaborative Text Editing with {Eg-walker}: Better, Faster, Smaller},
@@ -1089,4 +1070,23 @@ school = {LMU Munich},
 year = {2025},
 month = jul,
 url = {https://arxiv.org/abs/2507.22071}
+}
+
+@misc{Weidner2025without,
+author = {Weidner, Matthew},
+title = {Collaborative Text Editing without {CRDTs} or {OT}},
+year = {2025},
+month = may,
+url = {https://mattweidner.com/2025/05/21/text-without-crdts.html}
+}
+
+@article{Weidner2025Fugue,
+author = {Weidner, Matthew and Kleppmann, Martin},
+title = {The Art of the {Fugue}: Minimizing Interleaving in Collaborative Text Editing},
+journal = {IEEE Transactions on Parallel and Distributed Systems},
+volume = {36},
+number = {11},
+pages = {2425--2437},
+year = {2025},
+doi = {10.1109/TPDS.2025.3611880}
 }
