@@ -7,6 +7,9 @@ from adoptedtombstone.adoptedtombstoneclient import AdOPTedTombstoneClient
 from adopted.adoptedclient import AdOPTedClient
 from adopted.adoptedtransform import EllisTransform, ResselTransform, IMORTransform, TM11Transform
 from adoptedtm11.adoptedtm11client import AdOPTedTM11Client
+from yjs.yjsclient import YjsClient
+from yjsmod.yjsmodclient import YjsModClient
+from sync9.sync9client import Sync9Client
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from typing import Sequence, Callable
@@ -43,6 +46,39 @@ def fuguemax_setup(num_of_clients: int) -> Devices:
     clients: list[FugueMaxClient] = []
     for n in range(num_of_clients):
         client = FugueMaxClient(n)
+        clients.append(client)
+
+    for client in clients:
+        client.set_clients(clients)
+    
+    return None, clients
+
+def yjs_setup(num_of_clients: int) -> Devices:
+    clients: list[YjsClient] = []
+    for n in range(num_of_clients):
+        client = YjsClient(n)
+        clients.append(client)
+
+    for client in clients:
+        client.set_clients(clients)
+    
+    return None, clients
+
+def yjsmod_setup(num_of_clients: int) -> Devices:
+    clients: list[YjsModClient] = []
+    for n in range(num_of_clients):
+        client = YjsModClient(n)
+        clients.append(client)
+
+    for client in clients:
+        client.set_clients(clients)
+    
+    return None, clients
+
+def sync9_setup(num_of_clients: int) -> Devices:
+    clients: list[Sync9Client] = []
+    for n in range(num_of_clients):
+        client = Sync9Client(n)
         clients.append(client)
 
     for client in clients:
