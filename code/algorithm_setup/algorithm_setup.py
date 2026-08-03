@@ -12,6 +12,7 @@ from yjsmod.yjsmodclient import YjsModClient
 from sync9.sync9client import Sync9Client
 from rga.rgaclient import RGAClient
 from got.gotclient import GOTClient
+from dopt.doptclient import dOPTClient
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from typing import Sequence, Callable
@@ -93,6 +94,17 @@ def yjsmod_setup(num_of_clients: int) -> Devices:
     clients: list[YjsModClient] = []
     for n in range(num_of_clients):
         client = YjsModClient(n)
+        clients.append(client)
+
+    for client in clients:
+        client.set_clients(clients)
+    
+    return None, clients
+
+def dOPT_setup(num_of_clients: int) -> Devices:
+    clients: list[dOPTClient] = []
+    for n in range(num_of_clients):
+        client = dOPTClient(n)
         clients.append(client)
 
     for client in clients:
