@@ -10,6 +10,8 @@ from adoptedtm11.adoptedtm11client import AdOPTedTM11Client
 from yjs.yjsclient import YjsClient
 from yjsmod.yjsmodclient import YjsModClient
 from sync9.sync9client import Sync9Client
+from rga.rgaclient import RGAClient
+from got.gotclient import GOTClient
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from typing import Sequence, Callable
@@ -52,6 +54,29 @@ def fuguemax_setup(num_of_clients: int) -> Devices:
         client.set_clients(clients)
     
     return None, clients
+
+def rga_setup(num_of_clients: int) -> Devices:
+    clients: list[RGAClient] = []
+    for n in range(num_of_clients):
+        client = RGAClient(n)
+        clients.append(client)
+
+    for client in clients:
+        client.set_clients(clients)
+    
+    return None, clients
+
+def got_setup(num_of_clients: int) -> Devices:
+    clients: list[GOTClient] = []
+    for n in range(num_of_clients):
+        client = GOTClient(n)
+        clients.append(client)
+
+    for client in clients:
+        client.set_clients(clients)
+    
+    return None, clients
+
 
 def yjs_setup(num_of_clients: int) -> Devices:
     clients: list[YjsClient] = []
