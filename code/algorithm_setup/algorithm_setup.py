@@ -13,6 +13,7 @@ from sync9.sync9client import Sync9Client
 from rga.rgaclient import RGAClient
 from got.gotclient import GOTClient
 from dopt.doptclient import dOPTClient
+from soct2.soct2client import SOCT2Client
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from typing import Sequence, Callable
@@ -111,6 +112,18 @@ def dOPT_setup(num_of_clients: int) -> Devices:
         client.set_clients(clients)
     
     return None, clients
+
+def SOCT2_setup(num_of_clients: int) -> Devices:
+    clients: list[SOCT2Client] = []
+    for n in range(num_of_clients):
+        client = SOCT2Client(n)
+        clients.append(client)
+
+    for client in clients:
+        client.set_clients(clients)
+    
+    return None, clients
+
 
 def sync9_setup(num_of_clients: int) -> Devices:
     clients: list[Sync9Client] = []
