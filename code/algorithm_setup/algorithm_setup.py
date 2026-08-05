@@ -16,6 +16,7 @@ from dopt.doptclient import dOPTClient
 from soct2.soct2client import SOCT2Client
 from woot.wootclient import WOOTClient
 from markandretrace.markandretraceclient import MarkAndRetraceClient
+from wooto.wootoclient import WOOTOClient
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from typing import Sequence, Callable
@@ -42,6 +43,17 @@ def woot_setup(num_of_clients: int) -> Devices:
     clients: list[WOOTClient] = []
     for n in range(num_of_clients):
         client = WOOTClient(n)
+        clients.append(client)
+
+    for client in clients:
+        client.set_clients(clients)
+    
+    return None, clients
+
+def wooto_setup(num_of_clients: int) -> Devices:
+    clients: list[WOOTOClient] = []
+    for n in range(num_of_clients):
+        client = WOOTOClient(n)
         clients.append(client)
 
     for client in clients:
