@@ -14,6 +14,7 @@ from rga.rgaclient import RGAClient
 from got.gotclient import GOTClient
 from dopt.doptclient import dOPTClient
 from soct2.soct2client import SOCT2Client
+from woot.wootclient import WOOTClient
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from typing import Sequence, Callable
@@ -34,6 +35,19 @@ def jupiter_setup(num_of_clients: int) -> Devices:
         client.set_server(server)
     
     return server, clients
+
+
+def woot_setup(num_of_clients: int) -> Devices:
+    clients: list[WOOTClient] = []
+    for n in range(num_of_clients):
+        client = WOOTClient(n)
+        clients.append(client)
+
+    for client in clients:
+        client.set_clients(clients)
+    
+    return None, clients
+
 
 def fugue_setup(num_of_clients: int) -> Devices:
     clients: list[FugueClient] = []
@@ -78,7 +92,6 @@ def got_setup(num_of_clients: int) -> Devices:
         client.set_clients(clients)
     
     return None, clients
-
 
 def yjs_setup(num_of_clients: int) -> Devices:
     clients: list[YjsClient] = []
