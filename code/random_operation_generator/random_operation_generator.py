@@ -43,10 +43,14 @@ def generate_random_client_server_operation(server: ServerDevice, clients: Seque
 
     operations = ["insert"]
 
+    client_can_receive_from = client.can_receive_from()
+
     if len(client.read_state()) > 0 and with_deletes:
         operations.append("delete")
     if client.can_receive_from_server():
-        operations.append("receive")
+        operations.append("receiveserver")
+    if len(client_can_receive_from) != 0:
+        operations.append("receiveclient")
 
     operation = random.choice(operations)
 
@@ -54,8 +58,11 @@ def generate_random_client_server_operation(server: ServerDevice, clients: Seque
         return generate_random_insert(client)
     elif operation == "delete":
         return generate_random_delete(client)
-    else:
+    elif operation == "receiveserver":
         return ClientReceiveFromServerOperation(client.client_id)
+    else:
+        receive_from = random.choice(client_can_receive_from)
+        return ClientReceiveFromClientOperation(client.client_id, receive_from)
     
 #Choices: client insert, client delete, server receive from client (if possible), client_receive (if possible) 
 def generate_random_client_client_operation(clients: Sequence[ClientDevice], with_deletes:bool=True) -> ClientOperation:  
