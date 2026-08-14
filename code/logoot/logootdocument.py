@@ -6,9 +6,10 @@ from random import randint
 class LogootIdentifier:
     pos: int
     client_id: int
+    clock: int
 
     def less_than(self, other: LogootIdentifier):
-        return self.pos < other.pos or (self.pos == other.pos and self.client_id < other.client_id)
+        return (self.pos, self.client_id, self.clock) < (other.pos, other.client_id, other.clock)
 
 LogootPosition = list[LogootIdentifier]
 
@@ -25,15 +26,17 @@ class LogootDocument:
     state: list[UniqueChar]
     ids: list[LogootPosition]
     site: int
+    clock: int
 
     def __init__(self, site: int) -> None:
         self.state = []
-        self.begin = [LogootIdentifier(0, 0)]
-        self.end = [LogootIdentifier(self.BASE - 1, 0)]
+        self.clock = 0
+        self.begin = [LogootIdentifier(0, 0, 0)]
+        self.end = [LogootIdentifier(self.BASE - 1, 0, 0)]
         self.ids = [self.begin, self.end]
         self.site = site
 
-    BASE = 2**64
+    BASE = 2**10
 
 
     def insert_char(self, character: UniqueChar, position: int):
@@ -97,19 +100,20 @@ class LogootDocument:
             r //= self.BASE
         digits.reverse()
 
+        self.clock += 1
 
         position : LogootPosition = []
         last = index - 1
         for i, digit in enumerate(digits):
             if i == last:
-                site_id = site
+                site_id, clock = site, self.clock
             elif i < len(p) and digit == p[i].pos:
-                site_id = p[i].client_id
+                site_id, clock = p[i].client_id, p[i].clock
             elif i < len(q) and digit == q[i].pos:
-                site_id = q[i].client_id
+                site_id, clock = q[i].client_id, q[i].clock
             else:
-                site_id = site
-            position.append(LogootIdentifier(digit, site_id))
+                site_id, clock = site, self.clock
+            position.append(LogootIdentifier(digit, site_id, clock))
         return position
 
 
