@@ -1,11 +1,19 @@
-from device.clientdevice import ClientDevice
-from device.serverdevice import ServerDevice
-from device.operations import ClientOperation, ServerOperation, ServerReceiveFromClientOperation, ClientInsertOperation, ClientDeleteOperation, ClientReceiveFromServerOperation, ClientReceiveFromClientOperation, ClientTimestepOperation
 import random
-from typing import Sequence
-from unique_char.uniquechar import UniqueChar
-from tibot.tibotclient import TIBOTClient
+from collections.abc import Sequence
 
+from device.clientdevice import ClientDevice, TimeSteppedClient
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+    ServerOperation,
+    ServerReceiveFromClientOperation,
+)
+from device.serverdevice import ServerDevice
+from unique_char.uniquechar import UniqueChar
 
 
 def generate_random_server_operation(server: ServerDevice) -> ServerOperation:
@@ -68,10 +76,7 @@ def generate_random_client_server_operation(server: ServerDevice, clients: Seque
 def generate_random_client_client_operation(clients: Sequence[ClientDevice], with_deletes:bool=True) -> ClientOperation:  
     client = random.choice(clients)
 
-    if isinstance(client, TIBOTClient):
-        with_timesteps = True
-    else:
-        with_timesteps = False
+    with_timesteps = isinstance(client, TimeSteppedClient)
 
     operations = ["insert"]
 
