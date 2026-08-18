@@ -1,6 +1,7 @@
-from device.operations import ServerOperation
 from abc import ABC, abstractmethod
-from unique_char.uniquechar import UniqueChar
+
+from device.operations import ServerOperation
+
 
 class ServerDevice(ABC):
 
@@ -10,9 +11,9 @@ class ServerDevice(ABC):
         pass
 
     #Returns the current state of the server
-    @abstractmethod
-    def read_state(self) -> list[UniqueChar]:
-        pass
+    #@abstractmethod
+    #def read_state(self) -> list[UniqueChar]:
+    #    pass
 
     #Returns a list id of client_ids that the server has messages from, but not yet received
     @abstractmethod

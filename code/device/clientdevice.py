@@ -1,6 +1,8 @@
-from device.operations import ClientOperation, ClientInsertOperation, ClientDeleteOperation
 from abc import ABC, abstractmethod
+
+from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation
 from unique_char.uniquechar import UniqueChar
+
 
 class ClientDevice(ABC):
 
@@ -24,3 +26,6 @@ class ClientDevice(ABC):
     def can_receive_from(self) -> list[int]:
         pass
 
+
+class TimeSteppedClient(ClientDevice):
+    pass
