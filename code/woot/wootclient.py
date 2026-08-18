@@ -1,12 +1,23 @@
 from typing import Literal, assert_never
 
-from unique_char.uniquechar import UniqueChar
 from device.clientdevice import ClientDevice
-from device.operations import ClientTimestepOperation, ClientReceiveFromServerOperation, ClientReceiveFromClientOperation, ClientOperation, ClientInsertOperation, ClientDeleteOperation
-
-from woot.wootmessage import WOOTMessage, WOOTDeletionOperation, WOOTInsertionOperation
-from woot.wootstring import WOOTCharacter, WOOTIdentifier, WOOTString, WOOTStringEntry, get_string_entry_id
-
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from unique_char.uniquechar import UniqueChar
+from woot.wootmessage import WOOTDeletionOperation, WOOTInsertionOperation, WOOTMessage
+from woot.wootstring import (
+    WOOTCharacter,
+    WOOTIdentifier,
+    WOOTString,
+    WOOTStringEntry,
+    get_string_entry_id,
+)
 
 
 class WOOTClient(ClientDevice):
