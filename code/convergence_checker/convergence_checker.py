@@ -20,42 +20,47 @@ from tibot.tibotclient import TIBOTClient
 def check_for_convergence_client_server(
     server: ServerDevice, clients: dict[int, ClientDevice], num_of_operations: int = 10
 ) -> bool:
-    for _ in range(num_of_operations):
-        operation = generate_random_client_server_operation(server, list(clients.values()))
-        # print(operation)
-        if isinstance(operation, ClientOperation):
-            client = clients[operation.client_id]
-            client.perform_operation(operation)
-        if isinstance(operation, ServerOperation):
-            server.perform_operation(operation)
+    try:
+        for _ in range(num_of_operations):
+            operation = generate_random_client_server_operation(server, list(clients.values()))
+            # print(operation)
+            if isinstance(operation, ClientOperation):
+                client = clients[operation.client_id]
+                client.perform_operation(operation)
+            if isinstance(operation, ServerOperation):
+                server.perform_operation(operation)
 
-    redo_check = True
-    while redo_check:
-        redo_check = False
+        redo_check = True
+        while redo_check:
+            redo_check = False
 
-        client_ids = server.can_receive_from()
-        if client_ids != []:
-            redo_check = True
-            client_id = random.choice(client_ids)
-            server.perform_operation(ServerReceiveFromClientOperation(client_id))
             client_ids = server.can_receive_from()
-
-        for client_id in clients:
-            client = clients[client_id]
-            if client.can_receive_from_server():
+            if client_ids != []:
                 redo_check = True
-                client.perform_operation(ClientReceiveFromServerOperation(client_id))
+                client_id = random.choice(client_ids)
+                server.perform_operation(ServerReceiveFromClientOperation(client_id))
+                client_ids = server.can_receive_from()
 
-        for client_id in clients:
-            client = clients[client_id]
-            client_can_receive_from = client.can_receive_from()
-            if len(client_can_receive_from) != 0:
-                redo_check = True
-                receive_from = random.choice(client_can_receive_from)
-                client.perform_operation(ClientReceiveFromClientOperation(client.client_id, receive_from))
-                # print(ClientReceiveFromClientOperation(client.client_id, receive_from))
-                # print(client.client_id,":",*client.read_state(), sep="")
+            for client_id in clients:
+                client = clients[client_id]
+                if client.can_receive_from_server():
+                    redo_check = True
+                    client.perform_operation(ClientReceiveFromServerOperation(client_id))
+
+            for client_id in clients:
+                client = clients[client_id]
                 client_can_receive_from = client.can_receive_from()
+                if len(client_can_receive_from) != 0:
+                    redo_check = True
+                    receive_from = random.choice(client_can_receive_from)
+                    client.perform_operation(ClientReceiveFromClientOperation(client.client_id, receive_from))
+                    # print(ClientReceiveFromClientOperation(client.client_id, receive_from))
+                    # print(client.client_id,":",*client.read_state(), sep="")
+                    client_can_receive_from = client.can_receive_from()
+    # The algorithm produced an operation that cannot be applied, e.g. a transformed delete past the end of the state.
+    except (IndexError, ValueError) as e:
+        print(f"This algorithm does not satisfy convergence ({type(e).__name__} while applying an operation: {e}).")
+        return False
 
     # Check for convergence
     # server_state = server.read_state()
@@ -69,23 +74,28 @@ def check_for_convergence_client_server(
 
 
 def check_for_convergence_client_client(clients: dict[int, ClientDevice], num_of_operations: int = 10) -> bool:
-    for _ in range(num_of_operations):
-        operation = generate_random_client_client_operation(list(clients.values()))
-        client = clients[operation.client_id]
-        client.perform_operation(operation)
-        # print(operation)
-        # print(operation.client_id,":",*client.read_state(), sep="")
+    try:
+        for _ in range(num_of_operations):
+            operation = generate_random_client_client_operation(list(clients.values()))
+            client = clients[operation.client_id]
+            client.perform_operation(operation)
+            # print(operation)
+            # print(operation.client_id,":",*client.read_state(), sep="")
 
-    # Receive all messages into clients
-    for client_id in clients:
-        client = clients[client_id]
-        client_can_receive_from = client.can_receive_from()
-        while len(client_can_receive_from) != 0:
-            receive_from = random.choice(client_can_receive_from)
-            client.perform_operation(ClientReceiveFromClientOperation(client.client_id, receive_from))
-            # print(ClientReceiveFromClientOperation(client.client_id, receive_from))
-            # print(client.client_id,":",*client.read_state(), sep="")
+        # Receive all messages into clients
+        for client_id in clients:
+            client = clients[client_id]
             client_can_receive_from = client.can_receive_from()
+            while len(client_can_receive_from) != 0:
+                receive_from = random.choice(client_can_receive_from)
+                client.perform_operation(ClientReceiveFromClientOperation(client.client_id, receive_from))
+                # print(ClientReceiveFromClientOperation(client.client_id, receive_from))
+                # print(client.client_id,":",*client.read_state(), sep="")
+                client_can_receive_from = client.can_receive_from()
+    # The algorithm produced an operation that cannot be applied, e.g. a transformed delete past the end of the state.
+    except (IndexError, ValueError) as e:
+        print(f"This algorithm does not satisfy convergence ({type(e).__name__} while applying an operation: {e}).")
+        return False
 
     # Check for convergence
     state = clients[0].read_state()
