@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from got.operations.operation import GOTOperation
 from unique_char.uniquechar import UniqueChar
-
 
 type StateVector = dict[int,  int]
 
@@ -14,8 +11,8 @@ class GOTDeleteOperation(GOTOperation):
     An implementation of a Delete operation for the GOT algorithm.
     """
 
-    _lost_information: Optional[tuple[GOTDeleteOperation, GOTDeleteOperation]]
-    _relative_addressed_to: Optional[StateVector]
+    _lost_information: tuple[GOTDeleteOperation, GOTDeleteOperation] | None
+    _relative_addressed_to: StateVector | None
 
     # Global counter for split operations
     split_operation_id_global_counter = 0

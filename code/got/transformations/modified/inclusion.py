@@ -1,8 +1,8 @@
 from got.operations.delete import GOTDeleteOperation
-from got.operations.split_delete import GOTSplitDeleteOperation
 from got.operations.insert import GOTInsertOperation
-from got.transformations.inclusion import InclusionTransformer
 from got.operations.operation import GOTOperation
+from got.operations.split_delete import GOTSplitDeleteOperation
+from got.transformations.inclusion import InclusionTransformer
 
 
 class ModifiedInclusionTransformer(InclusionTransformer):
@@ -25,9 +25,7 @@ class ModifiedInclusionTransformer(InclusionTransformer):
         """
         transformed_op = op_a.copy()
 
-        if op_a.idx < op_b.idx:
-            return op_a.copy()
-        elif op_a.idx == op_b.idx and op_a.check_if_precedes(op_b):
+        if op_a.idx < op_b.idx or op_a.idx == op_b.idx and op_a.check_if_precedes(op_b):
             return op_a.copy()
         else:
             transformed_op.idx += len(op_b.sequence)

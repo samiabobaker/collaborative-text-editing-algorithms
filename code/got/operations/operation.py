@@ -4,6 +4,7 @@ import abc
 
 from unique_char.uniquechar import UniqueChar
 
+
 class GOTOperation:
     """
     An abstract class to represent operations in the GOT algorithm.

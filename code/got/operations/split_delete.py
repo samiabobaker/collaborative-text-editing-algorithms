@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Union
-
 from got.operations.delete import GOTDeleteOperation
 from got.operations.operation import GOTOperation
 
@@ -16,15 +14,15 @@ class GOTSplitDeleteOperation(GOTOperation):
     client_id: int
     state_vector: dict[int, int]
 
-    first: Union[GOTDeleteOperation, GOTSplitDeleteOperation]
-    second: Union[GOTDeleteOperation, GOTSplitDeleteOperation]
+    first: GOTDeleteOperation | GOTSplitDeleteOperation
+    second: GOTDeleteOperation | GOTSplitDeleteOperation
 
     def __init__(
         self,
         client_id: int,
         state_vector: dict[int, int],
-        first: Union[GOTDeleteOperation, GOTSplitDeleteOperation],
-        second: Union[GOTDeleteOperation, GOTSplitDeleteOperation],
+        first: GOTDeleteOperation | GOTSplitDeleteOperation,
+        second: GOTDeleteOperation | GOTSplitDeleteOperation,
     ):
         self.client_id = client_id
         self.state_vector = state_vector

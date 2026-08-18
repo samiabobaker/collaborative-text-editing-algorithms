@@ -1,17 +1,24 @@
+from typing import assert_never
+
 from device.clientdevice import ClientDevice
-from device.operations import ClientDeleteOperation, ClientOperation, ClientReceiveFromServerOperation, ClientReceiveFromClientOperation, ClientTimestepOperation, ClientInsertOperation
-from unique_char.uniquechar import UniqueChar
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
 from got.gotmessage import GOTMessage
-from got.operations.operation import GOTOperation
 from got.operations.delete import GOTDeleteOperation
 from got.operations.insert import GOTInsertOperation
+from got.operations.operation import GOTOperation
 from got.operations.split_delete import GOTSplitDeleteOperation
-
-from got.transformations.inclusion import InclusionTransformer
 from got.transformations.exclusion import ExclusionTransformer
+from got.transformations.inclusion import InclusionTransformer
 from got.transformations.original.original_exclusion import OriginalExclusionTransformer
 from got.transformations.original.original_inclusion import OriginalInclusionTransformer
-
+from unique_char.uniquechar import UniqueChar
 
 
 class GOTClient(ClientDevice):
@@ -429,7 +436,7 @@ class GOTClient(ClientDevice):
             flattened_and_transformed = self._flatten_and_transform_split_operation(operation)
             for i, op in enumerate(flattened_and_transformed):
                 self._apply_operation_to_document(
-                    op, add_to_history_buffer=True, increment_state_vector=True if i == 0 else False
+                    op, add_to_history_buffer=True, increment_state_vector= i == 0 
                 )
 
 

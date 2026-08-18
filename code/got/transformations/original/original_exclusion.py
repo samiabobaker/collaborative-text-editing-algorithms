@@ -1,8 +1,8 @@
 from got.operations.delete import GOTDeleteOperation
-from got.operations.split_delete import GOTSplitDeleteOperation
 from got.operations.insert import GOTInsertOperation
-from got.transformations.exclusion import ExclusionTransformer
 from got.operations.operation import GOTOperation
+from got.operations.split_delete import GOTSplitDeleteOperation
+from got.transformations.exclusion import ExclusionTransformer
 
 
 class OriginalExclusionTransformer(ExclusionTransformer):
