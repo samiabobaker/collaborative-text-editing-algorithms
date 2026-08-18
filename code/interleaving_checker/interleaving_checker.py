@@ -1,8 +1,9 @@
-from unique_char.uniquechar import UniqueChar
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
+from interleaving_checker.client_trace import Character, ClientTrace
 from interleaving_checker.random_trace import build_random_trace
-from interleaving_checker.client_trace import ClientTrace, Character
+from unique_char.uniquechar import UniqueChar
+
 
 def forward_non_interleaving(clients: dict[int, ClientDevice], server: ServerDevice | None = None, num_of_ops:int = 30,print_ops:bool=False):
     #Assume algorithm satisfies the strong list spec
@@ -144,7 +145,7 @@ def check_condition_1(state: list[UniqueChar], characters: dict[int, Character],
     #Does this condition apply?
     #Is A the left origin of B?
     B_character = characters[B.id]
-    if A != B_character.left_origin:
+    if B_character.left_origin != A:
         return True
     #For all elements that A is the left origin of, is B the earliest one in the state.
     A_character = characters[A.id]
@@ -161,7 +162,7 @@ def check_condition_2(state: list[UniqueChar], characters: dict[int, Character],
     #Does this condition apply?
     #Is B the right origin of A?
     A_character = characters[A.id]
-    if B != A_character.right_origin:
+    if A_character.right_origin != B:
         return True
     
     #For all elements that has B as right origin, A appears latest in the list.

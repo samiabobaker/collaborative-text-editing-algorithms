@@ -1,10 +1,15 @@
-from unique_char.uniquechar import UniqueChar
-from typing import Literal
-from device.operations import ClientInsertOperation, ClientDeleteOperation, ClientOperation
-from device.clientdevice import ClientDevice
-from device.serverdevice import ServerDevice
-from random_operation_generator.random_operation_generator import generate_random_client_client_operation, generate_random_client_server_operation
 from dataclasses import dataclass
+from typing import Literal
+
+from device.clientdevice import ClientDevice
+from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation
+from device.serverdevice import ServerDevice
+from random_operation_generator.random_operation_generator import (
+    generate_random_client_client_operation,
+    generate_random_client_server_operation,
+)
+from unique_char.uniquechar import UniqueChar
+
 
 class Character:
     char: UniqueChar

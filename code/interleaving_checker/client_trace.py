@@ -1,7 +1,9 @@
-from unique_char.uniquechar import UniqueChar
-from device.operations import ClientDeleteOperation, ClientInsertOperation
-from typing import Literal
 from dataclasses import dataclass
+from typing import Literal
+
+from device.operations import ClientDeleteOperation, ClientInsertOperation
+from unique_char.uniquechar import UniqueChar
+
 
 class Character:
     char: UniqueChar
