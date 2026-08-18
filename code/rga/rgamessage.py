@@ -1,7 +1,9 @@
 from dataclasses import dataclass
-from unique_char.uniquechar import UniqueChar
-from device.operations import ClientInsertOperation, ClientDeleteOperation
+
+from device.operations import ClientDeleteOperation, ClientInsertOperation
 from rga.rgatree import RGATimestamp
+from unique_char.uniquechar import UniqueChar
+
 
 @dataclass
 class RGAInsertionOperation:
