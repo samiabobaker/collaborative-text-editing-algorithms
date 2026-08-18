@@ -1,9 +1,22 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, assert_never
-from jupiter.jupitermessage import JupiterMessage, JupiterDeletionOperation, JupiterNoOperation, JupiterInsertionOperation, JupiterOperation
-from jupiter.jupitertransform import JupiterTransform
+
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ServerOperation,
+    ServerReceiveFromClientOperation,
+)
 from device.serverdevice import ServerDevice
-from device.operations import ServerOperation, ServerReceiveFromClientOperation, ClientInsertOperation, ClientDeleteOperation
+from jupiter.jupitermessage import (
+    JupiterDeletionOperation,
+    JupiterInsertionOperation,
+    JupiterMessage,
+    JupiterNoOperation,
+    JupiterOperation,
+)
+from jupiter.jupitertransform import JupiterTransform
 from unique_char.uniquechar import UniqueChar
 
 if TYPE_CHECKING:
