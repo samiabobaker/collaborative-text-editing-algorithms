@@ -4,7 +4,13 @@ from device.operations import ClientDeleteOperation, ClientInsertOperation
 from unique_char.uniquechar import UniqueChar
 
 
-@dataclass
+# eq=False keeps the default identity-based __hash__: a dataclass-generated
+# __eq__ sets __hash__ to None, making these operations unhashable, so
+# SuleimanTransform's av/ap sets (b1.union({O2}) in adoptedtransform.py)
+# raise TypeError. Identity semantics is what those sets need — each
+# transform step reuses the memoised operation objects from the
+# interaction model.
+@dataclass(eq=False)
 class AdOPTedInsertionOperation:
     position: int
     character: UniqueChar
@@ -14,7 +20,7 @@ class AdOPTedInsertionOperation:
     vector_clock: dict[int, int]
 
 
-@dataclass
+@dataclass(eq=False)
 class AdOPTedDeletionOperation:
     position: int
     priority: int
