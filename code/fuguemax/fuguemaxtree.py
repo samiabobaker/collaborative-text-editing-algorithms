@@ -1,6 +1,6 @@
-from unique_char.uniquechar import UniqueChar
 from typing import Literal, assert_never
 
+from unique_char.uniquechar import UniqueChar
 
 RightOriginId = int | Literal["end"] | None
 
@@ -266,7 +266,7 @@ class FugueMaxTreeNode:
         self.tombstone_count = 0
         self.right_origin_id = right_origin_id
 
-        if direction == "right" and right_origin_id == None:
+        if direction == "right" and right_origin_id is None:
             raise ValueError("Every right child must have a right origin")
 
 
@@ -389,7 +389,7 @@ class FugueMaxTreeNode:
         for node in self.left_children:
             result += node.traverse_with_right_origins()
 
-        if not self.deleted and self.right_origin_id != None:
+        if not self.deleted and self.right_origin_id is not None:
             result.append((self.value,'end' if self.right_origin_id == 'end' else self.tree.get_node_with_id(self.right_origin_id).value))
         
         for node in self.right_children:

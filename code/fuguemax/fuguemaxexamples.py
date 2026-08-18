@@ -1,6 +1,7 @@
 from fuguemax.fuguemaxclient import FugueMaxClient
 from unique_char.uniquechar import UniqueChar
 
+
 def strong_list_specification_violation_example():
     #Set Up
     A = FugueMaxClient(0)

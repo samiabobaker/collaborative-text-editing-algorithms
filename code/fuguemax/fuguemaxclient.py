@@ -1,9 +1,23 @@
-from unique_char.uniquechar import UniqueChar
-from fuguemax.fuguemaxtree import FugueMaxTree, RightOriginId
-from device.clientdevice import ClientDevice
-from device.operations import ClientOperation, ClientInsertOperation, ClientDeleteOperation, ClientReceiveFromServerOperation, ClientReceiveFromClientOperation, ClientTimestepOperation
-from fuguemax.fuguemaxmessage import FugueMaxMessage, FugueMaxOperation, FugueMaxInsertionOperation, FugueMaxDeletionOperation
 from typing import Literal, assert_never
+
+from device.clientdevice import ClientDevice
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from fuguemax.fuguemaxmessage import (
+    FugueMaxDeletionOperation,
+    FugueMaxInsertionOperation,
+    FugueMaxMessage,
+    FugueMaxOperation,
+)
+from fuguemax.fuguemaxtree import FugueMaxTree, RightOriginId
+from unique_char.uniquechar import UniqueChar
+
 
 class FugueMaxClient(ClientDevice):
     client_id: int
