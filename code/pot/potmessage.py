@@ -10,14 +10,18 @@ class POTInsertionOperation:
     character: UniqueChar
     client_id: int
 
+
 @dataclass
 class POTDeletionOperation:
     position: int
 
+
 class POTNoOperation:
     pass
 
+
 POTOperation = POTInsertionOperation | POTDeletionOperation | POTNoOperation
+
 
 @dataclass
 class POTMessage:
@@ -26,4 +30,3 @@ class POTMessage:
     to: int
     operation: POTOperation
     causing_operation: ClientInsertOperation | ClientDeleteOperation
-

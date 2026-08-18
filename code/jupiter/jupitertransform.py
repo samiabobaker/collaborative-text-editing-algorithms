@@ -10,30 +10,32 @@ from jupiter.jupitermessage import (
 
 class JupiterTransform:
     @staticmethod
-    def transform_jupiter_operation(client_operation: JupiterOperation, server_operation: JupiterOperation) -> tuple[JupiterOperation, JupiterOperation]:
+    def transform_jupiter_operation(
+        client_operation: JupiterOperation, server_operation: JupiterOperation
+    ) -> tuple[JupiterOperation, JupiterOperation]:
         match client_operation, server_operation:
             case JupiterInsertionOperation(i, x), JupiterInsertionOperation(j, y):
                 if i < j:
-                    return JupiterInsertionOperation(i, x), JupiterInsertionOperation(j+1, y)
-                elif i>j:
-                    return JupiterInsertionOperation(i+1, x), JupiterInsertionOperation(j, y)
+                    return JupiterInsertionOperation(i, x), JupiterInsertionOperation(j + 1, y)
+                elif i > j:
+                    return JupiterInsertionOperation(i + 1, x), JupiterInsertionOperation(j, y)
                 else:
-                    return JupiterInsertionOperation(i, x), JupiterInsertionOperation(j+1, y)
+                    return JupiterInsertionOperation(i, x), JupiterInsertionOperation(j + 1, y)
             case JupiterInsertionOperation(i, x), JupiterDeletionOperation(j):
                 if i <= j:
-                    return JupiterInsertionOperation(i, x), JupiterDeletionOperation(j+1)
+                    return JupiterInsertionOperation(i, x), JupiterDeletionOperation(j + 1)
                 else:
-                    return JupiterInsertionOperation(i-1, x), JupiterDeletionOperation(j)
+                    return JupiterInsertionOperation(i - 1, x), JupiterDeletionOperation(j)
             case JupiterDeletionOperation(i), JupiterInsertionOperation(j, y):
                 if i < j:
-                    return JupiterDeletionOperation(i), JupiterInsertionOperation(j-1, y)
+                    return JupiterDeletionOperation(i), JupiterInsertionOperation(j - 1, y)
                 else:
-                    return JupiterDeletionOperation(i+1), JupiterInsertionOperation(j, y)
+                    return JupiterDeletionOperation(i + 1), JupiterInsertionOperation(j, y)
             case JupiterDeletionOperation(i), JupiterDeletionOperation(j):
                 if i > j:
-                    return JupiterDeletionOperation(i-1), JupiterDeletionOperation(j)
+                    return JupiterDeletionOperation(i - 1), JupiterDeletionOperation(j)
                 elif i < j:
-                    return JupiterDeletionOperation(i), JupiterDeletionOperation(j-1)
+                    return JupiterDeletionOperation(i), JupiterDeletionOperation(j - 1)
                 else:
                     return JupiterNoOperation(), JupiterNoOperation()
             case JupiterNoOperation(), oper:

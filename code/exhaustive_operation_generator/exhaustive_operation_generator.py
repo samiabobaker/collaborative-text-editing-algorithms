@@ -21,27 +21,29 @@ def generate_all_server_operations(server: ServerDevice) -> list[ServerOperation
     return [ServerReceiveFromClientOperation(client_id) for client_id in client_ids]
 
 
-
 def generate_all_inserts(client: ClientDevice) -> list[ClientInsertOperation]:
     state = client.read_state()
 
     character = UniqueChar.get_unique_char("a")
 
-    return [ClientInsertOperation(client.client_id, position, character) for position in range(len(state)+1)]
+    return [ClientInsertOperation(client.client_id, position, character) for position in range(len(state) + 1)]
+
 
 def generate_all_deletes(client: ClientDevice) -> list[ClientDeleteOperation]:
     state = client.read_state()
 
     return [ClientDeleteOperation(client.client_id, position, state[position]) for position in range(len(state))]
 
-#Choices: client insert, client delete, server receive from client (if possible), client_receive (if possible) 
-def generate_all_client_server_operations(server: ServerDevice, clients: Sequence[ClientDevice], with_deletes:bool = True) -> tuple[list[ServerOperation], list[ClientOperation]]:  
+
+# Choices: client insert, client delete, server receive from client (if possible), client_receive (if possible)
+def generate_all_client_server_operations(
+    server: ServerDevice, clients: Sequence[ClientDevice], with_deletes: bool = True
+) -> tuple[list[ServerOperation], list[ClientOperation]]:
     server_operations = generate_all_server_operations(server)
-    
+
     client_operations: list[ClientOperation] = []
 
     for client in clients:
-
         operations = ["insert"]
 
         if len(client.read_state()) > 0 and with_deletes:
@@ -56,13 +58,16 @@ def generate_all_client_server_operations(server: ServerDevice, clients: Sequenc
                 client_operations += generate_all_deletes(client)
             elif operation == "receive":
                 client_operations.append(ClientReceiveFromServerOperation(client.client_id))
-    
+
     return server_operations, client_operations
-    
-#Choices: client insert, client delete, server receive from client (if possible), client_receive (if possible) 
-def generate_all_client_client_operations(clients: Sequence[ClientDevice], with_deletes:bool=True) -> list[ClientOperation]:  
+
+
+# Choices: client insert, client delete, server receive from client (if possible), client_receive (if possible)
+def generate_all_client_client_operations(
+    clients: Sequence[ClientDevice], with_deletes: bool = True
+) -> list[ClientOperation]:
     client_operations: list[ClientOperation] = []
-    
+
     for client in clients:
         with_timesteps = isinstance(client, TimeSteppedClient)
 

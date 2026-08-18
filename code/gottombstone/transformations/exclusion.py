@@ -15,5 +15,7 @@ class ExclusionTransformer(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def list_exclusion_transform(self, op_a: GOTTombstoneOperation, op_list_2: list[GOTTombstoneOperation]) -> GOTTombstoneOperation:
+    def list_exclusion_transform(
+        self, op_a: GOTTombstoneOperation, op_list_2: list[GOTTombstoneOperation]
+    ) -> GOTTombstoneOperation:
         pass

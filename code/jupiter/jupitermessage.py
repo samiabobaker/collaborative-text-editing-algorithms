@@ -9,9 +9,11 @@ class JupiterInsertionOperation:
     position: int
     character: UniqueChar
 
+
 @dataclass
 class JupiterDeletionOperation:
     position: int
+
 
 class JupiterNoOperation:
     pass
@@ -19,10 +21,12 @@ class JupiterNoOperation:
 
 JupiterOperation = JupiterInsertionOperation | JupiterDeletionOperation | JupiterNoOperation
 
+
 @dataclass
 class JupiterMessage:
     client_message_count: int
     server_message_count: int
     operation: JupiterOperation
-    causing_operation: ClientInsertOperation | ClientDeleteOperation #The client operation that triggered this message to be sent.
-
+    causing_operation: (
+        ClientInsertOperation | ClientDeleteOperation
+    )  # The client operation that triggered this message to be sent.

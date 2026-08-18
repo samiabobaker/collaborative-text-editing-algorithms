@@ -27,11 +27,9 @@ class FugueMaxClient(ClientDevice):
     vector_clock: dict[int, int]
     message_buffer: dict[int, list[FugueMaxMessage]]
 
-
     def __init__(self, client_id: int):
         self.tree = FugueMaxTree()
         self.client_id = client_id
-
 
     def set_clients(self, clients: list[FugueMaxClient]) -> None:
         self.clients = clients
@@ -41,21 +39,37 @@ class FugueMaxClient(ClientDevice):
             self.vector_clock[client.client_id] = 0
             self.message_buffer[client.client_id] = []
 
-
     def perform_local_insert(self, operation: ClientInsertOperation) -> None:
-        #Perform change to local tree
+        # Perform change to local tree
         node = self.tree.insert_char(operation.position, operation.character)
-        #Send message to all other clients
-        self.__send_to_other_clients(FugueMaxMessage(self.vector_clock.copy(), FugueMaxInsertionOperation(node.parent_node_id, node.node_id, node.value, node.direction, node.right_origin_id), operation))
+        # Send message to all other clients
+        self.__send_to_other_clients(
+            FugueMaxMessage(
+                self.vector_clock.copy(),
+                FugueMaxInsertionOperation(
+                    node.parent_node_id, node.node_id, node.value, node.direction, node.right_origin_id
+                ),
+                operation,
+            )
+        )
 
     def perform_local_delete(self, operation: ClientDeleteOperation) -> None:
-        #Perform change to local tree
+        # Perform change to local tree
         node = self.tree.delete_char(operation.position)
-        #Send message to all other clients
-        self.__send_to_other_clients(FugueMaxMessage(self.vector_clock.copy(), FugueMaxDeletionOperation(node.node_id), operation))
+        # Send message to all other clients
+        self.__send_to_other_clients(
+            FugueMaxMessage(self.vector_clock.copy(), FugueMaxDeletionOperation(node.node_id), operation)
+        )
 
-    def perform_remote_insert(self, parent_node_id: int, node_id: int, char: UniqueChar, direction: Literal['left','right'], right_origin_id: RightOriginId) -> None:
-        #Insert into local tree, at the right index to keep ids in order
+    def perform_remote_insert(
+        self,
+        parent_node_id: int,
+        node_id: int,
+        char: UniqueChar,
+        direction: Literal["left", "right"],
+        right_origin_id: RightOriginId,
+    ) -> None:
+        # Insert into local tree, at the right index to keep ids in order
         self.tree.insert_char_at_node(parent_node_id, node_id, char, direction, right_origin_id)
 
     def perform_remote_delete(self, id: int) -> None:
@@ -83,8 +97,8 @@ class FugueMaxClient(ClientDevice):
 
     def read_state(self) -> list[UniqueChar]:
         return self.tree.traverse()
-    
-    def read_right_origins(self) -> list[tuple[UniqueChar, UniqueChar | Literal['end']]]:
+
+    def read_right_origins(self) -> list[tuple[UniqueChar, UniqueChar | Literal["end"]]]:
         return self.tree.traverse_with_right_origins()
 
     def __apply_operation(self, operation: FugueMaxOperation):
@@ -97,15 +111,15 @@ class FugueMaxClient(ClientDevice):
                 assert_never(unreachable)
 
     def receive_from_client(self, client_id: int) -> list[ClientInsertOperation | ClientDeleteOperation]:
-        #Check if message from client exists, and is causally ready.
+        # Check if message from client exists, and is causally ready.
         client_message_buffer = self.message_buffer[client_id]
 
         if len(client_message_buffer) == 0:
             return []
-        
+
         if not self.__is_causally_ready(client_message_buffer[0]):
             return []
-        
+
         message = client_message_buffer.pop(0)
 
         self.__apply_operation(message.operation)
@@ -120,15 +134,15 @@ class FugueMaxClient(ClientDevice):
             client_message_buffer = self.message_buffer[client.client_id]
             if len(client_message_buffer) != 0 and self.__is_causally_ready(client_message_buffer[0]):
                 client_ids.append(client.client_id)
-        
+
         return client_ids
 
     def can_receive_from_server(self) -> bool:
         return False
-    
+
     def send_message(self, client_id: int, message: FugueMaxMessage):
         self.message_buffer[client_id].append(message)
-    
+
     def __send_to_other_clients(self, message: FugueMaxMessage) -> None:
         for client in self.clients:
             if client.client_id == self.client_id:
@@ -141,6 +155,3 @@ class FugueMaxClient(ClientDevice):
             if message.vector_clock[client.client_id] > self.vector_clock[client.client_id]:
                 return False
         return True
-
-
-

@@ -62,9 +62,7 @@ class YjsModClient(ClientDevice):
         self.__send_to_other_clients(
             YjsModMessage(
                 self.vector_clock.copy(),
-                YjsModInsertionOperation(
-                    item.id, item.origin_left, item.origin_right, item.value
-                ),
+                YjsModInsertionOperation(item.id, item.origin_left, item.origin_right, item.value),
                 operation,
             )
         )
@@ -74,9 +72,7 @@ class YjsModClient(ClientDevice):
         item = self.document.delete_char(operation.position)
         # Send message to all other clients
         self.__send_to_other_clients(
-            YjsModMessage(
-                self.vector_clock.copy(), YjsModDeletionOperation(item.id), operation
-            )
+            YjsModMessage(self.vector_clock.copy(), YjsModDeletionOperation(item.id), operation)
         )
 
     def perform_remote_insert(
@@ -91,9 +87,7 @@ class YjsModClient(ClientDevice):
     def perform_remote_delete(self, id: YjsModId) -> None:
         self.document.delete_item_with_id(id)
 
-    def perform_operation(
-        self, operation: ClientOperation
-    ) -> list[ClientInsertOperation | ClientDeleteOperation]:
+    def perform_operation(self, operation: ClientOperation) -> list[ClientInsertOperation | ClientDeleteOperation]:
         match operation:
             case ClientInsertOperation():
                 self.perform_local_insert(operation)
@@ -125,9 +119,7 @@ class YjsModClient(ClientDevice):
             case _ as unreachable:
                 assert_never(unreachable)
 
-    def receive_from_client(
-        self, client_id: int
-    ) -> list[ClientInsertOperation | ClientDeleteOperation]:
+    def receive_from_client(self, client_id: int) -> list[ClientInsertOperation | ClientDeleteOperation]:
         # Check if message from client exists, and is causally ready.
         client_message_buffer = self.message_buffer[client_id]
 
@@ -149,9 +141,7 @@ class YjsModClient(ClientDevice):
         client_ids: list[int] = []
         for client in self.clients:
             client_message_buffer = self.message_buffer[client.client_id]
-            if len(client_message_buffer) != 0 and self.__is_causally_ready(
-                client_message_buffer[0]
-            ):
+            if len(client_message_buffer) != 0 and self.__is_causally_ready(client_message_buffer[0]):
                 client_ids.append(client.client_id)
 
         return client_ids

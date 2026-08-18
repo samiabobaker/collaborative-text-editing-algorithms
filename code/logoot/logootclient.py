@@ -27,11 +27,9 @@ class LogootClient(ClientDevice):
     vector_clock: dict[int, int]
     message_buffer: dict[int, list[LogootMessage]]
 
-
     def __init__(self, client_id: int):
         self.document = LogootDocument(client_id)
         self.client_id = client_id
-
 
     def set_clients(self, clients: list[LogootClient]) -> None:
         self.clients = clients
@@ -41,19 +39,22 @@ class LogootClient(ClientDevice):
             self.vector_clock[client.client_id] = 0
             self.message_buffer[client.client_id] = []
 
-
     def perform_local_insert(self, operation: ClientInsertOperation) -> None:
         position = self.document.insert_char(operation.character, operation.position)
-        #Send message to all other clients
-        self.__send_to_other_clients(LogootMessage(self.vector_clock.copy(), LogootInsertionOperation(position, operation.character), operation))
+        # Send message to all other clients
+        self.__send_to_other_clients(
+            LogootMessage(self.vector_clock.copy(), LogootInsertionOperation(position, operation.character), operation)
+        )
 
     def perform_local_delete(self, operation: ClientDeleteOperation) -> None:
         position = self.document.delete_char(operation.position)
-        #Send message to all other clients
-        self.__send_to_other_clients(LogootMessage(self.vector_clock.copy(), LogootDeletionOperation(position), operation))
+        # Send message to all other clients
+        self.__send_to_other_clients(
+            LogootMessage(self.vector_clock.copy(), LogootDeletionOperation(position), operation)
+        )
 
     def perform_remote_insert(self, position: LogootPosition, character: UniqueChar) -> None:
-        #Insert into local tree, at the right index to keep ids in order
+        # Insert into local tree, at the right index to keep ids in order
         self.document.integrate_insert(position, character)
 
     def perform_remote_delete(self, position: LogootPosition) -> None:
@@ -89,15 +90,15 @@ class LogootClient(ClientDevice):
                 assert_never(unreachable)
 
     def receive_from_client(self, client_id: int) -> list[ClientInsertOperation | ClientDeleteOperation]:
-        #Check if message from client exists, and is causally ready.
+        # Check if message from client exists, and is causally ready.
         client_message_buffer = self.message_buffer[client_id]
 
         if len(client_message_buffer) == 0:
             return []
-        
+
         if not self.__is_causally_ready(client_message_buffer[0]):
             return []
-        
+
         message = client_message_buffer.pop(0)
 
         self.__apply_operation(message.operation)
@@ -112,15 +113,15 @@ class LogootClient(ClientDevice):
             client_message_buffer = self.message_buffer[client.client_id]
             if len(client_message_buffer) != 0 and self.__is_causally_ready(client_message_buffer[0]):
                 client_ids.append(client.client_id)
-        
+
         return client_ids
 
     def can_receive_from_server(self) -> bool:
         return False
-    
+
     def send_message(self, client_id: int, message: LogootMessage):
         self.message_buffer[client_id].append(message)
-    
+
     def __send_to_other_clients(self, message: LogootMessage) -> None:
         for client in self.clients:
             if client.client_id == self.client_id:

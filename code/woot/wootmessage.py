@@ -17,7 +17,9 @@ class WOOTInsertionOperation:
 class WOOTDeletionOperation:
     character_id: WOOTIdentifier
 
+
 WOOTOperation = WOOTInsertionOperation | WOOTDeletionOperation
+
 
 @dataclass
 class WOOTMessage:

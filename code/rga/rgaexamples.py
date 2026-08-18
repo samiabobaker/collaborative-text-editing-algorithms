@@ -6,18 +6,12 @@ from unique_char.uniquechar import UniqueChar
 
 
 def __insert(client: RGAClient, position: int, char: str) -> None:
-    client.perform_local_insert(
-        ClientInsertOperation(
-            client.client_id, position, UniqueChar.get_unique_char(char)
-        )
-    )
+    client.perform_local_insert(ClientInsertOperation(client.client_id, position, UniqueChar.get_unique_char(char)))
 
 
 def __delete(client: RGAClient, position: int) -> None:
     character = client.read_state()[position]
-    client.perform_local_delete(
-        ClientDeleteOperation(client.client_id, position, character)
-    )
+    client.perform_local_delete(ClientDeleteOperation(client.client_id, position, character))
 
 
 def __drain(clients: list[RGAClient]) -> None:
@@ -34,9 +28,6 @@ def __drain(clients: list[RGAClient]) -> None:
 def __report(clients: list[RGAClient]) -> None:
     for client in clients:
         print(f"{client.client_id}:", *client.read_state(), sep="")
-
-
-
 
 
 def figure_2_example():

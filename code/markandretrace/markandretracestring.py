@@ -45,7 +45,7 @@ class MarkAndRetraceString:
                 if self.__state_vector_leq(delete_op.state_vector, state_vector):
                     character.visible = False
 
-    def find_visible_character_at(self, position:  int) -> MarkAndRetraceCharacter:
+    def find_visible_character_at(self, position: int) -> MarkAndRetraceCharacter:
         index = 0
         n = 0
         while index < position or not self.string[n].visible:
@@ -56,7 +56,7 @@ class MarkAndRetraceString:
         return self.string[n]
 
     def get_insertion_range(self, position: int) -> tuple[int, int]:
-        #Get starting position
+        # Get starting position
         start_index = 0
         visible = 0
         while visible < position:
@@ -75,9 +75,9 @@ class MarkAndRetraceString:
         SV2_sum = sum(SV2.values())
         return (SV1_sum < SV2_sum) or (SV1_sum == SV2_sum and client_id1 < client_id2)
 
-    #Finds insertion position between start and end
+    # Finds insertion position between start and end
     def range_scan(self, character: MarkAndRetraceCharacter, state_vector: dict[int, int], start: int, end: int) -> int:
-        p : int = -1
+        p: int = -1
         scan_index = start
         while scan_index < end:
             character_scanning = self.string[scan_index]
@@ -86,12 +86,29 @@ class MarkAndRetraceString:
                     p = scan_index
                 break
             elif not self.__state_vector_leq(state_vector, self.string[scan_index].insert_op.state_vector):
-                if self.__total_order_less_than(character.client_id, character.insert_op.state_vector, character_scanning.client_id, character_scanning.insert_op.state_vector) and p == -1:
+                if (
+                    self.__total_order_less_than(
+                        character.client_id,
+                        character.insert_op.state_vector,
+                        character_scanning.client_id,
+                        character_scanning.insert_op.state_vector,
+                    )
+                    and p == -1
+                ):
                     p = scan_index
-                
-                if self.__total_order_less_than(character_scanning.client_id, character_scanning.insert_op.state_vector, character.client_id, character.insert_op.state_vector) \
-                    and (p == -1 or self.__state_vector_leq(character_scanning.insert_op.state_vector, self.string[p].insert_op.state_vector)):
-                                    p = -1
+
+                if self.__total_order_less_than(
+                    character_scanning.client_id,
+                    character_scanning.insert_op.state_vector,
+                    character.client_id,
+                    character.insert_op.state_vector,
+                ) and (
+                    p == -1
+                    or self.__state_vector_leq(
+                        character_scanning.insert_op.state_vector, self.string[p].insert_op.state_vector
+                    )
+                ):
+                    p = -1
             scan_index += 1
         if p == -1:
             return end

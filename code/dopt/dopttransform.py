@@ -16,7 +16,7 @@ class dOPTTransform:
                 if i < j:
                     return dOPTInsertionOperation(pr1, i, x)
                 elif i > j:
-                    return dOPTInsertionOperation(pr1, i+1, x)
+                    return dOPTInsertionOperation(pr1, i + 1, x)
                 else:
                     if x == y:
                         return dOPTNoOperation(pr1)
@@ -28,7 +28,7 @@ class dOPTTransform:
                 if i < j:
                     return dOPTInsertionOperation(pr1, i, x)
                 else:
-                    return dOPTInsertionOperation(pr1, i-1, x)
+                    return dOPTInsertionOperation(pr1, i - 1, x)
             case dOPTDeletionOperation(pr1, i), dOPTInsertionOperation(pr2, j, y):
                 if i < j:
                     return dOPTDeletionOperation(pr1, i)

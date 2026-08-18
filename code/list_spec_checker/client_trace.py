@@ -17,11 +17,12 @@ class ClientTrace:
         self.states_after_events.append(list(state))
 
     def copy(self) -> ClientTrace:
-        trace_copy  = ClientTrace()
+        trace_copy = ClientTrace()
         trace_copy.events_seen = list(self.events_seen)
         trace_copy.states_after_events = list(self.states_after_events)
         return trace_copy
-    
+
+
 @dataclass
 class Event:
     operation: list[ClientInsertOperation | ClientDeleteOperation]

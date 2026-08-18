@@ -23,6 +23,7 @@ def generate_random_server_operation(server: ServerDevice) -> ServerOperation:
 
     return ServerReceiveFromClientOperation(client_id)
 
+
 def generate_random_insert(client: ClientDevice) -> ClientInsertOperation:
     state = client.read_state()
 
@@ -30,6 +31,7 @@ def generate_random_insert(client: ClientDevice) -> ClientInsertOperation:
     character = UniqueChar.get_unique_char(random.choice("abcdefghijklmnopqrstuvwxyz"))
 
     return ClientInsertOperation(client.client_id, position, character)
+
 
 def generate_random_delete(client: ClientDevice) -> ClientDeleteOperation:
     state = client.read_state()
@@ -40,13 +42,16 @@ def generate_random_delete(client: ClientDevice) -> ClientDeleteOperation:
 
     return ClientDeleteOperation(client.client_id, position, character)
 
-#Choices: client insert, client delete, server receive from client (if possible), client_receive (if possible) 
-def generate_random_client_server_operation(server: ServerDevice, clients: Sequence[ClientDevice], with_deletes:bool = True) -> ClientOperation | ServerOperation:  
+
+# Choices: client insert, client delete, server receive from client (if possible), client_receive (if possible)
+def generate_random_client_server_operation(
+    server: ServerDevice, clients: Sequence[ClientDevice], with_deletes: bool = True
+) -> ClientOperation | ServerOperation:
     if len(server.can_receive_from()) != 0:
         num_devices = len(clients) + 1
-        if random.random() < (1/num_devices):
+        if random.random() < (1 / num_devices):
             return generate_random_server_operation(server)
-    
+
     client = random.choice(clients)
 
     operations = ["insert"]
@@ -71,9 +76,12 @@ def generate_random_client_server_operation(server: ServerDevice, clients: Seque
     else:
         receive_from = random.choice(client_can_receive_from)
         return ClientReceiveFromClientOperation(client.client_id, receive_from)
-    
-#Choices: client insert, client delete, server receive from client (if possible), client_receive (if possible) 
-def generate_random_client_client_operation(clients: Sequence[ClientDevice], with_deletes:bool=True) -> ClientOperation:  
+
+
+# Choices: client insert, client delete, server receive from client (if possible), client_receive (if possible)
+def generate_random_client_client_operation(
+    clients: Sequence[ClientDevice], with_deletes: bool = True
+) -> ClientOperation:
     client = random.choice(clients)
 
     with_timesteps = isinstance(client, TimeSteppedClient)

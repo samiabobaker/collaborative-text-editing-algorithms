@@ -77,11 +77,7 @@ class Sync9Document:
     # ---- reading -------------------------------------------------------
 
     def traverse(self) -> list[UniqueChar]:
-        return [
-            item.value
-            for item in self.items
-            if not item.deleted and item.value is not None
-        ]
+        return [item.value for item in self.items if not item.deleted and item.value is not None]
 
     def traverse_with_tombstones(self) -> list[UniqueChar]:
         return [item.value for item in self.items if item.value is not None]
@@ -192,7 +188,7 @@ class Sync9Document:
         if new_item.id.seq != last_seen + 1:
             raise ValueError("Operations out of order")
         self.version[new_item.id.client_id] = new_item.id.seq
-        
+
         parent_index = self.__find_item(new_item.origin_left, new_item.insert_after)
         dest_index = parent_index + 1
 

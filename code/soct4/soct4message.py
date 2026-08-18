@@ -12,6 +12,7 @@ class SOCT4InsertOperation:
     position: int
     causing_operation: ClientInsertOperation | ClientDeleteOperation
 
+
 @dataclass
 class SOCT4DeleteOperation:
     timestamp: int
@@ -19,13 +20,16 @@ class SOCT4DeleteOperation:
     position: int
     causing_operation: ClientInsertOperation | ClientDeleteOperation
 
+
 @dataclass
 class SOCT4NoOperation:
     timestamp: int
     client_id: int
     causing_operation: ClientInsertOperation | ClientDeleteOperation
 
+
 SOCT4Operation = SOCT4DeleteOperation | SOCT4InsertOperation | SOCT4NoOperation
+
 
 @dataclass
 class SOCT4TicketRequestMessage:
@@ -33,6 +37,7 @@ class SOCT4TicketRequestMessage:
     n: int
     operation: SOCT4Operation
     causing_operation: ClientInsertOperation | ClientDeleteOperation
+
 
 @dataclass
 class SOCT4TicketResponseMessage:
@@ -42,12 +47,12 @@ class SOCT4TicketResponseMessage:
     operation: SOCT4Operation
     causing_operation: ClientInsertOperation | ClientDeleteOperation
 
+
 @dataclass
 class SOCT4OperationMessage:
     client_id: int
     operation: SOCT4Operation
     causing_operation: ClientInsertOperation | ClientDeleteOperation
-
 
 
 SOCT4Message = SOCT4TicketRequestMessage | SOCT4TicketResponseMessage | SOCT4OperationMessage

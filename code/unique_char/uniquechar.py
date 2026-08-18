@@ -1,7 +1,7 @@
 class UniqueChar:
     now = 0
 
-    char: str 
+    char: str
     id: int
 
     def __init__(self, char: str, id: int) -> None:

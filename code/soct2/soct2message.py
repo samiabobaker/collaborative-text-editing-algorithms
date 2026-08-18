@@ -16,7 +16,9 @@ class SOCT2DeletionOperation:
     priority: int
     position: int
 
+
 SOCT2Operation = SOCT2InsertionOperation | SOCT2DeletionOperation
+
 
 @dataclass
 class SOCT2Message:
@@ -24,4 +26,3 @@ class SOCT2Message:
     vector_clock: dict[int, int]
     operation: SOCT2Operation
     causing_operation: ClientInsertOperation | ClientDeleteOperation
-

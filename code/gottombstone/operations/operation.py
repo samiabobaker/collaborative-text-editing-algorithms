@@ -33,7 +33,7 @@ class GOTTombstoneOperation:
         pass
 
     @abc.abstractmethod
-    def __eq__(self, other:object) -> bool:
+    def __eq__(self, other: object) -> bool:
         pass
 
     @abc.abstractmethod

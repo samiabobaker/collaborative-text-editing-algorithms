@@ -1,4 +1,3 @@
-
 from gottombstone.operations.delete import GOTDeleteOperation
 from gottombstone.operations.insert import GOTInsertOperation
 from gottombstone.operations.operation import GOTTombstoneOperation
@@ -29,7 +28,7 @@ class OriginalExclusionTransformer(ExclusionTransformer):
             transformed_op = op_a.copy()
             transformed_op.idx -= 1
             return transformed_op
-        
+
     def _et_delete_delete(self, op_a: GOTDeleteOperation, op_b: GOTDeleteOperation) -> GOTTombstoneOperation:
         return op_a.copy()
 
@@ -50,13 +49,17 @@ class OriginalExclusionTransformer(ExclusionTransformer):
         self.num_transformations_performed += 1
         return out
 
-    def list_exclusion_transform(self, op_a: GOTTombstoneOperation, op_list_2: list[GOTTombstoneOperation]) -> GOTTombstoneOperation:
+    def list_exclusion_transform(
+        self, op_a: GOTTombstoneOperation, op_list_2: list[GOTTombstoneOperation]
+    ) -> GOTTombstoneOperation:
         if isinstance(op_a, (GOTInsertOperation, GOTDeleteOperation)):
             return self._list_et(op_a, op_list_2)
         else:
             raise ValueError("Invalid operation type")
 
-    def _list_et(self, op_a: GOTInsertOperation | GOTDeleteOperation, remaining: list[GOTTombstoneOperation]) -> GOTTombstoneOperation:
+    def _list_et(
+        self, op_a: GOTInsertOperation | GOTDeleteOperation, remaining: list[GOTTombstoneOperation]
+    ) -> GOTTombstoneOperation:
         if op_a.is_relatively_addressed() or not remaining:
             return op_a.copy()
 

@@ -12,7 +12,6 @@ def jupiter_convergence():
     cases = 0
 
     while True:
-
         if cases % 1000 == 0:
             print(f"{cases} cases checked.")
 
@@ -26,7 +25,7 @@ def jupiter_convergence():
         B.set_server(server)
         C.set_server(server)
 
-        converges = check_for_convergence_client_server(server, {A.client_id: A, B.client_id:B, C.client_id:C}, 30)
+        converges = check_for_convergence_client_server(server, {A.client_id: A, B.client_id: B, C.client_id: C}, 30)
 
         if not converges:
             print(f"Converges {converges}")
@@ -39,11 +38,11 @@ def jupiter_convergence():
 
         cases += 1
 
+
 def fugue_convergence():
     cases = 0
 
     while True:
-
         if cases % 1000 == 0:
             print(f"{cases} cases checked.")
 
@@ -51,11 +50,11 @@ def fugue_convergence():
         B = FugueClient(1)
         C = FugueClient(2)
 
-        A.set_clients([A,B,C])
-        B.set_clients([A,B,C])
-        C.set_clients([A,B,C])
+        A.set_clients([A, B, C])
+        B.set_clients([A, B, C])
+        C.set_clients([A, B, C])
 
-        converges = check_for_convergence_client_client({A.client_id: A, B.client_id:B, C.client_id:C}, 30)
+        converges = check_for_convergence_client_client({A.client_id: A, B.client_id: B, C.client_id: C}, 30)
 
         if not converges:
             print(f"Converges {converges}")
@@ -67,11 +66,11 @@ def fugue_convergence():
 
         cases += 1
 
+
 def fuguemax_convergence():
     cases = 0
 
     while True:
-
         if cases % 1000 == 0:
             print(f"{cases} cases checked.")
 
@@ -79,11 +78,11 @@ def fuguemax_convergence():
         B = FugueMaxClient(1)
         C = FugueMaxClient(2)
 
-        A.set_clients([A,B,C])
-        B.set_clients([A,B,C])
-        C.set_clients([A,B,C])
+        A.set_clients([A, B, C])
+        B.set_clients([A, B, C])
+        C.set_clients([A, B, C])
 
-        converges = check_for_convergence_client_client({A.client_id: A, B.client_id:B, C.client_id:C}, 30)
+        converges = check_for_convergence_client_client({A.client_id: A, B.client_id: B, C.client_id: C}, 30)
 
         if not converges:
             print(f"Converges {converges}")
@@ -95,4 +94,5 @@ def fuguemax_convergence():
 
         cases += 1
 
-#fugue_convergence()
+
+# fugue_convergence()

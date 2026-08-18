@@ -14,7 +14,7 @@ def jupiter_strong():
     while True:
         n += 1
 
-        if n%1000 == 0:
+        if n % 1000 == 0:
             print(f"{n} cases checked.")
 
         A = JupiterClient(0)
@@ -32,7 +32,8 @@ def jupiter_strong():
             print("B:", *B.read_state(), sep="")
             print("C:", *C.read_state(), sep="")
             input()
-            print("-"*80)
+            print("-" * 80)
+
 
 def fugue_strong():
     n = 0
@@ -40,23 +41,24 @@ def fugue_strong():
     while True:
         n += 1
 
-        if n%1000 == 0:
+        if n % 1000 == 0:
             print(f"{n} cases checked.")
 
         A = FugueClient(0)
         B = FugueClient(1)
         C = FugueClient(2)
 
-        A.set_clients([A,B,C])
-        B.set_clients([A,B,C])
-        C.set_clients([A,B,C])
+        A.set_clients([A, B, C])
+        B.set_clients([A, B, C])
+        C.set_clients([A, B, C])
 
         if not strong_list_specification_checker({0: A, 1: B, 2: C}):
             print("A:", *A.read_state(), sep="")
             print("B:", *B.read_state(), sep="")
             print("C:", *C.read_state(), sep="")
             input()
-            print("-"*80)
+            print("-" * 80)
+
 
 def fuguemax_strong():
     n = 0
@@ -64,23 +66,24 @@ def fuguemax_strong():
     while True:
         n += 1
 
-        if n%1000 == 0:
+        if n % 1000 == 0:
             print(f"{n} cases checked.")
 
         A = FugueMaxClient(0)
         B = FugueMaxClient(1)
         C = FugueMaxClient(2)
 
-        A.set_clients([A,B,C])
-        B.set_clients([A,B,C])
-        C.set_clients([A,B,C])
+        A.set_clients([A, B, C])
+        B.set_clients([A, B, C])
+        C.set_clients([A, B, C])
 
         if not strong_list_specification_checker({0: A, 1: B, 2: C}):
             print("A:", *A.read_state(), sep="")
             print("B:", *B.read_state(), sep="")
             print("C:", *C.read_state(), sep="")
             input()
-            print("-"*80)
+            print("-" * 80)
+
 
 def jupiter_weak():
     n = 0
@@ -88,7 +91,7 @@ def jupiter_weak():
     while True:
         n += 1
 
-        if n%1000 == 0:
+        if n % 1000 == 0:
             print(f"{n} cases checked.")
 
         A = JupiterClient(0)
@@ -106,7 +109,8 @@ def jupiter_weak():
             print("B:", *B.read_state(), sep="")
             print("C:", *C.read_state(), sep="")
             input()
-            print("-"*80)
+            print("-" * 80)
+
 
 def fugue_weak():
     n = 0
@@ -114,23 +118,24 @@ def fugue_weak():
     while True:
         n += 1
 
-        if n%1000 == 0:
+        if n % 1000 == 0:
             print(f"{n} cases checked.")
 
         A = FugueClient(0)
         B = FugueClient(1)
         C = FugueClient(2)
 
-        A.set_clients([A,B,C])
-        B.set_clients([A,B,C])
-        C.set_clients([A,B,C])
+        A.set_clients([A, B, C])
+        B.set_clients([A, B, C])
+        C.set_clients([A, B, C])
 
         if not weak_list_specification_checker({0: A, 1: B, 2: C}):
             print("A:", *A.read_state(), sep="")
             print("B:", *B.read_state(), sep="")
             print("C:", *C.read_state(), sep="")
             input()
-            print("-"*80)
+            print("-" * 80)
+
 
 def fuguemax_weak():
     n = 0
@@ -138,20 +143,20 @@ def fuguemax_weak():
     while True:
         n += 1
 
-        if n%1000 == 0:
+        if n % 1000 == 0:
             print(f"{n} cases checked.")
 
         A = FugueMaxClient(0)
         B = FugueMaxClient(1)
         C = FugueMaxClient(2)
 
-        A.set_clients([A,B,C])
-        B.set_clients([A,B,C])
-        C.set_clients([A,B,C])
+        A.set_clients([A, B, C])
+        B.set_clients([A, B, C])
+        C.set_clients([A, B, C])
 
         if not weak_list_specification_checker({0: A, 1: B, 2: C}):
             print("A:", *A.read_state(), sep="")
             print("B:", *B.read_state(), sep="")
             print("C:", *C.read_state(), sep="")
             input()
-            print("-"*80)
+            print("-" * 80)

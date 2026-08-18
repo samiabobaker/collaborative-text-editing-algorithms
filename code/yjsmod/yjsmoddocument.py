@@ -156,11 +156,7 @@ class YjsModDocument:
         self.version[new_item.id.client_id] = new_item.id.seq
 
         left = self.__find_item(new_item.origin_left)
-        right = (
-            len(self.items)
-            if new_item.origin_right is None
-            else self.__find_item(new_item.origin_right)
-        )
+        right = len(self.items) if new_item.origin_right is None else self.__find_item(new_item.origin_right)
 
         dest_index = left + 1
         scanning = False
@@ -180,11 +176,7 @@ class YjsModDocument:
 
             other = self.items[index]
             other_left = self.__find_item(other.origin_left)
-            other_right = (
-                len(self.items)
-                if other.origin_right is None
-                else self.__find_item(other.origin_right)
-            )
+            other_right = len(self.items) if other.origin_right is None else self.__find_item(other.origin_right)
 
             if other_left < left:
                 # Anchored further left than us, so it and its subtree come

@@ -31,8 +31,8 @@ class AdOPTedTM11Client(ClientDevice):
 
     vector_clock: dict[int, int]
 
-    interaction_model: dict[tuple[dict[int,int], dict[int,int]], AdOPTedTM11Operation]
-    
+    interaction_model: dict[tuple[dict[int, int], dict[int, int]], AdOPTedTM11Operation]
+
     request_log: dict[int, list[AdOPTedTM11Message]]
 
     def __init__(self, client_id: int):
@@ -40,7 +40,6 @@ class AdOPTedTM11Client(ClientDevice):
         self.state = []
         self.local_request_count = 0
         self.interaction_model = {}
-
 
     def set_clients(self, clients: list[AdOPTedTM11Client]) -> None:
         self.clients = clients
@@ -55,9 +54,9 @@ class AdOPTedTM11Client(ClientDevice):
     def __insert_string(self, position: int, string: list[UniqueChar]) -> None:
         self.state = self.state[:position] + list(string) + self.state[position:]
 
-    def __delete_string(self, position:int, length: int) -> None:
-        #assert self.state[position:position+len(string)] == string, f"{self.state}, {self.state[position:position+len(string)]}, {string}"
-        self.state = self.state[:position] + self.state[position+length:]
+    def __delete_string(self, position: int, length: int) -> None:
+        # assert self.state[position:position+len(string)] == string, f"{self.state}, {self.state[position:position+len(string)]}, {string}"
+        self.state = self.state[:position] + self.state[position + length :]
 
     def __apply_operation(self, operation: AdOPTedTM11Operation) -> None:
         match operation:
@@ -70,8 +69,9 @@ class AdOPTedTM11Client(ClientDevice):
             case _ as unreachable:
                 assert_never(unreachable)
 
-
-    def __perform_local_operation(self, operation: AdOPTedTM11Operation, causing_operation: ClientInsertOperation | ClientDeleteOperation) -> None:
+    def __perform_local_operation(
+        self, operation: AdOPTedTM11Operation, causing_operation: ClientInsertOperation | ClientDeleteOperation
+    ) -> None:
         self.__apply_operation(operation)
 
         message = AdOPTedTM11Message(self.client_id, dict(self.vector_clock), operation, causing_operation)
@@ -80,9 +80,10 @@ class AdOPTedTM11Client(ClientDevice):
         self.request_log[self.client_id].append(message)
         self.vector_clock[self.client_id] += 1
 
-
     def perform_local_insert(self, operation: ClientInsertOperation) -> None:
-        self.__perform_local_operation(AdOPTedTM11InsertionOperation(operation.position, [operation.character], self.client_id), operation)
+        self.__perform_local_operation(
+            AdOPTedTM11InsertionOperation(operation.position, [operation.character], self.client_id), operation
+        )
 
     def perform_local_delete(self, operation: ClientDeleteOperation) -> None:
         self.__perform_local_operation(AdOPTedTM11DeletionOperation(operation.position, 1, self.client_id), operation)
@@ -104,24 +105,33 @@ class AdOPTedTM11Client(ClientDevice):
             case _ as unreachable:
                 assert_never(unreachable)
 
-    def __transform_operation(self, client_id: int, operation: AdOPTedTM11Operation, source_clock: dict[int, int], dest_clock: dict[int, int]) -> AdOPTedTM11Operation:
+    def __transform_operation(
+        self, client_id: int, operation: AdOPTedTM11Operation, source_clock: dict[int, int], dest_clock: dict[int, int]
+    ) -> AdOPTedTM11Operation:
         if source_clock == dest_clock:
-            self.interaction_model[(self.to_dict_key(dest_clock), self.to_dict_key(self.__get_resulting_clock(dest_clock, client_id)))] = operation
+            self.interaction_model[
+                (self.to_dict_key(dest_clock), self.to_dict_key(self.__get_resulting_clock(dest_clock, client_id)))
+            ] = operation
             return operation
-        
-        if (self.to_dict_key(dest_clock), self.to_dict_key(self.__get_resulting_clock(dest_clock, client_id))) in self.interaction_model:
-            return self.interaction_model[(self.to_dict_key(dest_clock), self.to_dict_key(self.__get_resulting_clock(dest_clock, client_id)))]
-        
-        #Find a predecessor state.
+
+        if (
+            self.to_dict_key(dest_clock),
+            self.to_dict_key(self.__get_resulting_clock(dest_clock, client_id)),
+        ) in self.interaction_model:
+            return self.interaction_model[
+                (self.to_dict_key(dest_clock), self.to_dict_key(self.__get_resulting_clock(dest_clock, client_id)))
+            ]
+
+        # Find a predecessor state.
         predecessor: dict[int, int] | None = None
         user: int | None = None
 
         for client in self.clients:
-            #Check that I can decrement from this user.
+            # Check that I can decrement from this user.
             if source_clock[client.client_id] > dest_clock[client.client_id] - 1:
                 continue
 
-            #Check this is in the interaction model
+            # Check this is in the interaction model
             predecessor_clock = dict(dest_clock)
             predecessor_clock[client.client_id] -= 1
 
@@ -141,11 +151,18 @@ class AdOPTedTM11Client(ClientDevice):
 
         final_r, final_r_i = self.__apply_transform(transformed_r, transformed_r_i)
 
-        self.interaction_model[(self.to_dict_key(dest_clock), self.to_dict_key(self.__get_resulting_clock(dest_clock, client_id)))] = final_r
-        self.interaction_model[(self.to_dict_key(self.__get_resulting_clock(predecessor, client_id)), self.to_dict_key(self.__get_resulting_clock(dest_clock, client_id)))] = final_r_i
+        self.interaction_model[
+            (self.to_dict_key(dest_clock), self.to_dict_key(self.__get_resulting_clock(dest_clock, client_id)))
+        ] = final_r
+        self.interaction_model[
+            (
+                self.to_dict_key(self.__get_resulting_clock(predecessor, client_id)),
+                self.to_dict_key(self.__get_resulting_clock(dest_clock, client_id)),
+            )
+        ] = final_r_i
 
         return final_r
-    
+
     def to_dict_key(self, clock: dict[int, int]):
         return tuple(sorted(clock.items()))
 
@@ -153,12 +170,12 @@ class AdOPTedTM11Client(ClientDevice):
         result = dict(clock)
         result[client_id] += 1
         return result
-    
+
     def __clock_is_reachable(self, clock: dict[int, int]) -> bool:
         for client_id in clock:
             if clock[client_id] == 0:
                 continue
-            
+
             request = self.request_log[client_id][clock[client_id] - 1]
 
             request_clock = dict(request.vector_clock)
@@ -173,18 +190,20 @@ class AdOPTedTM11Client(ClientDevice):
         return self.state
 
     def receive_from_client(self, client_id: int) -> list[ClientInsertOperation | ClientDeleteOperation]:
-        #Check if message from client exists, and is causally ready.
+        # Check if message from client exists, and is causally ready.
         client_message_buffer = self.message_buffer[client_id]
 
         if len(client_message_buffer) == 0:
             return []
-        
+
         if not self.__is_causally_ready(client_message_buffer[0]):
             return []
-        
+
         message = client_message_buffer.pop(0)
 
-        transformed_operation = self.__transform_operation(client_id, message.operation, message.vector_clock, self.vector_clock)
+        transformed_operation = self.__transform_operation(
+            client_id, message.operation, message.vector_clock, self.vector_clock
+        )
 
         self.__apply_operation(transformed_operation)
 
@@ -199,29 +218,31 @@ class AdOPTedTM11Client(ClientDevice):
             client_message_buffer = self.message_buffer[client.client_id]
             if len(client_message_buffer) != 0 and self.__is_causally_ready(client_message_buffer[0]):
                 client_ids.append(client.client_id)
-        
+
         return client_ids
 
     def can_receive_from_server(self) -> bool:
         return False
-    
+
     def send_message(self, client_id: int, message: AdOPTedTM11Message):
         self.message_buffer[client_id].append(message)
-    
+
     def __send_to_other_clients(self, message: AdOPTedTM11Message) -> None:
         for client in self.clients:
             if client.client_id == self.client_id:
                 continue
             client.send_message(self.client_id, message)
-        #self.vector_clock[self.client_id] += 1
+        # self.vector_clock[self.client_id] += 1
 
     def __is_causally_ready(self, message: AdOPTedTM11Message) -> bool:
         for client in self.clients:
             if message.vector_clock[client.client_id] > self.vector_clock[client.client_id]:
                 return False
         return True
-    
-    def __apply_transform(self, O1: AdOPTedTM11Operation, O2: AdOPTedTM11Operation) -> tuple[AdOPTedTM11Operation, AdOPTedTM11Operation]:
+
+    def __apply_transform(
+        self, O1: AdOPTedTM11Operation, O2: AdOPTedTM11Operation
+    ) -> tuple[AdOPTedTM11Operation, AdOPTedTM11Operation]:
         return self.__transform(O1, O2), self.__transform(O2, O1)
 
     def __transform(self, O1: AdOPTedTM11Operation, O2: AdOPTedTM11Operation) -> AdOPTedTM11Operation:
@@ -232,32 +253,32 @@ class AdOPTedTM11Client(ClientDevice):
                 else:
                     return AdOPTedTM11InsertionOperation(i + len(y), x, pr1)
             case AdOPTedTM11InsertionOperation(i, x, pr1), AdOPTedTM11DeletionOperation(j, y, pr2):
-                 if i < j:
-                     return AdOPTedTM11InsertionOperation(i, x, pr1)
-                 elif i >= (j + y):
-                     return AdOPTedTM11InsertionOperation(i - y, x, pr1)
-                 else:
-                     return AdOPTedTM11NoOperation()
+                if i < j:
+                    return AdOPTedTM11InsertionOperation(i, x, pr1)
+                elif i >= (j + y):
+                    return AdOPTedTM11InsertionOperation(i - y, x, pr1)
+                else:
+                    return AdOPTedTM11NoOperation()
             case AdOPTedTM11DeletionOperation(i, x, pr1), AdOPTedTM11InsertionOperation(j, y, pr2):
                 if (i + x) <= j:
                     return AdOPTedTM11DeletionOperation(i, x, pr1)
-                elif i>j:
+                elif i > j:
                     return AdOPTedTM11DeletionOperation(i + len(y), x, pr1)
                 elif i == j:
-                    return AdOPTedTM11DeletionOperation(i, len(y)+x, pr1)
+                    return AdOPTedTM11DeletionOperation(i, len(y) + x, pr1)
                 else:
-                    return AdOPTedTM11DeletionOperation(i, (j-i) + len(y) + (i+x-j) ,pr1)
+                    return AdOPTedTM11DeletionOperation(i, (j - i) + len(y) + (i + x - j), pr1)
             case AdOPTedTM11DeletionOperation(i, x, pr1), AdOPTedTM11DeletionOperation(j, y, pr2):
                 if i + x <= j:
                     return AdOPTedTM11DeletionOperation(i, x, pr1)
                 elif i >= j + y:
                     return AdOPTedTM11DeletionOperation(i - y, x, pr1)
-                elif i < j and j < i + x and i+x <= j+y:
-                    return AdOPTedTM11DeletionOperation(i, j-i, pr1)
-                elif j<=i and i<j+y and j+y<i+x:
-                    return AdOPTedTM11DeletionOperation(j, i+x-j-y, pr1)
-                elif i<j and j+y<i+x:
-                    return AdOPTedTM11DeletionOperation(i, x-y, pr1)
+                elif i < j and j < i + x and i + x <= j + y:
+                    return AdOPTedTM11DeletionOperation(i, j - i, pr1)
+                elif j <= i and i < j + y and j + y < i + x:
+                    return AdOPTedTM11DeletionOperation(j, i + x - j - y, pr1)
+                elif i < j and j + y < i + x:
+                    return AdOPTedTM11DeletionOperation(i, x - y, pr1)
                 else:
                     return AdOPTedTM11NoOperation()
             case AdOPTedTM11NoOperation(), _:
@@ -266,6 +287,3 @@ class AdOPTedTM11Client(ClientDevice):
                 return oper
             case _ as unreachable:
                 assert_never(unreachable)
-
-
-

@@ -18,7 +18,9 @@ class WOOTOInsertionOperation:
 class WOOTODeletionOperation:
     character_id: WOOTOIdentifier
 
+
 WOOTOOperation = WOOTOInsertionOperation | WOOTODeletionOperation
+
 
 @dataclass
 class WOOTOMessage:

@@ -3,7 +3,7 @@ from __future__ import annotations
 from got.operations.operation import GOTOperation
 from unique_char.uniquechar import UniqueChar
 
-type StateVector = dict[int,  int]
+type StateVector = dict[int, int]
 
 
 class GOTDeleteOperation(GOTOperation):
@@ -99,7 +99,9 @@ class GOTDeleteOperation(GOTOperation):
         Returns a copy of the operation with all metadata removed.
         This method is intended to be used to sanitise the internal state of an incoming operation from another client.
         """
-        return GOTDeleteOperation(self.num_to_delete, self.idx, self.sequence[:], self.client_id, self.state_vector.copy())
+        return GOTDeleteOperation(
+            self.num_to_delete, self.idx, self.sequence[:], self.client_id, self.state_vector.copy()
+        )
 
     def copy_without_relative_addressing(self) -> GOTDeleteOperation:
         """
@@ -124,7 +126,7 @@ class GOTDeleteOperation(GOTOperation):
     def __repr__(self):
         return self.__str__()
 
-    def __eq__(self, other:object):
+    def __eq__(self, other: object):
         return (
             isinstance(other, GOTDeleteOperation)
             and self.num_to_delete == other.num_to_delete

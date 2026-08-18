@@ -6,18 +6,12 @@ from yjs.yjsclient import YjsClient
 
 
 def __insert(client: YjsClient, position: int, char: str) -> None:
-    client.perform_local_insert(
-        ClientInsertOperation(
-            client.client_id, position, UniqueChar.get_unique_char(char)
-        )
-    )
+    client.perform_local_insert(ClientInsertOperation(client.client_id, position, UniqueChar.get_unique_char(char)))
 
 
 def __delete(client: YjsClient, position: int) -> None:
     character = client.read_state()[position]
-    client.perform_local_delete(
-        ClientDeleteOperation(client.client_id, position, character)
-    )
+    client.perform_local_delete(ClientDeleteOperation(client.client_id, position, character))
 
 
 def __drain(clients: list[YjsClient]) -> None:

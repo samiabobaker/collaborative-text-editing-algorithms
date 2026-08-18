@@ -7,12 +7,14 @@ from unique_char.uniquechar import UniqueChar
 
 class Character:
     char: UniqueChar
-    left_origin: UniqueChar | Literal['start']
-    right_origin: UniqueChar | Literal['end']
+    left_origin: UniqueChar | Literal["start"]
+    right_origin: UniqueChar | Literal["end"]
     left_origin_of: list[UniqueChar]
     right_origin_of: list[UniqueChar]
 
-    def __init__(self, char: UniqueChar, left_origin: UniqueChar | Literal['start'], right_origin: UniqueChar | Literal['end']):
+    def __init__(
+        self, char: UniqueChar, left_origin: UniqueChar | Literal["start"], right_origin: UniqueChar | Literal["end"]
+    ):
         self.char = char
         self.left_origin = left_origin
         self.right_origin = right_origin
@@ -30,15 +32,16 @@ class Character:
 
         character_copy.left_origin_of = list(self.left_origin_of)
         character_copy.right_origin_of = list(self.right_origin_of)
-        
+
         return character_copy
 
     def __str__(self) -> str:
-        return f'''Char: {self.char}
+        return f"""Char: {self.char}
                    Left: {self.left_origin} 
                    Right: {self.right_origin}
                    LeftOf: {self.left_origin_of}
-                   RightOf: {self.right_origin_of} '''
+                   RightOf: {self.right_origin_of} """
+
 
 class ClientTrace:
     events_seen: list[Event]
@@ -53,11 +56,10 @@ class ClientTrace:
         self.states_after_events.append(list(state))
 
     def copy(self) -> ClientTrace:
-        trace_copy  = ClientTrace()
+        trace_copy = ClientTrace()
         trace_copy.events_seen = list(self.events_seen)
         trace_copy.states_after_events = list(self.states_after_events)
         return trace_copy
-    
 
 
 @dataclass

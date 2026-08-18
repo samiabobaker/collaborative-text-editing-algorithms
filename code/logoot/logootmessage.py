@@ -10,11 +10,14 @@ class LogootInsertionOperation:
     position: LogootPosition
     character: UniqueChar
 
+
 @dataclass
 class LogootDeletionOperation:
     position: LogootPosition
 
+
 LogootOperation = LogootInsertionOperation | LogootDeletionOperation
+
 
 @dataclass
 class LogootMessage:

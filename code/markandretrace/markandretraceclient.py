@@ -27,7 +27,6 @@ class MarkAndRetraceClient(ClientDevice):
     vector_clock: dict[int, int]
     message_buffer: dict[int, list[MarkAndRetraceMessage]]
 
-
     def __init__(self, client_id: int):
         self.client_id = client_id
         self.string = MarkAndRetraceString()
@@ -35,37 +34,36 @@ class MarkAndRetraceClient(ClientDevice):
     def read_state(self) -> list[UniqueChar]:
         return self.string.read_state()
 
-
-
     def can_receive_from_server(self) -> bool:
         return False
 
     def can_receive_from(self) -> list[int]:
-            client_ids: list[int] = []
-            for client in self.clients:
-                client_message_buffer = self.message_buffer[client.client_id]
-                if len(client_message_buffer) != 0 and self.__is_causally_ready(client_message_buffer[0]):
-                    client_ids.append(client.client_id)
-            
-            return client_ids
+        client_ids: list[int] = []
+        for client in self.clients:
+            client_message_buffer = self.message_buffer[client.client_id]
+            if len(client_message_buffer) != 0 and self.__is_causally_ready(client_message_buffer[0]):
+                client_ids.append(client.client_id)
+
+        return client_ids
 
     def __is_causally_ready(self, message: MarkAndRetraceMessage) -> bool:
-            for client in self.clients:
-                if message.vector_clock[client.client_id] > self.vector_clock[client.client_id]:
-                    return False
-            return True
+        for client in self.clients:
+            if message.vector_clock[client.client_id] > self.vector_clock[client.client_id]:
+                return False
+        return True
 
-    
     def perform_local_insert(self, causing_operation: ClientInsertOperation) -> None:
-            operation_state_vector = self.vector_clock.copy()
-            operation_state_vector[self.client_id] += 1
-            operation = MarkAndRetraceInsertionOperation(self.client_id, operation_state_vector, causing_operation.character, causing_operation.position)
-            message = MarkAndRetraceMessage(self.vector_clock.copy(), operation, causing_operation)
+        operation_state_vector = self.vector_clock.copy()
+        operation_state_vector[self.client_id] += 1
+        operation = MarkAndRetraceInsertionOperation(
+            self.client_id, operation_state_vector, causing_operation.character, causing_operation.position
+        )
+        message = MarkAndRetraceMessage(self.vector_clock.copy(), operation, causing_operation)
 
-            self.control_algorithm(operation)
-            #Send message to all other clients
-            self.__send_to_other_clients(message)
-    
+        self.control_algorithm(operation)
+        # Send message to all other clients
+        self.__send_to_other_clients(message)
+
     def perform_local_delete(self, causing_operation: ClientDeleteOperation) -> None:
         operation_state_vector = self.vector_clock.copy()
         operation_state_vector[self.client_id] += 1
@@ -90,8 +88,7 @@ class MarkAndRetraceClient(ClientDevice):
                 return []
             case _ as unreachable:
                 assert_never(unreachable)
-    
-    
+
     def __send_to_other_clients(self, message: MarkAndRetraceMessage) -> None:
         for client in self.clients:
             if client.client_id == self.client_id:
@@ -100,15 +97,14 @@ class MarkAndRetraceClient(ClientDevice):
 
     def send_message(self, client_id: int, message: MarkAndRetraceMessage):
         self.message_buffer[client_id].append(message)
-    
- 
+
     def set_clients(self, clients: list[MarkAndRetraceClient]) -> None:
-            self.clients = clients
-            self.vector_clock = {}
-            self.message_buffer = {}
-            for client in clients:
-                self.vector_clock[client.client_id] = 0
-                self.message_buffer[client.client_id] = []
+        self.clients = clients
+        self.vector_clock = {}
+        self.message_buffer = {}
+        for client in clients:
+            self.vector_clock[client.client_id] = 0
+            self.message_buffer[client.client_id] = []
 
     def __execute_operation(self, O: MarkAndRetraceOperation) -> MarkAndRetraceCharacter:
         match O:
@@ -134,18 +130,17 @@ class MarkAndRetraceClient(ClientDevice):
         self.string.retrace(self.vector_clock)
 
     def receive_from_client(self, client_id: int) -> list[ClientInsertOperation | ClientDeleteOperation]:
-            #Check if message from client exists, and is causally ready.
-            client_message_buffer = self.message_buffer[client_id]
-    
-            if len(client_message_buffer) == 0:
-                return []
-            
-            if not self.__is_causally_ready(client_message_buffer[0]):
-                return []
-            
-            message = client_message_buffer.pop(0)
-    
-            self.control_algorithm(message.operation)
-    
-            return [message.causing_operation]
-    
+        # Check if message from client exists, and is causally ready.
+        client_message_buffer = self.message_buffer[client_id]
+
+        if len(client_message_buffer) == 0:
+            return []
+
+        if not self.__is_causally_ready(client_message_buffer[0]):
+            return []
+
+        message = client_message_buffer.pop(0)
+
+        self.control_algorithm(message.operation)
+
+        return [message.causing_operation]

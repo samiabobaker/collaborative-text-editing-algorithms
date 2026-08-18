@@ -13,15 +13,15 @@ class LogootIdentifier:
     def less_than(self, other: LogootIdentifier):
         return (self.pos, self.client_id, self.clock) < (other.pos, other.client_id, other.clock)
 
+
 LogootPosition = list[LogootIdentifier]
+
 
 def position_less_than(pos1: LogootPosition, pos2: LogootPosition) -> bool:
     for id1, id2 in zip(pos1, pos2, strict=True):
         if id1 != id2:
             return id1.less_than(id2)
     return len(pos1) < len(pos2)
-
-    
 
 
 class LogootDocument:
@@ -40,7 +40,6 @@ class LogootDocument:
 
     BASE = 2**10
 
-
     def insert_char(self, character: UniqueChar, position: int):
         p = self.ids[position]
         q = self.ids[position + 1]
@@ -58,7 +57,7 @@ class LogootDocument:
         index = 1
         while index < len(self.ids) - 1 and position_less_than(self.ids[index], target):
             index += 1
-        return index 
+        return index
 
     def delete_char(self, position: int) -> LogootPosition:
         target = self.ids[position + 1]
@@ -75,11 +74,10 @@ class LogootDocument:
     def read_state(self) -> list[UniqueChar]:
         return self.state
 
-
-    def generate_line_id(self, p: LogootPosition, q: LogootPosition, N: int,  site: int) -> list[LogootPosition]:
+    def generate_line_id(self, p: LogootPosition, q: LogootPosition, N: int, site: int) -> list[LogootPosition]:
         assert position_less_than(p, q)
 
-        ids : list[LogootPosition] = []
+        ids: list[LogootPosition] = []
         index = 0
         interval = 0
 
@@ -94,8 +92,7 @@ class LogootDocument:
             r += step
         return ids
 
-
-    def construct_position(self, r:int, index: int, p:LogootPosition, q:LogootPosition, site:int) -> LogootPosition:
+    def construct_position(self, r: int, index: int, p: LogootPosition, q: LogootPosition, site: int) -> LogootPosition:
         digits: list[int] = []
         for _ in range(index):
             digits.append(r % self.BASE)
@@ -104,7 +101,7 @@ class LogootDocument:
 
         self.clock += 1
 
-        position : LogootPosition = []
+        position: LogootPosition = []
         last = index - 1
         for i, digit in enumerate(digits):
             if i == last:
@@ -118,12 +115,10 @@ class LogootDocument:
             position.append(LogootIdentifier(digit, site_id, clock))
         return position
 
-
-    def prefix(self, p:LogootPosition, index: int) -> int:
+    def prefix(self, p: LogootPosition, index: int) -> int:
         result = 0
         for i in range(index):
             digit = p[i].pos if i < len(p) else 0
             result *= self.BASE
             result += digit
         return result
-

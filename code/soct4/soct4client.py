@@ -23,8 +23,8 @@ from unique_char.uniquechar import UniqueChar
 if TYPE_CHECKING:
     from soct4.soct4server import SOCT4Server
 
-class SOCT4Client(ClientDevice):
 
+class SOCT4Client(ClientDevice):
     client_id: int
 
     server: SOCT4Server
@@ -36,7 +36,6 @@ class SOCT4Client(ClientDevice):
 
     clients: list[SOCT4Client]
 
-
     def __init__(self, client_id: int):
         self.client_id = client_id
         self.timestamp = 0
@@ -45,18 +44,16 @@ class SOCT4Client(ClientDevice):
         self.history_buffer = []
 
     def set_clients(self, clients: list[SOCT4Client]) -> None:
-            self.clients = clients
-            self.message_buffer = {}
-            for client in clients:
-                self.message_buffer[client.client_id] = []
+        self.clients = clients
+        self.message_buffer = {}
+        for client in clients:
+            self.message_buffer[client.client_id] = []
 
     def set_server(self, server: SOCT4Server):
         self.server = server
 
     def read_state(self):
         return self.state
-
-    
 
     def perform_operation(self, operation: ClientOperation) -> list[ClientInsertOperation | ClientDeleteOperation]:
         match operation:
@@ -91,21 +88,20 @@ class SOCT4Client(ClientDevice):
         return len(self.server_message_buffer) != 0
 
     def receive_from_client(self, client_id: int) -> list[ClientInsertOperation | ClientDeleteOperation]:
-            #Check if message from client exists, and is causally ready.
-            client_message_buffer = self.message_buffer[client_id]
-            
-            if len(client_message_buffer) == 0:
-                return []
+        # Check if message from client exists, and is causally ready.
+        client_message_buffer = self.message_buffer[client_id]
 
-            if not self.__is_ready(client_message_buffer[0]):
-                return []
-            
-            message = client_message_buffer.pop(0)
-    
-            self.integrate(message.operation)
+        if len(client_message_buffer) == 0:
+            return []
 
-            return [message.causing_operation]
+        if not self.__is_ready(client_message_buffer[0]):
+            return []
 
+        message = client_message_buffer.pop(0)
+
+        self.integrate(message.operation)
+
+        return [message.causing_operation]
 
     def __is_ready(self, message: SOCT4OperationMessage) -> bool:
         return self.timestamp + 1 == message.operation.timestamp
@@ -119,7 +115,6 @@ class SOCT4Client(ClientDevice):
                 return [client_id]
         return []
 
-
     def execute_operation(self, op: SOCT4Operation):
         match op:
             case SOCT4InsertOperation(_, _, character, position):
@@ -130,7 +125,6 @@ class SOCT4Client(ClientDevice):
                 pass
             case _ as unreachable:
                 assert_never(unreachable)
-
 
     def execute_local(self, op: SOCT4Operation, causing_operation: ClientInsertOperation | ClientDeleteOperation):
         n = len(self.history_buffer)
@@ -154,7 +148,6 @@ class SOCT4Client(ClientDevice):
     def send_message(self, client_id: int, message: SOCT4OperationMessage):
         self.message_buffer[client_id].append(message)
 
-
     def integrate(self, op: SOCT4Operation):
         if self.timestamp != op.timestamp:
             self.history_buffer.insert(self.timestamp, op)
@@ -167,7 +160,6 @@ class SOCT4Client(ClientDevice):
             self.execute_operation(op)
             self.timestamp += 1
         self.deferred_broadcast()
-
 
     def deferred_broadcast(self):
         while len(self.history_buffer) > self.timestamp:
@@ -182,23 +174,23 @@ class SOCT4Client(ClientDevice):
             case SOCT4InsertOperation(t1, id1, x, i, co1), SOCT4InsertOperation(_, id2, _, j):
                 if i < j:
                     return SOCT4InsertOperation(t1, id1, x, i, co1)
-                elif i>j or id1 < id2:
-                    return SOCT4InsertOperation(t1, id1, x, i+1, co1)
+                elif i > j or id1 < id2:
+                    return SOCT4InsertOperation(t1, id1, x, i + 1, co1)
                 else:
                     return SOCT4InsertOperation(t1, id1, x, i, co1)
             case SOCT4InsertOperation(t1, id1, x, i, co1), SOCT4DeleteOperation(_, _, j):
                 if i <= j:
                     return SOCT4InsertOperation(t1, id1, x, i, co1)
                 else:
-                    return SOCT4InsertOperation(t1, id1, x, i-1, co1)
+                    return SOCT4InsertOperation(t1, id1, x, i - 1, co1)
             case SOCT4DeleteOperation(t1, id1, i, co1), SOCT4InsertOperation(_, _, _, j):
                 if i < j:
                     return SOCT4DeleteOperation(t1, id1, i, co1)
                 else:
-                    return SOCT4DeleteOperation(t1, id1, i+1, co1)
+                    return SOCT4DeleteOperation(t1, id1, i + 1, co1)
             case SOCT4DeleteOperation(t1, id1, i, co1), SOCT4DeleteOperation(_, _, j):
                 if i > j:
-                    return SOCT4DeleteOperation(t1, id1, i-1, co1)
+                    return SOCT4DeleteOperation(t1, id1, i - 1, co1)
                 elif i < j:
                     return SOCT4DeleteOperation(t1, id1, i, co1)
                 else:
@@ -208,5 +200,4 @@ class SOCT4Client(ClientDevice):
             case oper, SOCT4NoOperation():
                 return oper
             case _ as unreachable:
-                assert_never(unreachable) 
-
+                assert_never(unreachable)

@@ -7,13 +7,12 @@ from pot.potmessage import POTMessage
 if TYPE_CHECKING:
     from pot.potclient import POTClient
 
-class POTServer(ServerDevice):
 
+class POTServer(ServerDevice):
     to: int
 
     message_buffer: dict[int, list[POTMessage]]
     clients: list[POTClient]
-
 
     def __init__(self, clients: list[POTClient]):
         self.to = 0
@@ -22,7 +21,6 @@ class POTServer(ServerDevice):
         self.message_buffer = {}
         for client in clients:
             self.message_buffer[client.client_id] = []
-
 
     def send_message(self, client_id: int, message: POTMessage):
         self.message_buffer[client_id].append(message)
@@ -46,14 +44,10 @@ class POTServer(ServerDevice):
             if len(self.message_buffer[client_id]) != 0:
                 client_ids.append(client_id)
         return client_ids
-    
 
     def perform_operation(self, operation: ServerOperation) -> None:
-            match operation:
-                case ServerReceiveFromClientOperation(client_id):
-                    self.receive_message(client_id)
-                case _ as unreachable:
-                    assert_never(unreachable)
-    
-
-        
+        match operation:
+            case ServerReceiveFromClientOperation(client_id):
+                self.receive_message(client_id)
+            case _ as unreachable:
+                assert_never(unreachable)

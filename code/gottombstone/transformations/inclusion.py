@@ -15,5 +15,7 @@ class InclusionTransformer(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def list_inclusion_transform(self, op_a: GOTTombstoneOperation, op_list_2: list[GOTTombstoneOperation]) -> GOTTombstoneOperation:
+    def list_inclusion_transform(
+        self, op_a: GOTTombstoneOperation, op_list_2: list[GOTTombstoneOperation]
+    ) -> GOTTombstoneOperation:
         pass

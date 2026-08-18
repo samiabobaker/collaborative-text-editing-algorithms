@@ -51,7 +51,10 @@ class ClientServerQueueItem:
 
         return ClientServerQueueItem(clients_copy_dict, server_copy, self.depth, client_trace_copy, characters_copy)
 
-def build_exhaustive_trace_clients(clients: dict[int, ClientDevice], num_of_operations: int = 4, randomised:bool=False) -> Generator[tuple[dict[int, ClientTrace], dict[int, Character]]]: 
+
+def build_exhaustive_trace_clients(
+    clients: dict[int, ClientDevice], num_of_operations: int = 4, randomised: bool = False
+) -> Generator[tuple[dict[int, ClientTrace], dict[int, Character]]]:
     initial_clients_trace: dict[int, ClientTrace] = {}
 
     for client_id in clients:
@@ -67,7 +70,7 @@ def build_exhaustive_trace_clients(clients: dict[int, ClientDevice], num_of_oper
         queue_item = queue.pop(-1)
 
         all_operations = generate_all_client_client_operations(list(queue_item.clients.values()), with_deletes=False)
-        
+
         for operation in all_operations:
             queue_item_copy = queue_item.copy()
 
@@ -80,14 +83,14 @@ def build_exhaustive_trace_clients(clients: dict[int, ClientDevice], num_of_oper
             if isinstance(operation, ClientInsertOperation):
                 char = operation.character
 
-                left_origin = state[operation.position - 1] if operation.position > 0 else 'start'
-                right_origin = state[operation.position + 1]  if operation.position < len(state) - 1 else 'end' 
+                left_origin = state[operation.position - 1] if operation.position > 0 else "start"
+                right_origin = state[operation.position + 1] if operation.position < len(state) - 1 else "end"
 
-                if left_origin != 'start':
+                if left_origin != "start":
                     left_origin_character = queue_item_copy.characters[left_origin.id]
                     left_origin_character.add_to_left_origin_of(char)
 
-                if right_origin != 'end':
+                if right_origin != "end":
                     right_origin_character = queue_item_copy.characters[right_origin.id]
                     right_origin_character.add_to_right_origin_of(char)
 
@@ -97,8 +100,10 @@ def build_exhaustive_trace_clients(clients: dict[int, ClientDevice], num_of_oper
 
             if len(operation_seen) != 0:
                 performed_locally = isinstance(operation, ClientInsertOperation | ClientDeleteOperation)
-                queue_item_copy.clients_trace[operation.client_id].add_event(Event(operation_seen, performed_locally), list(client.read_state()))
-            
+                queue_item_copy.clients_trace[operation.client_id].add_event(
+                    Event(operation_seen, performed_locally), list(client.read_state())
+                )
+
             queue_item_copy.depth += 1
 
             if queue_item_copy.depth == num_of_operations:
@@ -106,7 +111,10 @@ def build_exhaustive_trace_clients(clients: dict[int, ClientDevice], num_of_oper
             else:
                 queue.append(queue_item_copy)
 
-def build_exhaustive_trace_client_server(clients: dict[int, ClientDevice], server: ServerDevice, num_of_operations: int = 4, randomised:bool=False) -> Generator[tuple[dict[int, ClientTrace], dict[int, Character]]]: 
+
+def build_exhaustive_trace_client_server(
+    clients: dict[int, ClientDevice], server: ServerDevice, num_of_operations: int = 4, randomised: bool = False
+) -> Generator[tuple[dict[int, ClientTrace], dict[int, Character]]]:
 
     initial_clients_trace: dict[int, ClientTrace] = {}
 
@@ -122,10 +130,12 @@ def build_exhaustive_trace_client_server(clients: dict[int, ClientDevice], serve
     while queue != []:
         queue_item = queue.pop(-1)
 
-        all_server_operations, all_client_operations = generate_all_client_server_operations(queue_item.server, list(queue_item.clients.values()), with_deletes=False)
+        all_server_operations, all_client_operations = generate_all_client_server_operations(
+            queue_item.server, list(queue_item.clients.values()), with_deletes=False
+        )
 
         if randomised:
-            #print("RANDOMISED")
+            # print("RANDOMISED")
             random.shuffle(all_client_operations)
             random.shuffle(all_server_operations)
 
@@ -141,14 +151,14 @@ def build_exhaustive_trace_client_server(clients: dict[int, ClientDevice], serve
             if isinstance(operation, ClientInsertOperation):
                 char = operation.character
 
-                left_origin = state[operation.position - 1] if operation.position > 0 else 'start'
-                right_origin = state[operation.position + 1]  if operation.position < len(state) - 1 else 'end' 
+                left_origin = state[operation.position - 1] if operation.position > 0 else "start"
+                right_origin = state[operation.position + 1] if operation.position < len(state) - 1 else "end"
 
-                if left_origin != 'start':
+                if left_origin != "start":
                     left_origin_character = queue_item_copy.characters[left_origin.id]
                     left_origin_character.add_to_left_origin_of(char)
 
-                if right_origin != 'end':
+                if right_origin != "end":
                     right_origin_character = queue_item_copy.characters[right_origin.id]
                     right_origin_character.add_to_right_origin_of(char)
 
@@ -158,8 +168,10 @@ def build_exhaustive_trace_client_server(clients: dict[int, ClientDevice], serve
 
             if len(operation_seen) != 0:
                 performed_locally = isinstance(operation, ClientInsertOperation | ClientDeleteOperation)
-                queue_item_copy.clients_trace[operation.client_id].add_event(Event(operation_seen, performed_locally), list(client.read_state()))
-            
+                queue_item_copy.clients_trace[operation.client_id].add_event(
+                    Event(operation_seen, performed_locally), list(client.read_state())
+                )
+
             queue_item_copy.depth += 1
 
             if queue_item_copy.depth == num_of_operations:
@@ -181,9 +193,14 @@ def build_exhaustive_trace_client_server(clients: dict[int, ClientDevice], serve
                 yield queue_item_copy.clients_trace, queue_item_copy.characters
                 queue.append(queue_item_copy)
 
-    
-def build_exhaustive_trace(clients: dict[int, ClientDevice], server: ServerDevice | None = None, num_of_operations: int = 30, randomised:bool=False) -> Generator[tuple[dict[int, ClientTrace], dict[int, Character]]]:
+
+def build_exhaustive_trace(
+    clients: dict[int, ClientDevice],
+    server: ServerDevice | None = None,
+    num_of_operations: int = 30,
+    randomised: bool = False,
+) -> Generator[tuple[dict[int, ClientTrace], dict[int, Character]]]:
     if server:
-        return build_exhaustive_trace_client_server(clients, server, num_of_operations,randomised)
+        return build_exhaustive_trace_client_server(clients, server, num_of_operations, randomised)
     else:
-        return build_exhaustive_trace_clients(clients, num_of_operations,randomised)
+        return build_exhaustive_trace_clients(clients, num_of_operations, randomised)

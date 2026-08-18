@@ -26,6 +26,7 @@ class TransformationPathEntry:
     operation: POTOperation
     to: int | None
 
+
 class POTClient(ClientDevice):
     client_id: int
     state: list[UniqueChar]
@@ -61,27 +62,33 @@ class POTClient(ClientDevice):
             case _ as unreachable:
                 assert_never(unreachable)
 
-    def perform_local_operation(self,  operation: POTOperation, causing_operation: ClientInsertOperation | ClientDeleteOperation):
-        #Step 1
+    def perform_local_operation(
+        self, operation: POTOperation, causing_operation: ClientInsertOperation | ClientDeleteOperation
+    ):
+        # Step 1
         self.__execute(operation)
 
-        #Step 2
-        message = POTMessage(self.client_id, self.rto, -1, operation, causing_operation) #TO will be assigned by the server
+        # Step 2
+        message = POTMessage(
+            self.client_id, self.rto, -1, operation, causing_operation
+        )  # TO will be assigned by the server
 
-        #step 3
+        # step 3
         for client_id in self.transformation_map:
             self.transformation_map[client_id].append(TransformationPathEntry(operation, None))
 
-        #step 4
+        # step 4
         self.server.send_message(self.client_id, message)
 
     def send_message(self, message: POTMessage):
-            self.message_buffer.append(message)
+        self.message_buffer.append(message)
 
     def perform_operation(self, operation: ClientOperation) -> list[ClientInsertOperation | ClientDeleteOperation]:
         match operation:
             case ClientInsertOperation():
-                self.perform_local_operation(POTInsertionOperation(operation.position, operation.character, self.client_id), operation)
+                self.perform_local_operation(
+                    POTInsertionOperation(operation.position, operation.character, self.client_id), operation
+                )
                 return [operation]
             case ClientDeleteOperation():
                 self.perform_local_operation(POTDeletionOperation(operation.position), operation)
@@ -96,8 +103,8 @@ class POTClient(ClientDevice):
                 assert_never(unreachable)
 
     def can_receive_from_server(self) -> bool:
-            return len(self.message_buffer) != 0
-    
+        return len(self.message_buffer) != 0
+
     def can_receive_from(self) -> list[int]:
         return []
 
@@ -117,7 +124,7 @@ class POTClient(ClientDevice):
 
         message = self.message_buffer.pop(0)
 
-        #The message is just a notification of the value of TO
+        # The message is just a notification of the value of TO
         if message.client_id == self.client_id:
             self.set_timestamp_in_transformation_path(message.to)
 
@@ -125,8 +132,8 @@ class POTClient(ClientDevice):
 
         transformation_path = self.transformation_map[message.client_id]
 
-        L1 : list[TransformationPathEntry] = []
-        L2 : list[TransformationPathEntry] = []
+        L1: list[TransformationPathEntry] = []
+        L2: list[TransformationPathEntry] = []
 
         for operation in transformation_path:
             if operation.to is not None and operation.to <= message.rto:
@@ -136,7 +143,6 @@ class POTClient(ClientDevice):
                 L1.append(operation)
             else:
                 L2.append(operation)
-
 
         transformed_operation1, transformed_L1 = self.SLT(message.operation, [i.operation for i in L1])
         transformed_operation2, transformed_L2 = self.SLT(transformed_operation1, [i.operation for i in L2])
@@ -151,7 +157,6 @@ class POTClient(ClientDevice):
         for entry, transformed_operation in zip(L2, transformed_L2, strict=True):
             entry.operation = transformed_operation
 
-
         for k in self.transformation_map:
             if k == message.client_id:
                 continue
@@ -160,19 +165,18 @@ class POTClient(ClientDevice):
 
             index = 0
 
-
-            while index < len(transformation_path) and transformation_path[index].to is not None and transformation_path[index].to < message.to:
+            while (
+                index < len(transformation_path)
+                and transformation_path[index].to is not None
+                and transformation_path[index].to < message.to
+            ):
                 index += 1
-
 
             transformation_path[index:] = [TransformationPathEntry(operation, None) for operation in transformed_L2]
 
             transformation_path.insert(index, TransformationPathEntry(transformed_operation1, message.to))
 
-
-
         return [message.causing_operation]
-             
 
     def SLT(self, operation: POTOperation, sequence: list[POTOperation]) -> tuple[POTOperation, list[POTOperation]]:
         transformed_op = operation
@@ -181,7 +185,6 @@ class POTClient(ClientDevice):
             transformed_sequence.append(self.T(sequence_op, transformed_op))
             transformed_op = self.T(transformed_op, sequence_op)
         return transformed_op, transformed_sequence
-
 
     def T(self, O1: POTOperation, O2: POTOperation) -> POTOperation:
         match O1, O2:
@@ -198,7 +201,7 @@ class POTClient(ClientDevice):
                 if i <= j:
                     return POTInsertionOperation(i, x, id1)
                 else:
-                    return POTInsertionOperation(i-1, x, id1)
+                    return POTInsertionOperation(i - 1, x, id1)
             case POTDeletionOperation(i), POTInsertionOperation(j, _):
                 if i < j:
                     return POTDeletionOperation(i)

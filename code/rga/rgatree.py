@@ -17,7 +17,7 @@ class RGATimestamp:
     counter: int
     client_id: int
 
-    def less_than(self, other : RGATimestamp) -> bool:
+    def less_than(self, other: RGATimestamp) -> bool:
         return (self.counter < other.counter) or ((self.counter == other.counter) and self.client_id < other.client_id)
 
 
@@ -54,7 +54,7 @@ class RGANode:
         self.deleted = False
 
     def traverse(self) -> list[RGANode]:
-        state : list[RGANode] = []
+        state: list[RGANode] = []
 
         if not self.deleted:
             state.append(self)
@@ -64,8 +64,8 @@ class RGANode:
 
         return state
 
-    def add_child(self, node : RGANode) -> None:
-        index = 0 
+    def add_child(self, node: RGANode) -> None:
+        index = 0
         while index < len(self.children) and node.timestamp.less_than(self.children[index].timestamp):
             index += 1
         self.children.insert(index, node)
@@ -73,23 +73,21 @@ class RGANode:
     def mark_deleted(self) -> None:
         self.deleted = True
 
+
 class RGATree:
     client_id: int
     children: list[RGANode]  # kept in decreasing timestamp order
-    max_counter : int
-    nodes : dict[tuple[int, int], RGANode] # (counter, client_id) => node
+    max_counter: int
+    nodes: dict[tuple[int, int], RGANode]  # (counter, client_id) => node
 
-    def __init__(
-        self,
-        client_id : int
-    ):
+    def __init__(self, client_id: int):
         self.children = []
         self.max_counter = 0
         self.client_id = client_id
         self.nodes = {}
 
     def traverse(self) -> list[RGANode]:
-        state : list[RGANode] = []
+        state: list[RGANode] = []
 
         for child in self.children:
             state += child.traverse()
@@ -114,24 +112,24 @@ class RGATree:
         self.nodes[(new_timestamp.client_id, new_timestamp.counter)] = node
         return node
 
-    def delete_char_at_position(self, position : int) -> RGANode:
+    def delete_char_at_position(self, position: int) -> RGANode:
         node = self.find_node_at_position(position)
         node.mark_deleted()
         return node
 
-    def delete_node_with_timestamp(self, timestamp : RGATimestamp):
+    def delete_node_with_timestamp(self, timestamp: RGATimestamp):
         node = self.nodes[(timestamp.client_id, timestamp.counter)]
         node.mark_deleted()
 
-    def add_child(self, node : RGANode) -> None:
-            index = 0 
-            while index < len(self.children) and node.timestamp.less_than(self.children[index].timestamp):
-                index += 1
-            self.children.insert(index, node)
+    def add_child(self, node: RGANode) -> None:
+        index = 0
+        while index < len(self.children) and node.timestamp.less_than(self.children[index].timestamp):
+            index += 1
+        self.children.insert(index, node)
 
-    def insert_node(self, timestamp : RGATimestamp, parent : RGATimestamp | None, char : UniqueChar):
+    def insert_node(self, timestamp: RGATimestamp, parent: RGATimestamp | None, char: UniqueChar):
         node = RGANode(char, timestamp, parent)
-        self.nodes[(timestamp.client_id, timestamp.counter)]  = node
+        self.nodes[(timestamp.client_id, timestamp.counter)] = node
         if parent is None:
             self.add_child(node)
         else:

@@ -62,9 +62,7 @@ class Sync9Client(ClientDevice):
         self.__send_to_other_clients(
             Sync9Message(
                 self.vector_clock.copy(),
-                Sync9InsertionOperation(
-                    item.id, item.origin_left, item.insert_after, item.value
-                ),
+                Sync9InsertionOperation(item.id, item.origin_left, item.insert_after, item.value),
                 operation,
             )
         )
@@ -73,11 +71,7 @@ class Sync9Client(ClientDevice):
         # Perform change to local document
         item = self.document.delete_char(operation.position)
         # Send message to all other clients
-        self.__send_to_other_clients(
-            Sync9Message(
-                self.vector_clock.copy(), Sync9DeletionOperation(item.id), operation
-            )
-        )
+        self.__send_to_other_clients(Sync9Message(self.vector_clock.copy(), Sync9DeletionOperation(item.id), operation))
 
     def perform_remote_insert(
         self,
@@ -91,9 +85,7 @@ class Sync9Client(ClientDevice):
     def perform_remote_delete(self, id: Sync9Id) -> None:
         self.document.delete_item_with_id(id)
 
-    def perform_operation(
-        self, operation: ClientOperation
-    ) -> list[ClientInsertOperation | ClientDeleteOperation]:
+    def perform_operation(self, operation: ClientOperation) -> list[ClientInsertOperation | ClientDeleteOperation]:
         match operation:
             case ClientInsertOperation():
                 self.perform_local_insert(operation)
@@ -125,9 +117,7 @@ class Sync9Client(ClientDevice):
             case _ as unreachable:
                 assert_never(unreachable)
 
-    def receive_from_client(
-        self, client_id: int
-    ) -> list[ClientInsertOperation | ClientDeleteOperation]:
+    def receive_from_client(self, client_id: int) -> list[ClientInsertOperation | ClientDeleteOperation]:
         # Check if message from client exists, and is causally ready.
         client_message_buffer = self.message_buffer[client_id]
 
@@ -149,9 +139,7 @@ class Sync9Client(ClientDevice):
         client_ids: list[int] = []
         for client in self.clients:
             client_message_buffer = self.message_buffer[client.client_id]
-            if len(client_message_buffer) != 0 and self.__is_causally_ready(
-                client_message_buffer[0]
-            ):
+            if len(client_message_buffer) != 0 and self.__is_causally_ready(client_message_buffer[0]):
                 client_ids.append(client.client_id)
 
         return client_ids

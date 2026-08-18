@@ -18,11 +18,12 @@ class MarkAndRetraceDeletionOperation:
     state_vector: dict[int, int]
     position: int
 
+
 MarkAndRetraceOperation = MarkAndRetraceInsertionOperation | MarkAndRetraceDeletionOperation
+
 
 @dataclass
 class MarkAndRetraceMessage:
     vector_clock: dict[int, int]
     operation: MarkAndRetraceOperation
     causing_operation: ClientInsertOperation | ClientDeleteOperation
-

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import assert_never
 
-#from typing import assert_never
+# from typing import assert_never
 from device.clientdevice import ClientDevice
 from device.operations import (
     ClientDeleteOperation,
@@ -63,9 +63,7 @@ class YjsClient(ClientDevice):
         self.__send_to_other_clients(
             YjsMessage(
                 self.vector_clock.copy(),
-                YjsInsertionOperation(
-                    item.id, item.origin_left, item.origin_right, item.value
-                ),
+                YjsInsertionOperation(item.id, item.origin_left, item.origin_right, item.value),
                 operation,
             )
         )
@@ -74,11 +72,7 @@ class YjsClient(ClientDevice):
         # Perform change to local document
         item = self.document.delete_char(operation.position)
         # Send message to all other clients
-        self.__send_to_other_clients(
-            YjsMessage(
-                self.vector_clock.copy(), YjsDeletionOperation(item.id), operation
-            )
-        )
+        self.__send_to_other_clients(YjsMessage(self.vector_clock.copy(), YjsDeletionOperation(item.id), operation))
 
     def perform_remote_insert(
         self,
@@ -92,9 +86,7 @@ class YjsClient(ClientDevice):
     def perform_remote_delete(self, id: YjsId) -> None:
         self.document.delete_item_with_id(id)
 
-    def perform_operation(
-        self, operation: ClientOperation
-    ) -> list[ClientInsertOperation | ClientDeleteOperation]:
+    def perform_operation(self, operation: ClientOperation) -> list[ClientInsertOperation | ClientDeleteOperation]:
         match operation:
             case ClientInsertOperation():
                 self.perform_local_insert(operation)
@@ -126,9 +118,7 @@ class YjsClient(ClientDevice):
             case _ as unreachable:
                 assert_never(unreachable)
 
-    def receive_from_client(
-        self, client_id: int
-    ) -> list[ClientInsertOperation | ClientDeleteOperation]:
+    def receive_from_client(self, client_id: int) -> list[ClientInsertOperation | ClientDeleteOperation]:
         # Check if message from client exists, and is causally ready.
         client_message_buffer = self.message_buffer[client_id]
 
@@ -150,9 +140,7 @@ class YjsClient(ClientDevice):
         client_ids: list[int] = []
         for client in self.clients:
             client_message_buffer = self.message_buffer[client.client_id]
-            if len(client_message_buffer) != 0 and self.__is_causally_ready(
-                client_message_buffer[0]
-            ):
+            if len(client_message_buffer) != 0 and self.__is_causally_ready(client_message_buffer[0]):
                 client_ids.append(client.client_id)
 
         return client_ids

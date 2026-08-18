@@ -6,18 +6,12 @@ from unique_char.uniquechar import UniqueChar
 
 
 def __insert(client: Sync9Client, position: int, char: str) -> None:
-    client.perform_local_insert(
-        ClientInsertOperation(
-            client.client_id, position, UniqueChar.get_unique_char(char)
-        )
-    )
+    client.perform_local_insert(ClientInsertOperation(client.client_id, position, UniqueChar.get_unique_char(char)))
 
 
 def __delete(client: Sync9Client, position: int) -> None:
     character = client.read_state()[position]
-    client.perform_local_delete(
-        ClientDeleteOperation(client.client_id, position, character)
-    )
+    client.perform_local_delete(ClientDeleteOperation(client.client_id, position, character))
 
 
 def __drain(clients: list[Sync9Client]) -> None:

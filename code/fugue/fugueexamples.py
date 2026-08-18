@@ -3,16 +3,16 @@ from unique_char.uniquechar import UniqueChar
 
 
 def strong_list_specification_violation_example():
-    #Set Up
+    # Set Up
     A = FugueClient(0)
     B = FugueClient(1)
     C = FugueClient(2)
 
-    A.set_clients([A,B,C])
-    B.set_clients([A,B,C])
-    C.set_clients([A,B,C])
+    A.set_clients([A, B, C])
+    B.set_clients([A, B, C])
+    C.set_clients([A, B, C])
 
-    #Operations
+    # Operations
 
     A.perform_local_insert(0, UniqueChar.get_unique_char("b"))
     B.receive_from_client(A.client_id)
@@ -40,20 +40,20 @@ def strong_list_specification_violation_example():
         C.receive_from_client(c)
         Alist = C.can_receive_from()
 
-
     print("A:", *A.read_state(), sep="")
     print("B:", *B.read_state(), sep="")
     print("C:", *C.read_state(), sep="")
 
+
 def interleaving_example():
-    #Set Up
+    # Set Up
     A = FugueClient(0)
     B = FugueClient(1)
 
-    A.set_clients([A,B])
-    B.set_clients([A,B])   
+    A.set_clients([A, B])
+    B.set_clients([A, B])
 
-    #Operations
+    # Operations
 
     A.perform_local_insert(0, UniqueChar.get_unique_char("a"))
     B.perform_local_insert(0, UniqueChar.get_unique_char("x"))
@@ -66,14 +66,15 @@ def interleaving_example():
     print("A:", *A.read_state(), sep="")
     print("B:", *B.read_state(), sep="")
 
+
 def maximal_interleaving_example():
     A = FugueClient(0)
     B = FugueClient(1)
     C = FugueClient(2)
 
-    A.set_clients([A,B,C])
-    B.set_clients([A,B,C])
-    C.set_clients([A,B,C])
+    A.set_clients([A, B, C])
+    B.set_clients([A, B, C])
+    C.set_clients([A, B, C])
 
     A.perform_local_insert(0, UniqueChar.get_unique_char("a"))
     B.perform_local_insert(0, UniqueChar.get_unique_char("b"))
@@ -85,7 +86,6 @@ def maximal_interleaving_example():
 
     B.perform_local_insert(1, UniqueChar.get_unique_char("y"))
     A.perform_local_insert(1, UniqueChar.get_unique_char("x"))
-    
 
     C.receive_from_client(A.client_id)
 
@@ -101,5 +101,6 @@ def maximal_interleaving_example():
     print("B:", *B.read_state(), sep="")
     print("C:", *C.read_state(), sep="")
 
-#strong_list_specification_violation_example()
-#interleaving_example()
+
+# strong_list_specification_violation_example()
+# interleaving_example()

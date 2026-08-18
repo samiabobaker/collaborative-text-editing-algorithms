@@ -38,16 +38,16 @@ Devices = tuple[ServerDevice | None, Sequence[ClientDevice]]
 DeviceSetup = Callable[[int], Devices]
 
 
-#Neither hook is on the ClientDevice ABC, so they are described structurally here.
-#The parameters are Any because each client narrows them to its own class,
-#e.g. TIBOT2Client.set_clients(self, clients: list[TIBOT2Client]).
+# Neither hook is on the ClientDevice ABC, so they are described structurally here.
+# The parameters are Any because each client narrows them to its own class,
+# e.g. TIBOT2Client.set_clients(self, clients: list[TIBOT2Client]).
 class PeerClient(Protocol):
-    #A client that is handed the peer list at setup time.
+    # A client that is handed the peer list at setup time.
     def set_clients(self, clients: Any) -> None: ...
 
 
 class ServedClient(Protocol):
-    #A client that is handed the server at setup time.
+    # A client that is handed the server at setup time.
     def set_server(self, server: Any) -> None: ...
 
 
@@ -57,9 +57,9 @@ def make_setup(
     *,
     peer_to_peer: bool = True,
 ) -> DeviceSetup:
-    #Builds the DeviceSetup for one algorithm.
-    #peer_to_peer: every client is told about its peers (all algorithms except Jupiter).
-    #server_class: a server is built from the clients, and every client is told about it.
+    # Builds the DeviceSetup for one algorithm.
+    # peer_to_peer: every client is told about its peers (all algorithms except Jupiter).
+    # server_class: a server is built from the clients, and every client is told about it.
     def setup(num_of_clients: int) -> Devices:
         clients = [client_class(n) for n in range(num_of_clients)]
 
@@ -79,7 +79,7 @@ def make_setup(
     return setup
 
 
-#Peer to peer
+# Peer to peer
 SOCT2_setup = make_setup(SOCT2Client)
 abt_setup = make_setup(ABTClient)
 adopted_tm11_setup = make_setup(AdOPTedTM11Client)
@@ -102,13 +102,13 @@ wooto_setup = make_setup(WOOTOClient)
 yjs_setup = make_setup(YjsClient)
 yjsmod_setup = make_setup(YjsModClient)
 
-#Client server
+# Client server
 jupiter_setup = make_setup(JupiterClient, JupiterServer, peer_to_peer=False)
 pot_setup = make_setup(POTClient, POTServer)
 soct3_setup = make_setup(SOCT3Client, SOCT3Server)
 soct4_setup = make_setup(SOCT4Client, SOCT4Server)
 
 
-#AdOPTed is parameterised by its transformation function, so it takes one more step.
+# AdOPTed is parameterised by its transformation function, so it takes one more step.
 def adopted_setup(transformation: Callable[[], Any]) -> DeviceSetup:
     return make_setup(lambda n: AdOPTedClient(n, transformation()))

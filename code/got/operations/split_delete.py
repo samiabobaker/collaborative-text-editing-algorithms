@@ -63,7 +63,7 @@ class GOTSplitDeleteOperation(GOTOperation):
             second=self.second.copy_without_relative_addressing(),
         )
 
-    def __eq__(self, other:object) -> bool:
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, GOTSplitDeleteOperation)
             and self.client_id == other.client_id

@@ -4,14 +4,14 @@ from unique_char.uniquechar import UniqueChar
 
 
 def interleaving_example():
-    #Set Up
+    # Set Up
     A = AdOPTedTM11Client(0)
     B = AdOPTedTM11Client(1)
 
-    A.set_clients([A,B])
-    B.set_clients([A,B])   
+    A.set_clients([A, B])
+    B.set_clients([A, B])
 
-    #Operations
+    # Operations
 
     A.perform_operation(ClientInsertOperation(A.client_id, 0, UniqueChar.get_unique_char("a")))
     B.perform_operation(ClientInsertOperation(B.client_id, 0, UniqueChar.get_unique_char("x")))

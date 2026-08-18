@@ -63,12 +63,13 @@ class OriginalInclusionTransformer(InclusionTransformer):
         self.num_transformations_performed += 1
         return out
 
-    def list_inclusion_transform(self, op_a: GOTTombstoneOperation, op_list_2: list[GOTTombstoneOperation]) -> GOTTombstoneOperation:
+    def list_inclusion_transform(
+        self, op_a: GOTTombstoneOperation, op_list_2: list[GOTTombstoneOperation]
+    ) -> GOTTombstoneOperation:
         if isinstance(op_a, (GOTInsertOperation, GOTDeleteOperation)):
             return self._list_it(op_a, op_list_2)
         else:
             raise ValueError("Invalid operation types")
-
 
     def _list_it(
         self, incoming_operation: GOTInsertOperation | GOTDeleteOperation, remaining: list[GOTTombstoneOperation]

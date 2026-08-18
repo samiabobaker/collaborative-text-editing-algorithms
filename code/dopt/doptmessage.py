@@ -16,6 +16,7 @@ class dOPTDeletionOperation:
     priority: int
     position: int
 
+
 @dataclass
 class dOPTNoOperation:
     priority: int
@@ -23,9 +24,12 @@ class dOPTNoOperation:
 
 dOPTOperation = dOPTInsertionOperation | dOPTDeletionOperation | dOPTNoOperation
 
+
 @dataclass
 class dOPTMessage:
     client_id: int
     vector_clock: dict[int, int]
     operation: dOPTOperation
-    causing_operation: ClientInsertOperation | ClientDeleteOperation #The client operation that triggered this message to be sent.
+    causing_operation: (
+        ClientInsertOperation | ClientDeleteOperation
+    )  # The client operation that triggered this message to be sent.

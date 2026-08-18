@@ -13,6 +13,7 @@ class SOCT3InsertOperation:
     position: int
     causing_operation: ClientInsertOperation | ClientDeleteOperation
 
+
 @dataclass
 class SOCT3DeleteOperation:
     vector_clock: dict[int, int]
@@ -21,7 +22,9 @@ class SOCT3DeleteOperation:
     position: int
     causing_operation: ClientInsertOperation | ClientDeleteOperation
 
+
 SOCT3Operation = SOCT3DeleteOperation | SOCT3InsertOperation
+
 
 @dataclass
 class SOCT3TicketRequestMessage:
@@ -29,6 +32,7 @@ class SOCT3TicketRequestMessage:
     n: int
     operation: SOCT3Operation
     causing_operation: ClientInsertOperation | ClientDeleteOperation
+
 
 @dataclass
 class SOCT3TicketResponseMessage:
@@ -38,12 +42,12 @@ class SOCT3TicketResponseMessage:
     operation: SOCT3Operation
     causing_operation: ClientInsertOperation | ClientDeleteOperation
 
+
 @dataclass
 class SOCT3OperationMessage:
     client_id: int
     operation: SOCT3Operation
     causing_operation: ClientInsertOperation | ClientDeleteOperation
-
 
 
 SOCT3Message = SOCT3TicketRequestMessage | SOCT3TicketResponseMessage | SOCT3OperationMessage

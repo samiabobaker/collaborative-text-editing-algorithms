@@ -11,7 +11,7 @@ class FugueMaxInsertionOperation:
     parent_node_id: int
     node_id: int
     char: UniqueChar
-    direction: Literal['left','right']
+    direction: Literal["left", "right"]
     right_origin_id: RightOriginId
 
 
@@ -19,11 +19,12 @@ class FugueMaxInsertionOperation:
 class FugueMaxDeletionOperation:
     node_id: int
 
+
 FugueMaxOperation = FugueMaxInsertionOperation | FugueMaxDeletionOperation
+
 
 @dataclass
 class FugueMaxMessage:
     vector_clock: dict[int, int]
     operation: FugueMaxOperation
     causing_operation: ClientInsertOperation | ClientDeleteOperation
-
