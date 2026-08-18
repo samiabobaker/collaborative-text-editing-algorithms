@@ -1,8 +1,12 @@
-from jupiter.jupiterclient import JupiterClient
-from jupiter.jupiterserver import JupiterServer
+from convergence_checker.convergence_checker import (
+    check_for_convergence_client_client,
+    check_for_convergence_client_server,
+)
 from fugue.fugueclient import FugueClient
 from fuguemax.fuguemaxclient import FugueMaxClient
-from convergence_checker.convergence_checker import check_for_convergence_client_server, check_for_convergence_client_client
+from jupiter.jupiterclient import JupiterClient
+from jupiter.jupiterserver import JupiterServer
+
 
 def jupiter_convergence():
     cases = 0
@@ -24,7 +28,7 @@ def jupiter_convergence():
 
         converges = check_for_convergence_client_server(server, {A.client_id: A, B.client_id:B, C.client_id:C}, 30)
 
-        if converges == False:
+        if not converges:
             print(f"Converges {converges}")
             print("A:", *A.read_state(), sep="")
             print("B:", *B.read_state(), sep="")
@@ -53,7 +57,7 @@ def fugue_convergence():
 
         converges = check_for_convergence_client_client({A.client_id: A, B.client_id:B, C.client_id:C}, 30)
 
-        if converges == False:
+        if not converges:
             print(f"Converges {converges}")
             print("A:", *A.read_state(), sep="")
             print("B:", *B.read_state(), sep="")
@@ -81,7 +85,7 @@ def fuguemax_convergence():
 
         converges = check_for_convergence_client_client({A.client_id: A, B.client_id:B, C.client_id:C}, 30)
 
-        if converges == False:
+        if not converges:
             print(f"Converges {converges}")
             print("A:", *A.read_state(), sep="")
             print("B:", *B.read_state(), sep="")

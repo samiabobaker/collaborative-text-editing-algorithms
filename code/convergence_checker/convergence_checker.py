@@ -1,9 +1,21 @@
-from device.clientdevice import ClientDevice
-from device.serverdevice import ServerDevice
-from device.operations import ClientOperation, ServerOperation, ServerReceiveFromClientOperation, ClientReceiveFromServerOperation, ClientReceiveFromClientOperation, ClientTimestepOperation
-from random_operation_generator.random_operation_generator import generate_random_client_server_operation, generate_random_client_client_operation
 import random
+
+from device.clientdevice import ClientDevice
+from device.operations import (
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+    ServerOperation,
+    ServerReceiveFromClientOperation,
+)
+from device.serverdevice import ServerDevice
+from random_operation_generator.random_operation_generator import (
+    generate_random_client_client_operation,
+    generate_random_client_server_operation,
+)
 from tibot.tibotclient import TIBOTClient
+
 
 def check_for_convergence_client_server(server: ServerDevice, clients: dict[int, ClientDevice], num_of_operations:int = 10) -> bool:
     for _ in range(num_of_operations):
