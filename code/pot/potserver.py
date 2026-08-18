@@ -1,8 +1,8 @@
-from device.serverdevice import ServerDevice
+from typing import TYPE_CHECKING, assert_never
 
+from device.operations import ServerOperation, ServerReceiveFromClientOperation
+from device.serverdevice import ServerDevice
 from pot.potmessage import POTMessage
-from device.operations import ServerReceiveFromClientOperation, ServerOperation
-from typing import assert_never, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pot.potclient import POTClient
