@@ -1,6 +1,7 @@
 from adoptedtm11.adoptedtm11client import AdOPTedTM11Client
-from unique_char.uniquechar import UniqueChar
 from device.operations import ClientInsertOperation
+from unique_char.uniquechar import UniqueChar
+
 
 def interleaving_example():
     #Set Up
