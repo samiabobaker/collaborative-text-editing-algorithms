@@ -217,7 +217,7 @@ class Sync9Document:
                 if other_parent < parent_index:
                     # Anchored further left than us, so it comes first.
                     break
-                elif other_parent == parent_index:
+                elif other_parent == parent_index:  # noqa: SIM102
                     # A sibling. Order broken by client id.
                     if new_item.id.client_id < other.id.client_id:
                         break
