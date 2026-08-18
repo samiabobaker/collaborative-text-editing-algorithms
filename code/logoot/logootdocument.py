@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from unique_char.uniquechar import UniqueChar
 from random import randint
+
+from unique_char.uniquechar import UniqueChar
+
 
 @dataclass
 class LogootIdentifier:
@@ -14,7 +16,7 @@ class LogootIdentifier:
 LogootPosition = list[LogootIdentifier]
 
 def position_less_than(pos1: LogootPosition, pos2: LogootPosition) -> bool:
-    for id1, id2 in zip(pos1, pos2):
+    for id1, id2 in zip(pos1, pos2, strict=True):
         if id1 != id2:
             return id1.less_than(id2)
     return len(pos1) < len(pos2)
@@ -120,10 +122,7 @@ class LogootDocument:
     def prefix(self, p:LogootPosition, index: int) -> int:
         result = 0
         for i in range(index):
-            if i < len(p):
-                digit = p[i].pos
-            else:
-                digit = 0
+            digit = p[i].pos if i < len(p) else 0
             result *= self.BASE
             result += digit
         return result
