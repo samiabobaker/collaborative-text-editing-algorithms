@@ -1,9 +1,23 @@
 from dataclasses import dataclass
 from typing import assert_never
+
 from device.clientdevice import ClientDevice
-from soct2.soct2message import SOCT2Message, SOCT2Operation, SOCT2DeletionOperation, SOCT2InsertionOperation
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from soct2.soct2message import (
+    SOCT2DeletionOperation,
+    SOCT2InsertionOperation,
+    SOCT2Message,
+    SOCT2Operation,
+)
 from unique_char.uniquechar import UniqueChar
-from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation, ClientReceiveFromClientOperation, ClientReceiveFromServerOperation, ClientTimestepOperation
+
 
 @dataclass
 class SOCT2LogEntry:

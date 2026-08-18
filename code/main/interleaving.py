@@ -1,9 +1,12 @@
-from device.clientdevice import ClientDevice
-from device.serverdevice import ServerDevice
-from interleaving_checker.interleaving_checker import maximally_non_interleaving, forward_non_interleaving
-from algorithm_setup.algorithm_setup import jupiter_setup, fugue_setup, fuguemax_setup, DeviceSetup, tibot_setup, adopted_tombstone_setup
 import random
-from typing import Sequence
+
+from algorithm_setup.algorithm_setup import DeviceSetup
+from device.clientdevice import ClientDevice
+from interleaving_checker.interleaving_checker import (
+    forward_non_interleaving,
+    maximally_non_interleaving,
+)
+
 
 def interleaving(device_setup: DeviceSetup):
     n = 0
@@ -28,7 +31,7 @@ def forward_interleaving(device_setup: DeviceSetup):
         forward_interleaving_with_seed(n, device_setup)
 
 
-def forward_interleaving_with_seed(n: int, device_setup: DeviceSetup, num_of_clients:int = 3, num_of_ops: int = 30,print_ops:bool=False) -> bool:
+def forward_interleaving_with_seed(n: int, device_setup: DeviceSetup, num_of_clients:int = 3, num_of_ops: int = 30,print_ops:bool=False, pause_on_failure:bool = True) -> bool:
         random.seed(n)
 
         server, clients = device_setup(num_of_clients)
@@ -43,12 +46,13 @@ def forward_interleaving_with_seed(n: int, device_setup: DeviceSetup, num_of_cli
 
             for client in clients:
                 print(f"{client.client_id}:", *client.read_state(), sep="")
-            input()
+            if pause_on_failure:
+                input()
             print("-"*80)
             return False
         return True
 
-def interleaving_with_seed(n: int, device_setup: DeviceSetup, num_of_clients:int = 3, num_of_ops: int = 30,print_ops:bool=False) -> bool:
+def interleaving_with_seed(n: int, device_setup: DeviceSetup, num_of_clients:int = 3, num_of_ops: int = 30,print_ops:bool=False, pause_on_failure: bool = True) -> bool:
         random.seed(n)
 
         server, clients = device_setup(num_of_clients)
@@ -63,7 +67,8 @@ def interleaving_with_seed(n: int, device_setup: DeviceSetup, num_of_clients:int
 
             for client in clients:
                 print(f"{client.client_id}:", *client.read_state(), sep="")
-            input()
+            if pause_on_failure:
+                input()
             print("-"*80)
             return False
         return True

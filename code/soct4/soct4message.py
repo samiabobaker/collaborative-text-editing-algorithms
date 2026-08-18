@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+
 from device.operations import ClientDeleteOperation, ClientInsertOperation
 from unique_char.uniquechar import UniqueChar
+
 
 @dataclass
 class SOCT4InsertOperation:

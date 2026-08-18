@@ -2,8 +2,9 @@ from typing import assert_never
 
 from device.operations import ServerOperation, ServerReceiveFromClientOperation
 from device.serverdevice import ServerDevice
-from soct3.soct3message import SOCT3Message, SOCT3TicketRequestMessage, SOCT3TicketResponseMessage
 from soct3.soct3client import SOCT3Client
+from soct3.soct3message import SOCT3Message, SOCT3TicketRequestMessage, SOCT3TicketResponseMessage
+
 
 #Acts as the sequencer.
 class SOCT3Server(ServerDevice):

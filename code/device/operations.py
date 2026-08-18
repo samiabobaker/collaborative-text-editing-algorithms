@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+
 from unique_char.uniquechar import UniqueChar
+
 
 @dataclass
 class ClientInsertOperation:

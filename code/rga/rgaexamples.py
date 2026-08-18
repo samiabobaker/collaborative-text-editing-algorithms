@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from device.operations import ClientInsertOperation, ClientDeleteOperation
-from unique_char.uniquechar import UniqueChar
+from device.operations import ClientDeleteOperation, ClientInsertOperation
 from rga.rgaclient import RGAClient
-
+from unique_char.uniquechar import UniqueChar
 
 
 def __insert(client: RGAClient, position: int, char: str) -> None:

@@ -1,10 +1,23 @@
 from typing import assert_never
-from unique_char.uniquechar import UniqueChar
+
 from device.clientdevice import ClientDevice
-from markandretrace.markandretracemessage import MarkAndRetraceInsertionOperation, MarkAndRetraceDeletionOperation, MarkAndRetraceMessage, MarkAndRetraceOperation
-from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation, ClientReceiveFromClientOperation, ClientReceiveFromServerOperation, ClientTimestepOperation
-from markandretrace.markandretracestring import MarkAndRetraceString, MarkAndRetraceCharacter
-    
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from markandretrace.markandretracemessage import (
+    MarkAndRetraceDeletionOperation,
+    MarkAndRetraceInsertionOperation,
+    MarkAndRetraceMessage,
+    MarkAndRetraceOperation,
+)
+from markandretrace.markandretracestring import MarkAndRetraceCharacter, MarkAndRetraceString
+from unique_char.uniquechar import UniqueChar
+
 
 class MarkAndRetraceClient(ClientDevice):
     client_id: int

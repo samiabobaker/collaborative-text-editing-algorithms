@@ -4,21 +4,21 @@ from typing import assert_never
 
 from device.clientdevice import ClientDevice
 from device.operations import (
-    ClientOperation,
-    ClientInsertOperation,
     ClientDeleteOperation,
-    ClientReceiveFromServerOperation,
+    ClientInsertOperation,
+    ClientOperation,
     ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
     ClientTimestepOperation,
 )
-from unique_char.uniquechar import UniqueChar
 from sync9.sync9document import Sync9Document, Sync9Id, Sync9Item
 from sync9.sync9message import (
+    Sync9DeletionOperation,
+    Sync9InsertionOperation,
     Sync9Message,
     Sync9Operation,
-    Sync9InsertionOperation,
-    Sync9DeletionOperation,
 )
+from unique_char.uniquechar import UniqueChar
 
 
 class Sync9Client(ClientDevice):

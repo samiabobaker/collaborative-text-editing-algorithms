@@ -1,9 +1,25 @@
-from device.clientdevice import ClientDevice
-from dopt.doptmessage import dOPTMessage, dOPTDeletionOperation, dOPTInsertionOperation, dOPTNoOperation, dOPTOperation
-from unique_char.uniquechar import UniqueChar
-from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation, ClientReceiveFromClientOperation, ClientReceiveFromServerOperation, ClientTimestepOperation
 from dataclasses import dataclass
+from typing import assert_never
+
+from device.clientdevice import ClientDevice
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from dopt.doptmessage import (
+    dOPTDeletionOperation,
+    dOPTInsertionOperation,
+    dOPTMessage,
+    dOPTNoOperation,
+    dOPTOperation,
+)
 from dopt.dopttransform import dOPTTransform
+from unique_char.uniquechar import UniqueChar
+
 
 @dataclass
 class dOPTRequestLogEntry:
@@ -110,11 +126,7 @@ class dOPTClient(ClientDevice):
         return index
 
     def __vector_clock_leq(self, v1: dict[int, int], v2: dict[int, int]) -> bool:
-        for client_id in v1:
-            if v1[client_id] > v2[client_id]:
-                return False
-
-        return True
+        return all(v1[client_id] <= v2[client_id] for client_id in v1)
 
     def receive_from_client(self, client_id: int) -> list[ClientInsertOperation | ClientDeleteOperation]:
             #Check if message from client exists, and is causally ready.

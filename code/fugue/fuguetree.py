@@ -1,5 +1,7 @@
-from unique_char.uniquechar import UniqueChar
 from typing import Literal
+
+from unique_char.uniquechar import UniqueChar
+
 
 class FugueTree:
 

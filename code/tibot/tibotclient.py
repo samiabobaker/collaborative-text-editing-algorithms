@@ -1,11 +1,26 @@
-from device.clientdevice import ClientDevice
-from device.operations import ClientOperation, ClientInsertOperation, ClientDeleteOperation, ClientReceiveFromClientOperation, ClientReceiveFromServerOperation, ClientTimestepOperation
-from unique_char.uniquechar import UniqueChar
-from tibot.tibotmessage import TIBOTOperation, TIBOTMessage, TIBOTInsertionOperation, TIBOTDeletionOperation, TIBOTNoOperation
-from tibot.tibottransform import undo_TIBOT_operations, SLOT
 from typing import assert_never
 
-class TIBOTClient(ClientDevice):
+from device.clientdevice import TimeSteppedClient
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from tibot.tibotmessage import (
+    TIBOTDeletionOperation,
+    TIBOTInsertionOperation,
+    TIBOTMessage,
+    TIBOTNoOperation,
+    TIBOTOperation,
+)
+from tibot.tibottransform import SLOT, undo_TIBOT_operations
+from unique_char.uniquechar import UniqueChar
+
+
+class TIBOTClient(TimeSteppedClient):
     client_id: int
     state: list[UniqueChar]
     clock: int
@@ -276,11 +291,7 @@ class TIBOTClient(ClientDevice):
                     return False
         #In the current time interval, every client with a lower client_id has seen it.
         clients = self.client_ids_from_time_interval[time_interval]
-        for i in range(sender_client_id):
-            if i not in clients and i != self.client_id:
-                return False
-            
-        return True
+        return all(not (i not in clients and i != self.client_id) for i in range(sender_client_id))
 
     def __get_earliest_time_interval_sent_from(self, client_id: int) -> int:
         messages = self.message_buffer[client_id]

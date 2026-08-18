@@ -1,15 +1,18 @@
+from typing import assert_never
+
 from device.clientdevice import ClientDevice
 from device.operations import (
-    ClientOperation,
-    ClientInsertOperation,
     ClientDeleteOperation,
-    ClientReceiveFromServerOperation,
+    ClientInsertOperation,
+    ClientOperation,
     ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
     ClientTimestepOperation,
 )
+from rga.rgamessage import RGADeletionOperation, RGAInsertionOperation, RGAMessage, RGAOperation
 from rga.rgatree import RGATree
-from rga.rgamessage import RGAOperation, RGADeletionOperation, RGAInsertionOperation, RGAMessage
 from unique_char.uniquechar import UniqueChar
+
 
 class RGAClient(ClientDevice):
     client_id : int

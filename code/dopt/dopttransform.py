@@ -1,5 +1,11 @@
-from dopt.doptmessage import dOPTOperation, dOPTNoOperation, dOPTDeletionOperation, dOPTInsertionOperation
 from typing import assert_never
+
+from dopt.doptmessage import (
+    dOPTDeletionOperation,
+    dOPTInsertionOperation,
+    dOPTNoOperation,
+    dOPTOperation,
+)
 
 
 class dOPTTransform:

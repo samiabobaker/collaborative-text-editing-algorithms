@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from device.operations import ClientInsertOperation, ClientDeleteOperation
+from device.operations import ClientDeleteOperation, ClientInsertOperation
 from unique_char.uniquechar import UniqueChar
 from yjsmod.yjsmodclient import YjsModClient
 

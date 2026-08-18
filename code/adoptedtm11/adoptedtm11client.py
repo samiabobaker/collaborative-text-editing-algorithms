@@ -1,8 +1,23 @@
-from unique_char.uniquechar import UniqueChar
-from adoptedtm11.adoptedtm11message import AdOPTedTM11Message, AdOPTedTM11Operation, AdOPTedTM11InsertionOperation, AdOPTedTM11DeletionOperation, AdOPTedTM11NoOperation
+from typing import assert_never
+
+from adoptedtm11.adoptedtm11message import (
+    AdOPTedTM11DeletionOperation,
+    AdOPTedTM11InsertionOperation,
+    AdOPTedTM11Message,
+    AdOPTedTM11NoOperation,
+    AdOPTedTM11Operation,
+)
 from device.clientdevice import ClientDevice
-from device.operations import ClientOperation, ClientInsertOperation, ClientDeleteOperation, ClientReceiveFromServerOperation, ClientReceiveFromClientOperation, ClientTimestepOperation
-from typing import Literal, assert_never
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from unique_char.uniquechar import UniqueChar
+
 
 class AdOPTedTM11Client(ClientDevice):
     client_id: int
@@ -115,8 +130,8 @@ class AdOPTedTM11Client(ClientDevice):
                 user = client.client_id
                 break
 
-        assert predecessor != None
-        assert user != None
+        assert predecessor is not None
+        assert user is not None
 
         r_i = self.request_log[user][dest_clock[user] - 1]
 

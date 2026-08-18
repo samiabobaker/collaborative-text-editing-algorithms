@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from device.operations import ClientInsertOperation, ClientDeleteOperation
-from unique_char.uniquechar import UniqueChar
+from device.operations import ClientDeleteOperation, ClientInsertOperation
 from sync9.sync9document import Sync9Id
+from unique_char.uniquechar import UniqueChar
 
 
 @dataclass

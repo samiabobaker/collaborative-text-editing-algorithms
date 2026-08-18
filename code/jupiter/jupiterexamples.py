@@ -1,6 +1,7 @@
-from jupiter.jupiterserver import JupiterServer
 from jupiter.jupiterclient import JupiterClient
+from jupiter.jupiterserver import JupiterServer
 from unique_char.uniquechar import UniqueChar
+
 
 #Examples from: https://github.com/aryan-25/got/blob/main/experiments/jupiter_examples.py
 def strong_list_specification_violation_example():

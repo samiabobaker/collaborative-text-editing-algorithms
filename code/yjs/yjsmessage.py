@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from device.operations import ClientInsertOperation, ClientDeleteOperation
+from device.operations import ClientDeleteOperation, ClientInsertOperation
 from unique_char.uniquechar import UniqueChar
 from yjs.yjsdocument import YjsId
 

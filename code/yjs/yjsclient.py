@@ -1,23 +1,24 @@
 from __future__ import annotations
 
-#from typing import assert_never
+from typing import assert_never
 
+#from typing import assert_never
 from device.clientdevice import ClientDevice
 from device.operations import (
-    ClientOperation,
-    ClientInsertOperation,
     ClientDeleteOperation,
-    ClientReceiveFromServerOperation,
+    ClientInsertOperation,
+    ClientOperation,
     ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
     ClientTimestepOperation,
 )
 from unique_char.uniquechar import UniqueChar
 from yjs.yjsdocument import YjsDocument, YjsId, YjsItem
 from yjs.yjsmessage import (
+    YjsDeletionOperation,
+    YjsInsertionOperation,
     YjsMessage,
     YjsOperation,
-    YjsInsertionOperation,
-    YjsDeletionOperation,
 )
 
 

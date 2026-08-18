@@ -1,12 +1,24 @@
-from typing import assert_never, TYPE_CHECKING
-
-from unique_char.uniquechar import UniqueChar
-from soct4.soct4message import SOCT4DeleteOperation, SOCT4InsertOperation, SOCT4NoOperation, SOCT4Operation, SOCT4OperationMessage, SOCT4TicketRequestMessage, SOCT4TicketResponseMessage
-
+from typing import TYPE_CHECKING, assert_never
 
 from device.clientdevice import ClientDevice
-
-from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation, ClientReceiveFromClientOperation, ClientReceiveFromServerOperation, ClientTimestepOperation
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from soct4.soct4message import (
+    SOCT4DeleteOperation,
+    SOCT4InsertOperation,
+    SOCT4NoOperation,
+    SOCT4Operation,
+    SOCT4OperationMessage,
+    SOCT4TicketRequestMessage,
+    SOCT4TicketResponseMessage,
+)
+from unique_char.uniquechar import UniqueChar
 
 if TYPE_CHECKING:
     from soct4.soct4server import SOCT4Server
@@ -170,10 +182,8 @@ class SOCT4Client(ClientDevice):
             case SOCT4InsertOperation(t1, id1, x, i, co1), SOCT4InsertOperation(_, id2, _, j):
                 if i < j:
                     return SOCT4InsertOperation(t1, id1, x, i, co1)
-                elif i>j:
+                elif i>j or id1 < id2:
                     return SOCT4InsertOperation(t1, id1, x, i+1, co1)
-                elif id1 < id2:
-                    return SOCT4InsertOperation(t1, id1, x, i + 1, co1)
                 else:
                     return SOCT4InsertOperation(t1, id1, x, i, co1)
             case SOCT4InsertOperation(t1, id1, x, i, co1), SOCT4DeleteOperation(_, _, j):

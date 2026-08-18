@@ -1,10 +1,8 @@
 from __future__ import annotations
-from typing import Optional
 
 from got.operations.delete import GOTDeleteOperation
 from got.operations.operation import GOTOperation
 from unique_char.uniquechar import UniqueChar
-
 
 type StateVector = dict[int, int]
 
@@ -14,8 +12,8 @@ class GOTInsertOperation(GOTOperation):
     An implementation of an Insert operation for the GOT algorithm.
     """
 
-    _lost_information: Optional[tuple[GOTInsertOperation, GOTDeleteOperation]]
-    _relative_addressed_to: Optional[StateVector] = None
+    _lost_information: tuple[GOTInsertOperation, GOTDeleteOperation] | None
+    _relative_addressed_to: StateVector | None = None
 
     def __init__(self, idx: int, sequence: list[UniqueChar], client_id: int, state_vector: dict[int, int]):
         self.client_id = client_id

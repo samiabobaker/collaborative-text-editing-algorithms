@@ -1,12 +1,17 @@
-from dataclasses import dataclass
-from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation
-from exhaustive_operation_generator.exhaustive_operation_generator import generate_all_client_client_operations, generate_all_client_server_operations
-from algorithm_setup.algorithm_copy import copy_clients, copy_client_server
-from device.clientdevice import ClientDevice
-from device.serverdevice import ServerDevice
-from typing import Generator
-from list_spec_checker.client_trace import  ClientTrace, Event
 import random
+from collections.abc import Generator
+from dataclasses import dataclass
+
+from algorithm_setup.algorithm_copy import copy_client_server, copy_clients
+from device.clientdevice import ClientDevice
+from device.operations import ClientDeleteOperation, ClientInsertOperation
+from device.serverdevice import ServerDevice
+from exhaustive_operation_generator.exhaustive_operation_generator import (
+    generate_all_client_client_operations,
+    generate_all_client_server_operations,
+)
+from list_spec_checker.client_trace import ClientTrace, Event
+
 
 @dataclass
 class ClientsQueueItem:

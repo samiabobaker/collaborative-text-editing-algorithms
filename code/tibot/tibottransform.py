@@ -1,6 +1,13 @@
-from unique_char.uniquechar import UniqueChar
-from tibot.tibotmessage import TIBOTOperation, TIBOTNoOperation, TIBOTInsertionOperation, TIBOTDeletionOperation
 from typing import assert_never
+
+from tibot.tibotmessage import (
+    TIBOTDeletionOperation,
+    TIBOTInsertionOperation,
+    TIBOTNoOperation,
+    TIBOTOperation,
+)
+from unique_char.uniquechar import UniqueChar
+
 
 def undo_TIBOT_operation(state: list[UniqueChar], operation: TIBOTOperation) -> list[UniqueChar]:
     match operation.operation:

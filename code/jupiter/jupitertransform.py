@@ -1,4 +1,12 @@
-from jupiter.jupitermessage import JupiterOperation, JupiterInsertionOperation, JupiterDeletionOperation, JupiterNoOperation
+from typing import assert_never
+
+from jupiter.jupitermessage import (
+    JupiterDeletionOperation,
+    JupiterInsertionOperation,
+    JupiterNoOperation,
+    JupiterOperation,
+)
+
 
 class JupiterTransform:
     @staticmethod
@@ -9,7 +17,7 @@ class JupiterTransform:
                     return JupiterInsertionOperation(i, x), JupiterInsertionOperation(j+1, y)
                 elif i>j:
                     return JupiterInsertionOperation(i+1, x), JupiterInsertionOperation(j, y)
-                elif i==j:
+                else:
                     return JupiterInsertionOperation(i, x), JupiterInsertionOperation(j+1, y)
             case JupiterInsertionOperation(i, x), JupiterDeletionOperation(j):
                 if i <= j:

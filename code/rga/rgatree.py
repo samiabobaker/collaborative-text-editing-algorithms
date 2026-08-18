@@ -1,5 +1,7 @@
-from unique_char.uniquechar import UniqueChar
 from dataclasses import dataclass
+
+from unique_char.uniquechar import UniqueChar
+
 
 @dataclass(frozen=True, order=True)
 class RGATimestamp:
@@ -130,7 +132,7 @@ class RGATree:
     def insert_node(self, timestamp : RGATimestamp, parent : RGATimestamp | None, char : UniqueChar):
         node = RGANode(char, timestamp, parent)
         self.nodes[(timestamp.client_id, timestamp.counter)]  = node
-        if parent == None:
+        if parent is None:
             self.add_child(node)
         else:
             parent_node = self.nodes[(parent.client_id, parent.counter)]

@@ -1,8 +1,10 @@
 from dataclasses import dataclass
-from unique_char.uniquechar import UniqueChar
-from fuguemax.fuguemaxtree import RightOriginId
-from device.operations import ClientInsertOperation, ClientDeleteOperation
 from typing import Literal
+
+from device.operations import ClientDeleteOperation, ClientInsertOperation
+from fuguemax.fuguemaxtree import RightOriginId
+from unique_char.uniquechar import UniqueChar
+
 
 @dataclass
 class FugueMaxInsertionOperation:

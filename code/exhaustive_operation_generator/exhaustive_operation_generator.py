@@ -1,10 +1,18 @@
-from device.clientdevice import ClientDevice
-from device.serverdevice import ServerDevice
-from device.operations import ClientOperation, ServerOperation, ServerReceiveFromClientOperation, ClientInsertOperation, ClientDeleteOperation, ClientReceiveFromServerOperation, ClientReceiveFromClientOperation, ClientTimestepOperation
-from typing import Sequence
-from unique_char.uniquechar import UniqueChar
-from tibot.tibotclient import TIBOTClient
+from collections.abc import Sequence
 
+from device.clientdevice import ClientDevice, TimeSteppedClient
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+    ServerOperation,
+    ServerReceiveFromClientOperation,
+)
+from device.serverdevice import ServerDevice
+from unique_char.uniquechar import UniqueChar
 
 
 def generate_all_server_operations(server: ServerDevice) -> list[ServerOperation]:
@@ -56,10 +64,7 @@ def generate_all_client_client_operations(clients: Sequence[ClientDevice], with_
     client_operations: list[ClientOperation] = []
     
     for client in clients:
-        if isinstance(client, TIBOTClient):
-            with_timesteps = True
-        else:
-            with_timesteps = False
+        with_timesteps = isinstance(client, TimeSteppedClient)
 
         operations = ["insert"]
 

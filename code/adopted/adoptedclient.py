@@ -1,9 +1,24 @@
-from unique_char.uniquechar import UniqueChar
-from adopted.adoptedmessage import AdOPTedMessage, AdOPTedOperation, AdOPTedDeletionOperation, AdOPTedInsertionOperation, AdOPTedNoOperation
-from device.clientdevice import ClientDevice
-from device.operations import ClientOperation, ClientInsertOperation, ClientDeleteOperation, ClientReceiveFromServerOperation, ClientReceiveFromClientOperation, ClientTimestepOperation
+from typing import assert_never
+
+from adopted.adoptedmessage import (
+    AdOPTedDeletionOperation,
+    AdOPTedInsertionOperation,
+    AdOPTedMessage,
+    AdOPTedNoOperation,
+    AdOPTedOperation,
+)
 from adopted.adoptedtransform import AdOPTedTransform
-from typing import Literal, assert_never
+from device.clientdevice import ClientDevice
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from unique_char.uniquechar import UniqueChar
+
 
 class AdOPTedClient(ClientDevice):
     client_id: int
@@ -123,8 +138,8 @@ class AdOPTedClient(ClientDevice):
                 user = client.client_id
                 break
 
-        assert predecessor != None
-        assert user != None
+        assert predecessor is not None
+        assert user is not None
 
         r_i = self.request_log[user][dest_clock[user] - 1]
 

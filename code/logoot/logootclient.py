@@ -1,10 +1,22 @@
-from unique_char.uniquechar import UniqueChar
+from typing import assert_never
+
 from device.clientdevice import ClientDevice
-from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation, ClientReceiveFromClientOperation, ClientReceiveFromServerOperation, ClientTimestepOperation
-from logoot.logootmessage import LogootMessage, LogootDeletionOperation, LogootInsertionOperation, LogootOperation
-
-
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
 from logoot.logootdocument import LogootDocument, LogootPosition
+from logoot.logootmessage import (
+    LogootDeletionOperation,
+    LogootInsertionOperation,
+    LogootMessage,
+    LogootOperation,
+)
+from unique_char.uniquechar import UniqueChar
 
 
 class LogootClient(ClientDevice):

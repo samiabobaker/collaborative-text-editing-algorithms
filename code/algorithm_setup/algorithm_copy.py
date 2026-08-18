@@ -1,11 +1,12 @@
-from jupiter.jupiterserver import JupiterServer
-from jupiter.jupiterclient import JupiterClient
-from tibot.tibotclient import TIBOTClient
-from fugue.fugueclient import FugueClient
+from collections.abc import Sequence
+
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
+from fugue.fugueclient import FugueClient
 from fuguemax.fuguemaxclient import FugueMaxClient
-from typing import Sequence
+from jupiter.jupiterclient import JupiterClient
+from jupiter.jupiterserver import JupiterServer
+from tibot.tibotclient import TIBOTClient
 
 
 def copy_clients(clients: list[ClientDevice]) -> Sequence[ClientDevice]:

@@ -2,10 +2,24 @@ from dataclasses import dataclass
 from typing import assert_never
 
 from device.clientdevice import ClientDevice
-from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation, ClientReceiveFromClientOperation, ClientReceiveFromServerOperation, ClientTimestepOperation
-from pot.potmessage import POTMessage, POTNoOperation, POTOperation, POTDeletionOperation, POTInsertionOperation
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from pot.potmessage import (
+    POTDeletionOperation,
+    POTInsertionOperation,
+    POTMessage,
+    POTNoOperation,
+    POTOperation,
+)
 from pot.potserver import POTServer
 from unique_char.uniquechar import UniqueChar
+
 
 @dataclass
 class TransformationPathEntry:
@@ -131,10 +145,10 @@ class POTClient(ClientDevice):
 
         self.rto = max(self.rto, message.to)
 
-        for entry, transformed_operation in zip(L1, transformed_L1):
+        for entry, transformed_operation in zip(L1, transformed_L1, strict=True):
             entry.operation = transformed_operation
 
-        for entry, transformed_operation in zip(L2, transformed_L2):
+        for entry, transformed_operation in zip(L2, transformed_L2, strict=True):
             entry.operation = transformed_operation
 
 

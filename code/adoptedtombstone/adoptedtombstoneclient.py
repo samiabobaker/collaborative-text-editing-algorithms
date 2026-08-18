@@ -1,8 +1,23 @@
-from unique_char.uniquechar import UniqueChar
-from adoptedtombstone.adoptedtombstonemessage import AdOPTedMessage, AdOPTedTombstoneOperation, AdOPTedTombstoneDeletionOperation, AdOPTedTombstoneInsertionOperation, AdOPTedTombstoneNoOperation
+from typing import assert_never
+
+from adoptedtombstone.adoptedtombstonemessage import (
+    AdOPTedMessage,
+    AdOPTedTombstoneDeletionOperation,
+    AdOPTedTombstoneInsertionOperation,
+    AdOPTedTombstoneNoOperation,
+    AdOPTedTombstoneOperation,
+)
 from device.clientdevice import ClientDevice
-from device.operations import ClientOperation, ClientInsertOperation, ClientDeleteOperation, ClientReceiveFromServerOperation, ClientReceiveFromClientOperation, ClientTimestepOperation
-from typing import Literal, assert_never
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from unique_char.uniquechar import UniqueChar
+
 
 class AdOPTedTombstoneClient(ClientDevice):
     client_id: int
@@ -117,8 +132,8 @@ class AdOPTedTombstoneClient(ClientDevice):
                 user = client.client_id
                 break
 
-        assert predecessor != None
-        assert user != None
+        assert predecessor is not None
+        assert user is not None
 
         r_i = self.request_log[user][dest_clock[user] - 1]
 
@@ -214,9 +229,7 @@ class AdOPTedTombstoneClient(ClientDevice):
     def __transform(self, O1: AdOPTedTombstoneOperation, O2: AdOPTedTombstoneOperation) -> AdOPTedTombstoneOperation:
         match O1, O2:
             case AdOPTedTombstoneInsertionOperation(i, x, pr1), AdOPTedTombstoneInsertionOperation(j, y, pr2):
-                if i < j:
-                    return AdOPTedTombstoneInsertionOperation(i, x, pr1)
-                elif i == j and pr1 < pr2:
+                if i < j or i == j and pr1 < pr2:
                     return AdOPTedTombstoneInsertionOperation(i, x, pr1)
                 else:
                     return AdOPTedTombstoneInsertionOperation(i+1,x,pr1)

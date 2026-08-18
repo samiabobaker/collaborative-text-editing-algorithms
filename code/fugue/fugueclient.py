@@ -1,9 +1,23 @@
-from unique_char.uniquechar import UniqueChar
-from fugue.fuguetree import FugueTree
-from device.clientdevice import ClientDevice
-from device.operations import ClientOperation, ClientInsertOperation, ClientDeleteOperation, ClientReceiveFromServerOperation, ClientReceiveFromClientOperation, ClientTimestepOperation
-from fugue.fuguemessage import FugueMessage, FugueOperation, FugueInsertionOperation, FugueDeletionOperation
 from typing import Literal, assert_never
+
+from device.clientdevice import ClientDevice
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from fugue.fuguemessage import (
+    FugueDeletionOperation,
+    FugueInsertionOperation,
+    FugueMessage,
+    FugueOperation,
+)
+from fugue.fuguetree import FugueTree
+from unique_char.uniquechar import UniqueChar
+
 
 class FugueClient(ClientDevice):
     client_id: int

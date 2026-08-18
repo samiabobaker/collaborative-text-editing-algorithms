@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from device.operations import ClientInsertOperation, ClientDeleteOperation
-from unique_char.uniquechar import UniqueChar
+from device.operations import ClientDeleteOperation, ClientInsertOperation
 from sync9.sync9client import Sync9Client
+from unique_char.uniquechar import UniqueChar
 
 
 def __insert(client: Sync9Client, position: int, char: str) -> None:

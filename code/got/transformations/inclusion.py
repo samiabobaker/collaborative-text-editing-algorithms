@@ -1,7 +1,8 @@
 import abc
 
-from got.operations.split_delete import GOTSplitDeleteOperation
 from got.operations.operation import GOTOperation
+from got.operations.split_delete import GOTSplitDeleteOperation
+
 
 class InclusionTransformer(abc.ABC):
     num_transformations_performed: int
