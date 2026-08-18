@@ -1,11 +1,13 @@
-from dataclasses import dataclass
-from unique_char.uniquechar import UniqueChar
-from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation
-from random_operation_generator.random_operation_generator import generate_random_client_client_operation, generate_random_client_server_operation
 from device.clientdevice import ClientDevice
+from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation
 from device.serverdevice import ServerDevice
 from list_spec_checker.client_trace import ClientTrace, Event
-    
+from random_operation_generator.random_operation_generator import (
+    generate_random_client_client_operation,
+    generate_random_client_server_operation,
+)
+
+
 def build_random_trace_clients(clients: dict[int, ClientDevice], num_of_operations: int = 30,print_ops:bool=False): 
     client_traces: dict[int, ClientTrace] = {}
 

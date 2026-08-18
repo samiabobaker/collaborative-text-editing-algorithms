@@ -1,8 +1,12 @@
-from jupiter.jupiterclient import JupiterClient
-from jupiter.jupiterserver import JupiterServer
 from fugue.fugueclient import FugueClient
 from fuguemax.fuguemaxclient import FugueMaxClient
-from list_spec_checker.list_spec_checker import strong_list_specification_checker, weak_list_specification_checker
+from jupiter.jupiterclient import JupiterClient
+from jupiter.jupiterserver import JupiterServer
+from list_spec_checker.list_spec_checker import (
+    strong_list_specification_checker,
+    weak_list_specification_checker,
+)
+
 
 def jupiter_strong():
     n = 0

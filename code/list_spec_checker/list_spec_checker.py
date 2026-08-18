@@ -1,9 +1,11 @@
-from device.serverdevice import ServerDevice
-from device.clientdevice import ClientDevice
-from list_spec_checker.random_trace import build_random_trace, ClientTrace
-from unique_char.uniquechar import UniqueChar
-from device.operations import ClientDeleteOperation, ClientInsertOperation
 from typing import assert_never
+
+from device.clientdevice import ClientDevice
+from device.operations import ClientDeleteOperation, ClientInsertOperation
+from device.serverdevice import ServerDevice
+from list_spec_checker.random_trace import ClientTrace, build_random_trace
+from unique_char.uniquechar import UniqueChar
+
 
 def strong_list_specification_checker(clients: dict[int, ClientDevice], server: ServerDevice | None = None, num_of_operations: int=30,print_ops:bool=False) -> bool:
     client_log = build_random_trace(clients, server, num_of_operations,print_ops)
@@ -138,10 +140,7 @@ def check_condition2_strong(list_order: set[tuple[UniqueChar, UniqueChar]]):
         list_order = set(transitive_closure_of_order)
     
     #Check for irreflexivity
-    for (x,y) in transitive_closure_of_order:
-        if x == y:
-            return False
-    return True
+    return all(x != y for x, y in transitive_closure_of_order)
 
 #Same as for strong, but do it at every step.
 #Also remove the deleted and not inserted characters at each step.
