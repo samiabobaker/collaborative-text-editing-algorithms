@@ -1,222 +1,114 @@
-from jupiter.jupiterclient import JupiterClient
-from jupiter.jupiterserver import JupiterServer
-from fugue.fugueclient import FugueClient
-from fuguemax.fuguemaxclient import FugueMaxClient
-from tibot.tibotclient import TIBOTClient
-from adoptedtombstone.adoptedtombstoneclient import AdOPTedTombstoneClient
+from collections.abc import Callable, Sequence
+from typing import Any, Protocol, cast
+
+from abt.abtclient import ABTClient
 from adopted.adoptedclient import AdOPTedClient
-from adopted.adoptedtransform import EllisTransform, ResselTransform, IMORTransform, TM11Transform
 from adoptedtm11.adoptedtm11client import AdOPTedTM11Client
-from yjs.yjsclient import YjsClient
-from yjsmod.yjsmodclient import YjsModClient
-from sync9.sync9client import Sync9Client
-from rga.rgaclient import RGAClient
-from got.gotclient import GOTClient
-from dopt.doptclient import dOPTClient
-from soct2.soct2client import SOCT2Client
-from woot.wootclient import WOOTClient
-from markandretrace.markandretraceclient import MarkAndRetraceClient
-from wooto.wootoclient import WOOTOClient
+from adoptedtombstone.adoptedtombstoneclient import AdOPTedTombstoneClient
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
-from typing import Sequence, Callable
+from dopt.doptclient import dOPTClient
+from fugue.fugueclient import FugueClient
+from fuguemax.fuguemaxclient import FugueMaxClient
+from got.gotclient import GOTClient
+from gottombstone.gottombstoneclient import GOTTombstoneClient
+from jupiter.jupiterclient import JupiterClient
+from jupiter.jupiterserver import JupiterServer
+from lbt.lbtclient import LBTClient
+from logoot.logootclient import LogootClient
+from markandretrace.markandretraceclient import MarkAndRetraceClient
+from pot.potclient import POTClient
+from pot.potserver import POTServer
+from rga.rgaclient import RGAClient
+from soct2.soct2client import SOCT2Client
+from soct3.soct3client import SOCT3Client
+from soct3.soct3server import SOCT3Server
+from soct4.soct4client import SOCT4Client
+from soct4.soct4server import SOCT4Server
+from sync9.sync9client import Sync9Client
+from tibot.tibotclient import TIBOTClient
+from tibot2.tibot2client import TIBOT2Client
+from treedoc.treedocclient import TreedocClient
+from woot.wootclient import WOOTClient
+from wooto.wootoclient import WOOTOClient
+from yjs.yjsclient import YjsClient
+from yjsmod.yjsmodclient import YjsModClient
 
 Devices = tuple[ServerDevice | None, Sequence[ClientDevice]]
 DeviceSetup = Callable[[int], Devices]
 
 
-def jupiter_setup(num_of_clients: int) -> Devices:
-    clients: list[JupiterClient] = []
-    for n in range(num_of_clients):
-        client = JupiterClient(n)
-        clients.append(client)
-
-    server = JupiterServer(clients)
-
-    for client in clients:
-        client.set_server(server)
-    
-    return server, clients
+#Neither hook is on the ClientDevice ABC, so they are described structurally here.
+#The parameters are Any because each client narrows them to its own class,
+#e.g. TIBOT2Client.set_clients(self, clients: list[TIBOT2Client]).
+class PeerClient(Protocol):
+    #A client that is handed the peer list at setup time.
+    def set_clients(self, clients: Any) -> None: ...
 
 
-def woot_setup(num_of_clients: int) -> Devices:
-    clients: list[WOOTClient] = []
-    for n in range(num_of_clients):
-        client = WOOTClient(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-def wooto_setup(num_of_clients: int) -> Devices:
-    clients: list[WOOTOClient] = []
-    for n in range(num_of_clients):
-        client = WOOTOClient(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-def markandretrace_setup(num_of_clients: int) -> Devices:
-    clients: list[MarkAndRetraceClient] = []
-    for n in range(num_of_clients):
-        client = MarkAndRetraceClient(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
+class ServedClient(Protocol):
+    #A client that is handed the server at setup time.
+    def set_server(self, server: Any) -> None: ...
 
 
-def fugue_setup(num_of_clients: int) -> Devices:
-    clients: list[FugueClient] = []
-    for n in range(num_of_clients):
-        client = FugueClient(n)
-        clients.append(client)
+def make_setup(
+    client_class: Callable[[int], ClientDevice],
+    server_class: Callable[[Any], ServerDevice] | None = None,
+    *,
+    peer_to_peer: bool = True,
+) -> DeviceSetup:
+    #Builds the DeviceSetup for one algorithm.
+    #peer_to_peer: every client is told about its peers (all algorithms except Jupiter).
+    #server_class: a server is built from the clients, and every client is told about it.
+    def setup(num_of_clients: int) -> Devices:
+        clients = [client_class(n) for n in range(num_of_clients)]
 
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
+        if peer_to_peer:
+            for client in clients:
+                cast(PeerClient, client).set_clients(clients)
 
-def fuguemax_setup(num_of_clients: int) -> Devices:
-    clients: list[FugueMaxClient] = []
-    for n in range(num_of_clients):
-        client = FugueMaxClient(n)
-        clients.append(client)
+        if server_class is None:
+            return None, clients
 
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-def rga_setup(num_of_clients: int) -> Devices:
-    clients: list[RGAClient] = []
-    for n in range(num_of_clients):
-        client = RGAClient(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-def got_setup(num_of_clients: int) -> Devices:
-    clients: list[GOTClient] = []
-    for n in range(num_of_clients):
-        client = GOTClient(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-def yjs_setup(num_of_clients: int) -> Devices:
-    clients: list[YjsClient] = []
-    for n in range(num_of_clients):
-        client = YjsClient(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-def yjsmod_setup(num_of_clients: int) -> Devices:
-    clients: list[YjsModClient] = []
-    for n in range(num_of_clients):
-        client = YjsModClient(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-def dOPT_setup(num_of_clients: int) -> Devices:
-    clients: list[dOPTClient] = []
-    for n in range(num_of_clients):
-        client = dOPTClient(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-def SOCT2_setup(num_of_clients: int) -> Devices:
-    clients: list[SOCT2Client] = []
-    for n in range(num_of_clients):
-        client = SOCT2Client(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-
-def sync9_setup(num_of_clients: int) -> Devices:
-    clients: list[Sync9Client] = []
-    for n in range(num_of_clients):
-        client = Sync9Client(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-
-def adopted_setup(transformation) -> Devices:
-    def setup(num_of_clients: int):
-        clients: list[AdOPTedClient] = []
-        for n in range(num_of_clients):
-            client = AdOPTedClient(n, transformation())
-            clients.append(client)
-
+        server = server_class(clients)
         for client in clients:
-            client.set_clients(clients)
-        
-        return None, clients
+            cast(ServedClient, client).set_server(server)
+
+        return server, clients
+
     return setup
 
-def adopted_tombstone_setup(num_of_clients: int) -> Devices:
-    clients: list[AdOPTedTombstoneClient] = []
-    for n in range(num_of_clients):
-        client = AdOPTedTombstoneClient(n)
-        clients.append(client)
 
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
+#Peer to peer
+SOCT2_setup = make_setup(SOCT2Client)
+abt_setup = make_setup(ABTClient)
+adopted_tm11_setup = make_setup(AdOPTedTM11Client)
+adopted_tombstone_setup = make_setup(AdOPTedTombstoneClient)
+dOPT_setup = make_setup(dOPTClient)
+fugue_setup = make_setup(FugueClient)
+fuguemax_setup = make_setup(FugueMaxClient)
+got_setup = make_setup(GOTClient)
+got_tombstone_setup = make_setup(GOTTombstoneClient)
+lbt_setup = make_setup(LBTClient)
+logoot_setup = make_setup(LogootClient)
+markandretrace_setup = make_setup(MarkAndRetraceClient)
+rga_setup = make_setup(RGAClient)
+sync9_setup = make_setup(Sync9Client)
+tibot_setup = make_setup(TIBOTClient)
+tibot2_setup = make_setup(TIBOT2Client)
+treedoc_setup = make_setup(TreedocClient)
+woot_setup = make_setup(WOOTClient)
+wooto_setup = make_setup(WOOTOClient)
+yjs_setup = make_setup(YjsClient)
+yjsmod_setup = make_setup(YjsModClient)
+
+#Client server
+jupiter_setup = make_setup(JupiterClient, JupiterServer, peer_to_peer=False)
+pot_setup = make_setup(POTClient, POTServer)
+soct3_setup = make_setup(SOCT3Client, SOCT3Server)
+soct4_setup = make_setup(SOCT4Client, SOCT4Server)
 
 
-def adopted_tm11_setup(num_of_clients: int) -> Devices:
-    clients: list[AdOPTedTM11Client] = []
-    for n in range(num_of_clients):
-        client = AdOPTedTM11Client(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
-
-def tibot_setup(num_of_clients: int) -> Devices:
-    clients: list[TIBOTClient] = []
-    for n in range(num_of_clients):
-        client = TIBOTClient(n)
-        clients.append(client)
-
-    for client in clients:
-        client.set_clients(clients)
-    
-    return None, clients
+#AdOPTed is parameterised by its transformation function, so it takes one more step.
+def adopted_setup(transformation: Callable[[], Any]) -> DeviceSetup:
+    return make_setup(lambda n: AdOPTedClient(n, transformation()))
