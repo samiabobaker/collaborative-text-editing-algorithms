@@ -1,12 +1,23 @@
-from typing import assert_never, TYPE_CHECKING
-
-from unique_char.uniquechar import UniqueChar
-from soct3.soct3message import SOCT3DeleteOperation, SOCT3InsertOperation, SOCT3Operation, SOCT3OperationMessage, SOCT3TicketRequestMessage, SOCT3TicketResponseMessage
-
+from typing import TYPE_CHECKING, assert_never
 
 from device.clientdevice import ClientDevice
-
-from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation, ClientReceiveFromClientOperation, ClientReceiveFromServerOperation, ClientTimestepOperation
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+)
+from soct3.soct3message import (
+    SOCT3DeleteOperation,
+    SOCT3InsertOperation,
+    SOCT3Operation,
+    SOCT3OperationMessage,
+    SOCT3TicketRequestMessage,
+    SOCT3TicketResponseMessage,
+)
+from unique_char.uniquechar import UniqueChar
 
 if TYPE_CHECKING:
     from soct3.soct3server import SOCT3Server
