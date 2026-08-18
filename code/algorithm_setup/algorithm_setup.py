@@ -14,7 +14,6 @@ from got.gotclient import GOTClient
 from gottombstone.gottombstoneclient import GOTTombstoneClient
 from jupiter.jupiterclient import JupiterClient
 from jupiter.jupiterserver import JupiterServer
-from lbt.lbtclient import LBTClient
 from logoot.logootclient import LogootClient
 from markandretrace.markandretraceclient import MarkAndRetraceClient
 from pot.potclient import POTClient
@@ -28,7 +27,6 @@ from soct4.soct4server import SOCT4Server
 from sync9.sync9client import Sync9Client
 from tibot.tibotclient import TIBOTClient
 from tibot2.tibot2client import TIBOT2Client
-from treedoc.treedocclient import TreedocClient
 from woot.wootclient import WOOTClient
 from wooto.wootoclient import WOOTOClient
 from yjs.yjsclient import YjsClient
@@ -89,14 +87,12 @@ fugue_setup = make_setup(FugueClient)
 fuguemax_setup = make_setup(FugueMaxClient)
 got_setup = make_setup(GOTClient)
 got_tombstone_setup = make_setup(GOTTombstoneClient)
-lbt_setup = make_setup(LBTClient)
 logoot_setup = make_setup(LogootClient)
 markandretrace_setup = make_setup(MarkAndRetraceClient)
 rga_setup = make_setup(RGAClient)
 sync9_setup = make_setup(Sync9Client)
 tibot_setup = make_setup(TIBOTClient)
 tibot2_setup = make_setup(TIBOT2Client)
-treedoc_setup = make_setup(TreedocClient)
 woot_setup = make_setup(WOOTClient)
 wooto_setup = make_setup(WOOTOClient)
 yjs_setup = make_setup(YjsClient)
