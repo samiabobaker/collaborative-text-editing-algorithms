@@ -1,7 +1,8 @@
-from typing import Literal
 from dataclasses import dataclass
+from typing import Literal
 
 from unique_char.uniquechar import UniqueChar
+
 
 @dataclass(frozen=True)
 class WOOTOIdentifier:
@@ -57,7 +58,4 @@ class WOOTOString:
         return visible_string[index]
         
     def contains(self, character_id: WOOTOIdentifier) -> bool:
-        for character in self.string:
-            if get_string_entry_id(character) == character_id:
-                return True
-        return False
+        return any(get_string_entry_id(character) == character_id for character in self.string)
