@@ -4,20 +4,20 @@ from typing import assert_never
 
 from device.clientdevice import ClientDevice
 from device.operations import (
-    ClientOperation,
-    ClientInsertOperation,
     ClientDeleteOperation,
-    ClientReceiveFromServerOperation,
+    ClientInsertOperation,
+    ClientOperation,
     ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
     ClientTimestepOperation,
 )
 from unique_char.uniquechar import UniqueChar
 from yjsmod.yjsmoddocument import YjsModDocument, YjsModId, YjsModItem
 from yjsmod.yjsmodmessage import (
+    YjsModDeletionOperation,
+    YjsModInsertionOperation,
     YjsModMessage,
     YjsModOperation,
-    YjsModInsertionOperation,
-    YjsModDeletionOperation,
 )
 
 
