@@ -1,9 +1,9 @@
-from device.clientdevice import ClientDevice
-from device.serverdevice import ServerDevice
-from list_spec_checker.list_spec_checker import weak_list_specification_checker
-from algorithm_setup.algorithm_setup import fugue_setup, fuguemax_setup, DeviceSetup, jupiter_setup, tibot_setup, adopted_tm11_setup
 import random
-from typing import Sequence
+
+from algorithm_setup.algorithm_setup import DeviceSetup
+from device.clientdevice import ClientDevice
+from list_spec_checker.list_spec_checker import weak_list_specification_checker
+
 
 def weaklistspec(device_setup: DeviceSetup):
     n = 0
@@ -18,7 +18,7 @@ def weaklistspec(device_setup: DeviceSetup):
 
 
 
-def weaklistspec_with_seed(n: int, device_setup: DeviceSetup, num_of_clients:int=3, num_of_ops:int=30) -> bool:
+def weaklistspec_with_seed(n: int, device_setup: DeviceSetup, num_of_clients:int=3, num_of_ops:int=30, pause_on_failure: bool = True) -> bool:
         random.seed(n)
 
         server, clients = device_setup(num_of_clients)
@@ -33,7 +33,8 @@ def weaklistspec_with_seed(n: int, device_setup: DeviceSetup, num_of_clients:int
 
             for client in clients:
                 print(f"{client.client_id}:", *client.read_state(), sep="")
-            input()
+            if pause_on_failure:
+                input()
             print("-"*80)
             return False
         return True
