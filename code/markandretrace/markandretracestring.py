@@ -1,5 +1,9 @@
-from markandretrace.markandretracemessage import MarkAndRetraceInsertionOperation, MarkAndRetraceDeletionOperation, MarkAndRetraceOperation
+from markandretrace.markandretracemessage import (
+    MarkAndRetraceDeletionOperation,
+    MarkAndRetraceInsertionOperation,
+)
 from unique_char.uniquechar import UniqueChar
+
 
 class MarkAndRetraceCharacter:
     client_id: int
@@ -28,11 +32,7 @@ class MarkAndRetraceString:
         self.string = []
 
     def __state_vector_leq(self, SV1: dict[int, int], SV2: dict[int, int]) -> bool:
-        for client_id in SV1:
-            if SV1[client_id] > SV2[client_id]:
-                return False 
-
-        return True
+        return all(SV1[client_id] <= SV2[client_id] for client_id in SV1)
 
     def retrace(self, state_vector: dict[int, int]):
         for character in self.string:
