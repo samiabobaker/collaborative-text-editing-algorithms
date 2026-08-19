@@ -3,6 +3,7 @@ import random
 from algorithm_setup.algorithm_setup import (
     DeviceSetup,
     automerge_setup,
+    diamondtypes_setup,
     fugue_setup,
     fuguemax_setup,
     loro_setup,
@@ -37,6 +38,7 @@ def _client_dict(setup: DeviceSetup, num_of_clients: int) -> dict[int, ClientDev
 def test_algorithms_match_their_declared_cells():
     for setup in [
         automerge_setup,
+        diamondtypes_setup,
         fugue_setup,
         fuguemax_setup,
         loro_setup,
@@ -111,6 +113,7 @@ def test_both_anchorings_are_declared_and_hold():
     assert anchoring_of(fugue_setup) == BEFORE
     for setup in [
         automerge_setup,
+        diamondtypes_setup,
         fugue_setup,
         fuguemax_setup,
         loro_setup,

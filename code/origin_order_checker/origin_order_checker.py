@@ -363,6 +363,7 @@ UNSETTLED = "unsettled"
 # rather than a separate claim about it.
 CELLS: dict[str, tuple[str, str, str]] = {
     "AutomergeClient": ("rga", "oplamport", BEFORE),
+    "DiamondTypesClient": ("fuguemax", "site", BEFORE),
     "FugueClient": ("fugue", "creation", BEFORE),
     "FugueMaxClient": ("fuguemax", "creation", BEFORE),
     "LoroClient": ("fugue", "site", BEFORE),

@@ -8,6 +8,7 @@ from adoptedtombstone.adoptedtombstoneclient import AdOPTedTombstoneClient
 from automerge.automergeclient import AutomergeClient
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
+from diamondtypes.diamondtypesclient import DiamondTypesClient
 from dopt.doptclient import dOPTClient
 from fugue.fugueclient import FugueClient
 from fuguemax.fuguemaxclient import FugueMaxClient
@@ -85,6 +86,7 @@ abt_setup = make_setup(ABTClient)
 adopted_tm11_setup = make_setup(AdOPTedTM11Client)
 adopted_tombstone_setup = make_setup(AdOPTedTombstoneClient)
 automerge_setup = make_setup(AutomergeClient)
+diamondtypes_setup = make_setup(DiamondTypesClient)
 dOPT_setup = make_setup(dOPTClient)
 fugue_setup = make_setup(FugueClient)
 fuguemax_setup = make_setup(FugueMaxClient)
