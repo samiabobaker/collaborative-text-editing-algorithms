@@ -1,5 +1,15 @@
-from device.clientdevice import ClientDevice
-from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation
+import random
+
+from device.clientdevice import ClientDevice, TimeSteppedClient
+from device.operations import (
+    ClientDeleteOperation,
+    ClientInsertOperation,
+    ClientOperation,
+    ClientReceiveFromClientOperation,
+    ClientReceiveFromServerOperation,
+    ClientTimestepOperation,
+    ServerReceiveFromClientOperation,
+)
 from device.serverdevice import ServerDevice
 from interleaving_checker.client_trace import Character, ClientTrace, Event
 from random_operation_generator.random_operation_generator import (
@@ -51,6 +61,41 @@ def build_random_trace_clients(
             performed_locally = isinstance(operation, ClientInsertOperation)
             client_traces[operation.client_id].add_event(Event(operation_seen, performed_locally), state)
 
+    # Deliver the messages still in flight, so the checkers see the settled states.
+    time_stepped_clients = [client for client in clients.values() if isinstance(client, TimeSteppedClient)]
+    if len(time_stepped_clients) != 0:
+        # Run time intervals
+        time_intervals = max([client.clock for client in time_stepped_clients]) + 1
+
+        for _ in range(time_intervals):
+            for time_stepped_client in time_stepped_clients:
+                time_stepped_client.perform_operation(ClientTimestepOperation(time_stepped_client.client_id))
+
+        for _ in range(time_intervals):
+            for client_id in clients:
+                client = clients[client_id]
+                client_can_receive_from = client.can_receive_from()
+                while len(client_can_receive_from) != 0:
+                    receive_from = random.choice(client_can_receive_from)
+                    operation_seen = client.perform_operation(
+                        ClientReceiveFromClientOperation(client.client_id, receive_from)
+                    )
+                    if len(operation_seen) != 0:
+                        client_traces[client_id].add_event(Event(operation_seen, False), list(client.read_state()))
+                    client_can_receive_from = client.can_receive_from()
+    else:
+        for client_id in clients:
+            client = clients[client_id]
+            client_can_receive_from = client.can_receive_from()
+            while len(client_can_receive_from) != 0:
+                receive_from = random.choice(client_can_receive_from)
+                operation_seen = client.perform_operation(
+                    ClientReceiveFromClientOperation(client.client_id, receive_from)
+                )
+                if len(operation_seen) != 0:
+                    client_traces[client_id].add_event(Event(operation_seen, False), list(client.read_state()))
+                client_can_receive_from = client.can_receive_from()
+
     return client_traces, characters
 
 
@@ -99,6 +144,36 @@ def build_random_trace_client_server(
                 client_traces[operation.client_id].add_event(Event(operation_seen, performed_locally), state)
         else:
             server.perform_operation(operation)
+
+    # Deliver the messages still in flight, so the checkers see the settled states.
+    redo_check = True
+    while redo_check:
+        redo_check = False
+
+        client_ids = server.can_receive_from()
+        if client_ids != []:
+            redo_check = True
+            server.perform_operation(ServerReceiveFromClientOperation(random.choice(client_ids)))
+
+        for client_id in clients:
+            client = clients[client_id]
+            if client.can_receive_from_server():
+                redo_check = True
+                operation_seen = client.perform_operation(ClientReceiveFromServerOperation(client_id))
+                if len(operation_seen) != 0:
+                    client_traces[client_id].add_event(Event(operation_seen, False), list(client.read_state()))
+
+        for client_id in clients:
+            client = clients[client_id]
+            client_can_receive_from = client.can_receive_from()
+            if len(client_can_receive_from) != 0:
+                redo_check = True
+                receive_from = random.choice(client_can_receive_from)
+                operation_seen = client.perform_operation(
+                    ClientReceiveFromClientOperation(client.client_id, receive_from)
+                )
+                if len(operation_seen) != 0:
+                    client_traces[client_id].add_event(Event(operation_seen, False), list(client.read_state()))
 
     return client_traces, characters
 
