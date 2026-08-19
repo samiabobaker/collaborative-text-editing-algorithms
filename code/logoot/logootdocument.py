@@ -84,7 +84,12 @@ class LogootDocument:
 
         while interval < N:
             index += 1
-            interval = self.prefix(q, index) - self.prefix(p, index) - 1
+            # q can sort after p on sites alone, leaving no room between the digits at any depth.
+            # New positions then extend the digits of p, which still sorts them between the two.
+            if self.prefix(q, index) > self.prefix(p, index):
+                interval = self.prefix(q, index) - self.prefix(p, index) - 1
+            else:
+                interval = self.BASE ** max(index - len(p), 0) - 1
 
         step = interval // N
         r = self.prefix(p, index)
