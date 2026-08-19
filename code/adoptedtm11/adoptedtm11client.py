@@ -31,7 +31,7 @@ class AdOPTedTM11Client(ClientDevice):
 
     vector_clock: dict[int, int]
 
-    interaction_model: dict[tuple[dict[int, int], dict[int, int]], AdOPTedTM11Operation]
+    interaction_model: dict[tuple[tuple[tuple[int, int], ...], tuple[tuple[int, int], ...]], AdOPTedTM11Operation]
 
     request_log: dict[int, list[AdOPTedTM11Message]]
 
