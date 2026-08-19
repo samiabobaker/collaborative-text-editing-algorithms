@@ -27,4 +27,4 @@ class ClientDevice(ABC):
 
 
 class TimeSteppedClient(ClientDevice):
-    pass
+    clock: int
