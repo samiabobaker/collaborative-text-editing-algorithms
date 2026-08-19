@@ -13,7 +13,14 @@ def strong_list_specification_checker(
     num_of_operations: int = 30,
     print_ops: bool = False,
 ) -> bool:
-    client_log = build_random_trace(clients, server, num_of_operations, print_ops)
+    try:
+        client_log = build_random_trace(clients, server, num_of_operations, print_ops)
+    # The algorithm produced an operation that cannot be applied, e.g. a transformed delete past the end of the state.
+    except (IndexError, ValueError) as e:
+        print(
+            f"This algorithm does not satisfy the list specification ({type(e).__name__} while applying an operation: {e})."
+        )
+        return False
 
     for client_id in clients:
         if not check_condition1a(client_log[client_id]):
@@ -55,7 +62,14 @@ def strong_list_specification_checker_for_client_log(client_log: dict[int, Clien
 def weak_list_specification_checker(
     clients: dict[int, ClientDevice], server: ServerDevice | None = None, num_of_ops: int = 30
 ) -> bool:
-    client_log = build_random_trace(clients, server, num_of_ops)
+    try:
+        client_log = build_random_trace(clients, server, num_of_ops)
+    # The algorithm produced an operation that cannot be applied, e.g. a transformed delete past the end of the state.
+    except (IndexError, ValueError) as e:
+        print(
+            f"This algorithm does not satisfy the list specification ({type(e).__name__} while applying an operation: {e})."
+        )
+        return False
 
     list_order = build_list_order_for_condition1b(client_log)
 
