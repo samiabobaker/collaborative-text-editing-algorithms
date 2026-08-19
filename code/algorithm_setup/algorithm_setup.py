@@ -5,6 +5,7 @@ from abt.abtclient import ABTClient
 from adopted.adoptedclient import AdOPTedClient
 from adoptedtm11.adoptedtm11client import AdOPTedTM11Client
 from adoptedtombstone.adoptedtombstoneclient import AdOPTedTombstoneClient
+from automerge.automergeclient import AutomergeClient
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from dopt.doptclient import dOPTClient
@@ -83,6 +84,7 @@ SOCT2_setup = make_setup(SOCT2Client)
 abt_setup = make_setup(ABTClient)
 adopted_tm11_setup = make_setup(AdOPTedTM11Client)
 adopted_tombstone_setup = make_setup(AdOPTedTombstoneClient)
+automerge_setup = make_setup(AutomergeClient)
 dOPT_setup = make_setup(dOPTClient)
 fugue_setup = make_setup(FugueClient)
 fuguemax_setup = make_setup(FugueMaxClient)

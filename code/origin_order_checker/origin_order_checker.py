@@ -31,6 +31,7 @@ class InsertRecord:
     site_seq: int
     creation: int
     lamport: int
+    op_lamport: int
     seen: frozenset[int]
 
 
@@ -41,6 +42,8 @@ def sibling_key(record: InsertRecord, key: str) -> tuple[int, int]:
         return (record.site, record.site_seq)
     if key == "lamport":
         return (record.lamport, record.site)
+    if key == "oplamport":
+        return (record.op_lamport, record.site)
     raise ValueError(f"unknown sibling key {key}")
 
 
@@ -68,6 +71,10 @@ def build_trace(
     seen: dict[int, set[int]] = {client_id: set() for client_id in clients}
     site_seq: dict[int, int] = dict.fromkeys(clients, 0)
     max_lamport: dict[int, int] = dict.fromkeys(clients, 0)
+    # A second clock that counts deletes as well, which is what an implementation
+    # drawing every operation from one counter stamps its insertions with.
+    max_op_lamport: dict[int, int] = dict.fromkeys(clients, 0)
+    delete_stamp: dict[tuple[int, int], int] = {}
 
     client_list = list(clients.values())
 
@@ -86,6 +93,7 @@ def build_trace(
                 while after < len(order) and order[after].id in deleted_seen[client.client_id]:
                     after += 1
             lamport = max_lamport[client.client_id] + 1
+            op_lamport = max_op_lamport[client.client_id] + 1
             record = InsertRecord(
                 operation.character,
                 order[after - 1] if after > 0 else None,
@@ -94,6 +102,7 @@ def build_trace(
                 site_seq[client.client_id],
                 len(records),
                 lamport,
+                op_lamport,
                 frozenset(seen[client.client_id]),
             )
             client.perform_operation(operation)
@@ -102,10 +111,13 @@ def build_trace(
             seen[client.client_id].add(record.creation)
             site_seq[client.client_id] += 1
             max_lamport[client.client_id] = lamport
+            max_op_lamport[client.client_id] = op_lamport
         elif isinstance(operation, ClientDeleteOperation):
             stream.append(("delete", client.client_id, operation.character.id))
             deleted.add(operation.character.id)
             deleted_seen[client.client_id].add(operation.character.id)
+            max_op_lamport[client.client_id] += 1
+            delete_stamp[(client.client_id, operation.character.id)] = max_op_lamport[client.client_id]
             client.perform_operation(operation)
         elif isinstance(operation, ClientReceiveFromClientOperation):
             for caused in client.perform_operation(operation):
@@ -113,10 +125,16 @@ def build_trace(
                     creation = creation_by_char_id[caused.character.id]
                     seen[client.client_id].add(creation)
                     max_lamport[client.client_id] = max(max_lamport[client.client_id], records[creation].lamport)
+                    max_op_lamport[client.client_id] = max(
+                        max_op_lamport[client.client_id], records[creation].op_lamport
+                    )
                 else:
                     # A delete this client has now integrated, which is what an anchoring
                     # past a run of tombstones needs in order to know the run is there.
                     deleted_seen[client.client_id].add(caused.character.id)
+                    stamp = delete_stamp.get((caused.client_id, caused.character.id))
+                    if stamp is not None:
+                        max_op_lamport[client.client_id] = max(max_op_lamport[client.client_id], stamp)
         else:
             raise ValueError("the origin order checker only generates inserts, deletes and receives")
 
@@ -344,6 +362,7 @@ UNSETTLED = "unsettled"
 # back into origins once the state holds tombstones, so it is an input to the check
 # rather than a separate claim about it.
 CELLS: dict[str, tuple[str, str, str]] = {
+    "AutomergeClient": ("rga", "oplamport", BEFORE),
     "FugueClient": ("fugue", "creation", BEFORE),
     "FugueMaxClient": ("fuguemax", "creation", BEFORE),
     "LoroClient": ("fugue", "site", BEFORE),
