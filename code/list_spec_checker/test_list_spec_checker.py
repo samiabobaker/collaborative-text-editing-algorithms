@@ -6,7 +6,7 @@ from list_spec_checker.list_spec_checker import (
 from unique_char.uniquechar import UniqueChar
 
 
-def _trace(*states):
+def _trace(*states: list[UniqueChar]):
     trace = ClientTrace()
     trace.states_after_events = [list(state) for state in states]
     return trace

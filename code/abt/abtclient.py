@@ -273,12 +273,13 @@ class ABTClient(ClientDevice):
 
     def update_HR(
         self, O: ABTSequenceEntry, Hi: ABTSequence, Hd: ABTSequence
-    ) -> tuple[ABTSequenceEntry, ABTSequence, ABTSequence]:
+    ) -> tuple[ABTOperation | None, ABTSequence, ABTSequence]:
         transformed_Hd = [replace(e) for e in Hd]
         transformed_Hi = list(Hi)
 
         _, Hic = self.convert_to_HC(O.operation, O.vector_clock, Hi)
         Opp = self.ITSQ(O.operation, Hic)
+        assert Opp is not None
         Op = self.ITSQ(Opp, Hd)
         if Op is None:
             return Op, Hi, Hd
@@ -289,6 +290,8 @@ class ABTClient(ClientDevice):
             for k in range(len(Hd)):
                 Oy = Ox
                 Ox = self.IT(Ox, Hd[k].operation)
-                transformed_Hd[k].operation = self.IT(transformed_Hd[k].operation, Oy)
+                transformed_Hd_k = self.IT(transformed_Hd[k].operation, Oy)
+                assert Ox is not None and transformed_Hd_k is not None
+                transformed_Hd[k].operation = transformed_Hd_k
             transformed_Hi.append(ABTSequenceEntry(O.vector_clock, Opp))
         return Op, transformed_Hi, transformed_Hd

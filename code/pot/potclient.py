@@ -165,11 +165,10 @@ class POTClient(ClientDevice):
 
             index = 0
 
-            while (
-                index < len(transformation_path)
-                and transformation_path[index].to is not None
-                and transformation_path[index].to < message.to
-            ):
+            while index < len(transformation_path):
+                entry_to = transformation_path[index].to
+                if entry_to is None or entry_to >= message.to:
+                    break
                 index += 1
 
             transformation_path[index:] = [TransformationPathEntry(operation, None) for operation in transformed_L2]

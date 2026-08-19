@@ -32,7 +32,7 @@ class AdOPTedClient(ClientDevice):
 
     vector_clock: dict[int, int]
 
-    interaction_model: dict[tuple[dict[int, int], dict[int, int]], AdOPTedOperation]
+    interaction_model: dict[tuple[tuple[tuple[int, int], ...], tuple[tuple[int, int], ...]], AdOPTedOperation]
 
     request_log: dict[int, list[AdOPTedMessage]]
 

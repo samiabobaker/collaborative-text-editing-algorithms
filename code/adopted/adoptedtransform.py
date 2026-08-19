@@ -96,12 +96,12 @@ class ResselTransform(AdOPTedTransform):
 
     def __transform(self, O1: AdOPTedOperation, O2: AdOPTedOperation) -> AdOPTedOperation:
         match O1, O2:
-            case AdOPTedInsertionOperation(i, x, pr1), AdOPTedInsertionOperation(j, y, pr2):
+            case AdOPTedInsertionOperation(i, x, pr1), AdOPTedInsertionOperation(j, _, pr2):
                 if (i < j) or (i == j and pr1 < pr2):
                     return AdOPTedInsertionOperation(i, x, pr1, set(), set(), {})
                 else:
                     return AdOPTedInsertionOperation(i + 1, x, pr1, set(), set(), {})
-            case AdOPTedDeletionOperation(i, pr1), AdOPTedInsertionOperation(j, y):
+            case AdOPTedDeletionOperation(i, pr1), AdOPTedInsertionOperation(j, _):
                 if i < j:
                     return AdOPTedDeletionOperation(i, pr1, {})
                 else:
@@ -198,7 +198,7 @@ class SuleimanTransform(AdOPTedTransform):
 
     def __transform(self, O1: AdOPTedOperation, O2: AdOPTedOperation) -> AdOPTedOperation:
         match O1, O2:
-            case AdOPTedInsertionOperation(i, x, pr1, b1, a1), AdOPTedInsertionOperation(j, y, pr2, b2, a2):
+            case AdOPTedInsertionOperation(i, x, pr1, b1, a1), AdOPTedInsertionOperation(j, y, _, b2, a2):
                 if i < j:
                     return AdOPTedInsertionOperation(i, x, pr1, b1, a1, {})
                 elif i > j or len(b1.intersection(a2)) != 0:
@@ -214,12 +214,12 @@ class SuleimanTransform(AdOPTedTransform):
                     return AdOPTedDeletionOperation(i, pr1, {})
                 else:
                     return AdOPTedDeletionOperation(i + 1, pr1, {})
-            case AdOPTedInsertionOperation(i, x, pr1, b1, a1), AdOPTedDeletionOperation(j, pr2):
+            case AdOPTedInsertionOperation(i, x, pr1, b1, a1), AdOPTedDeletionOperation(j, _):
                 if i > j:
                     return AdOPTedInsertionOperation(i - 1, x, pr1, b1.union({O2}), a1, {})
                 else:
                     return AdOPTedInsertionOperation(i, x, pr1, b1, a1.union({O2}), {})
-            case AdOPTedDeletionOperation(i, pr1), AdOPTedDeletionOperation(j, pr2):
+            case AdOPTedDeletionOperation(i, pr1), AdOPTedDeletionOperation(j, _):
                 if i < j:
                     return AdOPTedDeletionOperation(i, pr1, {})
                 elif i > j:
@@ -263,19 +263,19 @@ class TM11Transform(AdOPTedTransform):
 
     def __transform(self, O1: AdOPTedOperation, O2: AdOPTedOperation) -> AdOPTedOperation:
         match O1, O2:
-            case AdOPTedInsertionOperation(i, x, pr1, b1, a1), AdOPTedInsertionOperation(j, y, pr2, b2, a2):
+            case AdOPTedInsertionOperation(i, x, pr1, _, _), AdOPTedInsertionOperation(j, _, pr2, _, _):
                 if i < j or (i == j and pr1 > pr2):
                     return AdOPTedInsertionOperation(i, x, pr1, set(), set(), {})
                 else:
                     return AdOPTedInsertionOperation(i + 1, x, pr1, set(), set(), {})
-            case AdOPTedDeletionOperation(i, pr1), AdOPTedInsertionOperation(j, y, b2, a2):
+            case AdOPTedDeletionOperation(i, pr1), AdOPTedInsertionOperation(j, _, _, _):
                 if i + 1 <= j:
                     return AdOPTedDeletionOperation(i, pr1, {})
                 elif i > j:
                     return AdOPTedDeletionOperation(i + 1, pr1, {})
                 else:
                     return AdOPTedDeletionOperation(i, pr1, {})
-            case AdOPTedInsertionOperation(i, x, pr1, b1, a1), AdOPTedDeletionOperation(j, pr2):
+            case AdOPTedInsertionOperation(i, x, pr1, _, _), AdOPTedDeletionOperation(j, pr2):
                 if i <= j:
                     return AdOPTedInsertionOperation(i, x, pr1, set(), set(), {})
                 elif i >= j + 1:

@@ -58,6 +58,7 @@ class Sync9Client(ClientDevice):
         id = Sync9Id(self.client_id, self.__next_seq)
         self.__next_seq += 1
         item = self.document.insert_char(operation.position, id, operation.character)
+        assert item.value is not None
         # Send message to all other clients
         self.__send_to_other_clients(
             Sync9Message(

@@ -3,4 +3,11 @@ repos:
     rev: v0.16.3
     hooks:
       - id: ruff-check
+        args: [--fix]
       - id: ruff-format
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.411
+    hooks:
+      - id: pyright
+        pass_filenames: false
+        stages: [pre-push]

@@ -12,7 +12,7 @@ class GOTDeleteOperation(GOTTombstoneOperation):
     """
 
     _lost_information: tuple[GOTDeleteOperation, GOTDeleteOperation] | None
-    _relative_addressed_to: StateVector | None
+    relative_addressed_to: StateVector | None
 
     # Global counter for split operations
     split_operation_id_global_counter = 0
@@ -35,7 +35,7 @@ class GOTDeleteOperation(GOTTombstoneOperation):
         self.unique_id = seq_number
 
         self._lost_information = None
-        self._relative_addressed_to = None
+        self.relative_addressed_to = None
 
     def save_lost_information(self, original_op_a: GOTDeleteOperation, op_b: GOTDeleteOperation) -> None:
         """
@@ -60,21 +60,21 @@ class GOTDeleteOperation(GOTTombstoneOperation):
         """
         Saves the state vector of the operation to which this delete operation is relatively addressed.
         """
-        assert self._relative_addressed_to is None
-        self._relative_addressed_to = op_b.state_vector
+        assert self.relative_addressed_to is None
+        self.relative_addressed_to = op_b.state_vector
 
     def is_relatively_addressed(self) -> bool:
         """
         Returns True if the operation is relatively addressed to another operation.
         """
-        return self._relative_addressed_to is not None
+        return self.relative_addressed_to is not None
 
     def check_relative_addressing(self, op_b: GOTTombstoneOperation) -> bool:
         """
         Checks if the provided operation matches the relative addressing state vector.
         """
-        assert self._relative_addressed_to is not None
-        return op_b.state_vector == self._relative_addressed_to
+        assert self.relative_addressed_to is not None
+        return op_b.state_vector == self.relative_addressed_to
 
     def copy(self) -> GOTDeleteOperation:
         """
@@ -90,7 +90,7 @@ class GOTDeleteOperation(GOTTombstoneOperation):
         )
 
         copied._lost_information = self._lost_information
-        copied._relative_addressed_to = self._relative_addressed_to
+        copied.relative_addressed_to = self.relative_addressed_to
 
         return copied
 
@@ -121,7 +121,7 @@ class GOTDeleteOperation(GOTTombstoneOperation):
         self.unique_id = GOTDeleteOperation.split_operation_id_global_counter
 
     def __str__(self):
-        return rf"Del({self.num_to_delete} ({self.sequence}), {self.idx}, c={self.client_id}, sv={self.state_vector}, RA={self._relative_addressed_to}, LI={self._lost_information}, seq={self.unique_id})"
+        return rf"Del({self.num_to_delete} ({self.sequence}), {self.idx}, c={self.client_id}, sv={self.state_vector}, RA={self.relative_addressed_to}, LI={self._lost_information}, seq={self.unique_id})"
 
     def __repr__(self):
         return self.__str__()
