@@ -18,7 +18,8 @@ LogootPosition = list[LogootIdentifier]
 
 
 def position_less_than(pos1: LogootPosition, pos2: LogootPosition) -> bool:
-    for id1, id2 in zip(pos1, pos2, strict=True):
+    # Positions can differ in length, and a strict prefix sorts before its extensions.
+    for id1, id2 in zip(pos1, pos2, strict=False):
         if id1 != id2:
             return id1.less_than(id2)
     return len(pos1) < len(pos2)
