@@ -346,6 +346,7 @@ UNSETTLED = "unsettled"
 CELLS: dict[str, tuple[str, str, str]] = {
     "FugueClient": ("fugue", "creation", BEFORE),
     "FugueMaxClient": ("fuguemax", "creation", BEFORE),
+    "LoroClient": ("fugue", "site", BEFORE),
     "RGAClient": ("rga", "lamport", BEFORE),
     "Sync9Client": ("fugue", "site", BEFORE),
     "YjsClient": ("yata", "site", AFTER),
