@@ -18,7 +18,7 @@ import time
 import traceback
 from collections.abc import Callable, Iterable
 
-from adopted.adoptedtransform import EllisTransform, IMORTransform, ResselTransform, TM11Transform
+from adopted.adoptedtransform import EllisTransform, IMORTransform, ResselTransform, SuleimanTransform, TM11Transform
 from algorithm_setup.algorithm_setup import (
     DeviceSetup,
     SOCT2_setup,
@@ -58,6 +58,7 @@ ALGORITHMS: dict[str, DeviceSetup] = {
     "adopted-ellis": adopted_setup(EllisTransform),
     "adopted-imor": adopted_setup(IMORTransform),
     "adopted-ressel": adopted_setup(ResselTransform),
+    "adopted-suleiman": adopted_setup(SuleimanTransform),
     "adopted-tm11-transform": adopted_setup(TM11Transform),
     "adopted-tm11": adopted_tm11_setup,
     "adopted-tombstone": adopted_tombstone_setup,
