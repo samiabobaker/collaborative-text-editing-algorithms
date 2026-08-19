@@ -31,7 +31,7 @@ class AdOPTedTombstoneClient(ClientDevice):
 
     vector_clock: dict[int, int]
 
-    interaction_model: dict[tuple[dict[int, int], dict[int, int]], AdOPTedTombstoneOperation]
+    interaction_model: dict[tuple[tuple[tuple[int, int], ...], tuple[tuple[int, int], ...]], AdOPTedTombstoneOperation]
 
     request_log: dict[int, list[AdOPTedMessage]]
 
@@ -169,7 +169,7 @@ class AdOPTedTombstoneClient(ClientDevice):
 
         return final_r
 
-    def to_dict_key(self, clock: dict[int, int]):
+    def to_dict_key(self, clock: dict[int, int]) -> tuple[tuple[int, int], ...]:
         return tuple(sorted(clock.items()))
 
     def __get_resulting_clock(self, clock: dict[int, int], client_id: int) -> dict[int, int]:
@@ -253,12 +253,12 @@ class AdOPTedTombstoneClient(ClientDevice):
 
     def __transform(self, O1: AdOPTedTombstoneOperation, O2: AdOPTedTombstoneOperation) -> AdOPTedTombstoneOperation:
         match O1, O2:
-            case AdOPTedTombstoneInsertionOperation(i, x, pr1), AdOPTedTombstoneInsertionOperation(j, y, pr2):
+            case AdOPTedTombstoneInsertionOperation(i, x, pr1), AdOPTedTombstoneInsertionOperation(j, _, pr2):
                 if i < j or i == j and pr1 < pr2:
                     return AdOPTedTombstoneInsertionOperation(i, x, pr1)
                 else:
                     return AdOPTedTombstoneInsertionOperation(i + 1, x, pr1)
-            case AdOPTedTombstoneDeletionOperation(i, pr1), AdOPTedTombstoneInsertionOperation(j, y):
+            case AdOPTedTombstoneDeletionOperation(i, pr1), AdOPTedTombstoneInsertionOperation(j, _):
                 if i < j:
                     return AdOPTedTombstoneDeletionOperation(i, pr1)
                 else:
