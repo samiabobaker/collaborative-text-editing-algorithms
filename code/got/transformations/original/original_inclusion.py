@@ -105,7 +105,7 @@ class OriginalInclusionTransformer(InclusionTransformer):
 
     def _inclusion_transform(self, op_a: GOTOperation, op_b: GOTOperation) -> GOTOperation:
         assert isinstance(op_a, (GOTInsertOperation, GOTDeleteOperation))
-        assert op_a._relative_addressed_to is None
+        assert op_a.relative_addressed_to is None
 
         if isinstance(op_a, GOTInsertOperation) and isinstance(op_b, GOTInsertOperation):
             out = self._it_insert_insert(op_a, op_b)

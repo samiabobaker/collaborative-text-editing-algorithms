@@ -13,7 +13,7 @@ class GOTInsertOperation(GOTOperation):
     """
 
     _lost_information: tuple[GOTInsertOperation, GOTDeleteOperation] | None
-    _relative_addressed_to: StateVector | None = None
+    relative_addressed_to: StateVector | None = None
 
     def __init__(self, idx: int, sequence: list[UniqueChar], client_id: int, state_vector: dict[int, int]):
         self.client_id = client_id
@@ -23,7 +23,7 @@ class GOTInsertOperation(GOTOperation):
 
         self._precedes: set[tuple[int, ...]] = set()
         self._lost_information = None
-        self._relative_addressed_to = None
+        self.relative_addressed_to = None
 
     def save_lost_information(self, original_op_a: GOTInsertOperation, op_b: GOTDeleteOperation) -> None:
         """
@@ -48,21 +48,21 @@ class GOTInsertOperation(GOTOperation):
         """
         Saves the relative addressing state vector of the operation `op_b`.
         """
-        assert self._relative_addressed_to is None
-        self._relative_addressed_to = op_b.state_vector
+        assert self.relative_addressed_to is None
+        self.relative_addressed_to = op_b.state_vector
 
     def is_relatively_addressed(self) -> bool:
         """
         Checks if the operation is relatively addressed to another operation.
         """
-        return self._relative_addressed_to is not None
+        return self.relative_addressed_to is not None
 
     def check_relative_addressing(self, op_b: GOTOperation) -> bool:
         """
         Checks if the operation is relatively addressed to `op_b`.
         """
-        assert self._relative_addressed_to is not None
-        return op_b.state_vector == self._relative_addressed_to
+        assert self.relative_addressed_to is not None
+        return op_b.state_vector == self.relative_addressed_to
 
     def save_precedes(self, op_b: GOTOperation) -> None:
         """
@@ -87,7 +87,7 @@ class GOTInsertOperation(GOTOperation):
 
         copied._precedes = self._precedes.copy()
         copied._lost_information = self._lost_information
-        copied._relative_addressed_to = self._relative_addressed_to
+        copied.relative_addressed_to = self.relative_addressed_to
         return copied
 
     def remove_all_metadata(self):
@@ -107,7 +107,7 @@ class GOTInsertOperation(GOTOperation):
         return copied
 
     def __str__(self):
-        return rf"Ins({self.sequence}, {self.idx}, c={self.client_id}, sv={self.state_vector}, RA={self._relative_addressed_to}, LI={self._lost_information})"
+        return rf"Ins({self.sequence}, {self.idx}, c={self.client_id}, sv={self.state_vector}, RA={self.relative_addressed_to}, LI={self._lost_information})"
 
     def __repr__(self):
         return self.__str__()
