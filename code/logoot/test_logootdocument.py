@@ -41,6 +41,19 @@ def test_generate_line_id_between_same_digit_positions():
     assert position_less_than(new_id, q) is True
 
 
+# The digits of q can extend the digits of p through a 0. Generating between them must
+# use the room deeper down instead of extending the digits of p, which would overshoot q.
+def test_generate_line_id_when_q_extends_p_through_zero():
+    document = LogootDocument(1)
+    p = [LogootIdentifier(14, 0, 1)]
+    q = [LogootIdentifier(14, 0, 1), LogootIdentifier(0, 0, 5), LogootIdentifier(10, 0, 5)]
+
+    new_id = document.generate_line_id(p, q, 1, 1)[0]
+
+    assert position_less_than(p, new_id) is True
+    assert position_less_than(new_id, q) is True
+
+
 def test_trace_with_same_digit_positions_converges():
     random.seed(66)
     server, clients = logoot_setup(3)
