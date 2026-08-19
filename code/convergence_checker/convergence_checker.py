@@ -1,6 +1,6 @@
 import random
 
-from device.clientdevice import ClientDevice
+from device.clientdevice import ClientDevice, TimeSteppedClient
 from device.operations import (
     ClientOperation,
     ClientReceiveFromClientOperation,
@@ -14,7 +14,6 @@ from random_operation_generator.random_operation_generator import (
     generate_random_client_client_operation,
     generate_random_client_server_operation,
 )
-from tibot.tibotclient import TIBOTClient
 
 
 def check_for_convergence_client_server(
@@ -109,7 +108,7 @@ def check_for_convergence_client_client(clients: dict[int, ClientDevice], num_of
 
 
 def check_for_convergence_client_client_with_time_steps(
-    clients: dict[int, TIBOTClient], num_of_operations: int = 10
+    clients: dict[int, TimeSteppedClient], num_of_operations: int = 10
 ) -> bool:
     for _ in range(num_of_operations):
         operation = generate_random_client_client_operation(list(clients.values()))

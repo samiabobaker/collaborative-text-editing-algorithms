@@ -32,7 +32,7 @@ def convergence_with_seed(
     for client in clients:
         client_dict[client.client_id] = client
     if any(isinstance(client, TimeSteppedClient) for client in clients):
-        if not check_for_convergence_client_client_with_time_steps(client_dict):  # type: ignore
+        if not check_for_convergence_client_client_with_time_steps(client_dict, num_of_ops):  # type: ignore
             print(f"Failed with seed {n}")
 
             for client in clients:
