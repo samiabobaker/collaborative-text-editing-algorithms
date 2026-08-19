@@ -373,92 +373,11 @@ control algorithm. Furthermore, OT papers often give control algorithms, but do 
 lied with the transformation functions.  Transformation functions should be considered as a key part of the algorithm, not merely as an implementation detail, or an application-specific concern.
 For this reason, we present all claims about combinations of control algorithms and transformation functions, 
 
-
-\section{Algorithm implementations}
-
-\subsection{dOPT}
-
-The dOPT algorithm is the original OT algorithm. It is well known not to work because of an issue known in literature as the dOPT puzzle. When two clients become
-more than two operations out of sync, the algorithm does not handle this case correctly. 
-
-The Jupiter and adOPTed algorithms fix the issues with the dOPT problem. 
-
-The Jupiter algorithm uses a server. The implementation was model-checked with transformation functions that were formally verified to work.  
-
-The adOPTed algorithm is decentralised. It requires the transformation functions to satisfy TP2. The paper provides transformation functions, but these were later shown to fail to satisfy
-TP2, and we are able to reproduce those violations in our implementation.
-
-
-\subsection{SOCT2}
-
-The SOCT2 is an OT algorithm that requires TP2 satisfying transformation functions. The functions in that paper claim to satisfy TP2, but actually
-do not. The algorithm works with the TTF functions, which do satisfy TP2. The SOCT2 algorithm and GOTO algorithm were published independently, but seem
-to be the exact same idea. SOCT2 requires the transformation functions to satisfy TP1, TP2 and the reversibility requirements. Note that the transformation functions
-given in the paper do not work -- they do not even satisfy TP1. The algorithm can be made to work using the tombstone transformation functions.
-
-
-SOCT3 is a similar algorithm to SOCT2, with the main change being that the delivery of operations is now serialised by introducing a sequencer (which essentially requires a server). This means that SOCT3 drops
-the requirement for the transformation functions to satisfy TP2. This means SOCT3 claims to work with transformation functions that satisfy TP1 and the reversibility requirements,
-but not TP2. No transformation functions satisfy this specific combination, so we test it with the original SOCT2 transformation functions (which do not work), and also the tombstone
-transformation functions (which do work).
-
-
-SOCT4 drops further the reversibility requirements, so we found it works with transformation functions that only satisfy TP1. It is important to note that SOCT4 makes a very
-strong assumption that all clients are online, which is not made by SOCT2 and SOCT3.
-
-
-
-\subsection{GOT}
-
-The GOT algorithm claims to be a TP2-avoiding algorithm that does not use a server. We find this algorithm is entirely broken, failing to converge. On top of this, the transformation functions
-given in the paper do not satisfy the reversibility requirements they claim to satisfy. We provide an example of this.
-We tried to implement the algorithm using TTF, and was able to achieve convergence, but still not achieve the weak list specification.
-
-
-
-
-\subsection{WOOT}
-
-We found the WOOT algorithm satisfies convergence and the weak and strong list specification. WOOT does have issues with performance, so it may be more
-useful to use one of its predecessors.
-
-
-\subsection{TreeDoc}
-
-We found that the TreeDoc algorithm satisfies the strong list specification. There is some ambiguity over what is meant by TreeDoc in the literature 
-
-
 \section{Results of the model-checker}
 
 \subsection{Properties of each algorithm}
 
 We do not claim that these properties are equal. 
-
-\subsection{Checking for forward non-interleaving}
-
-
-For each local insertion operation, the model-checker records the left origin of that character by recording the character
-immediately before it at the point in which it was inserted. The forward non-interleaving condition can then by simply checked by iterating
-over every pair of characters $a,b$. If $a$ is the left origin of $b$, $b$ appears earlier than any other element that
-has $a$ as left origin, but $a$ and $b$ are not consecutive elements, then this means forward non-interleaving is not satisfied.
-If this does not occur for all pair, then forward non-interleaving is satisfied.
-
-\subsection{Checking for maximal non-interleaving}
-
-The check for maximal non-interleaving is analagous to the checks for forward non-interleaving. These are straightforward iterations over
-all pairs of characters, ensuring the relevant conditions are satisfied.
-
-
-
-\subsection{Checking properties of transformation functions}
-
-
-OT literature commonly suggests that the two parts of an OT algorithms -- the control algorithm and the transformation functions -- can be considered individually as two separate layers of the algorithm. This would
-suggest verifying the properties of transformation functions on their own rather than with a control algorithm. We choose to push away from this because we feel that the two components
-cannot be separated as cleanly as previous work suggests. Two transformation functions can both satisfy TP1 and TP2, yet lead to different behaviour when tested against the same
-control algorithm. Furthermore, OT papers often give control algorithms, but do not give concrete transformation functions. When an OT algorithm is shown to not work, the issue has often
-lied with the transformation functions.  Transformation functions should be considered as a key part of the algorithm, not merely as an implementation detail, or an application-specific concern.
-For this reason, we present all claims about combinations of control algorithms and transformation functions, 
 
 
 \section{Algorithm implementations}
@@ -533,7 +452,26 @@ TIBOT avoids the need for TP2 by ensuring operations are delivered in a total or
 
 We implemented the LOGOOT algorithm .   The original version of this algorithm is knwon to have a divergence bug. That bug was fixed in the description of
 this algorithm when implementing LOGOOT. Although we could not find any more divergence bugs, the algorithm has a significant bug where it will get stuck in an 
-infinite loop. 
+infinite loop.
+
+
+\subsection{POT}
+
+We found the algorithm for POT works as expected. This algorithm is often listed as a decentralised algorithm that does not use a server. This is misleading. The algorithm 
+requires operations to be delivered in a total order (that is consistent with the causal order), but does not describe how such an order is implemented. Often, this requires a server
+or making a strong assumption about the clients.
+
+\subsection{TIBOT 2.0}
+
+TIBOT 2.0 is a modification of TIBOT, with the only difference being in how the algorithm handles receiving remote operations. The algorithm has the same issues as TIBOT of assuming all 
+clients are online. TIBOT works with group operations (which is a sequence of operations generated in the same time interval by the same client), but the TIBOT 2.0 description (while still
+claiming to retain this characteristic of using group operations) assumes that the received operation is a single operation. The way to handle this is already described in the original TIBOT
+paper (what it calls the SLOT algorithm), so we adapt the description to work with group operations in our implementation.
+
+\subsection{COT}
+
+Similarly to POT, COT is a TP2-avoiding algorithm that has been claimed to work without a server, but actually requires some total ordering mechanism on the operations,
+
 
 \subsection{Interleaving in OT algorithms}
 
@@ -691,7 +629,7 @@ algorithm only exhibits backward interleaving, therefore satisfying forward non-
     \end{tabular}   
 \end{table*}
 
-\subsection{Assumptions made by each algorithm}
+\subsection{Assumptions made by each algorithm}  \label{sec:assumptions}
 
 %% Assumptions made about the server / network 
 %% Assumptions made about the transformation functions (TP1 or TP2)
