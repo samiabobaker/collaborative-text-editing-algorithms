@@ -101,7 +101,9 @@ def check_condition1a(client_log: ClientTrace) -> bool:
     return True
 
 
-# Builds an order such that if i<j at any point in any of the states, there is a path from i to j, so condition 1b must be satisfied.
+# Records every pair of each state, not just adjacent pairs, as condition 1b requires.
+# The weak check restricts this order to a state's characters before taking the transitive
+# closure, so a pair related only through a character absent from that state would be lost.
 def build_list_order_for_condition1b(client_logs: dict[int, ClientTrace]) -> set[tuple[UniqueChar, UniqueChar]]:
     list_order: set[tuple[UniqueChar, UniqueChar]] = set()
 
@@ -109,8 +111,9 @@ def build_list_order_for_condition1b(client_logs: dict[int, ClientTrace]) -> set
         client_log = client_logs[client]
 
         for state in client_log.states_after_events:
-            for i in range(len(state) - 1):
-                list_order.add((state[i], state[i + 1]))
+            for i in range(len(state)):
+                for j in range(i + 1, len(state)):
+                    list_order.add((state[i], state[j]))
 
     return list_order
 
