@@ -471,7 +471,10 @@ paper (what it calls the SLOT algorithm), so we adapt the description to work wi
 \subsection{COT}
 
 Similarly to POT, COT is a TP2-avoiding algorithm that has been claimed to work without a server, but actually requires some total ordering mechanism on the operations,
-
+The paper mentions that context can be represented either as a set of operations or as a vector clock. This is merely an implementation detail we use
+vector clocks. There are re-descriptions of this algorithm in later papers, but these do not fully describe the transform method in the algorithm, which is only
+fully described in the original paper. Although we do not consider performance, the paper notes that COT uses a very slow recursive algorithm -- too slow to model-check through even only a few hundred cases. 
+Memoising the recursive algorithm (as mentioned in the paper) was therefore necessary for us to model-check it (and necessary in any practical implementation).
 
 \subsection{Interleaving in OT algorithms}
 
