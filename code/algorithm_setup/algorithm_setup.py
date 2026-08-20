@@ -5,6 +5,8 @@ from abt.abtclient import ABTClient
 from adopted.adoptedclient import AdOPTedClient
 from adoptedtm11.adoptedtm11client import AdOPTedTM11Client
 from adoptedtombstone.adoptedtombstoneclient import AdOPTedTombstoneClient
+from cot.cotclient import COTClient
+from cot.cotserver import COTServer
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from dopt.doptclient import dOPTClient
@@ -99,6 +101,7 @@ yjs_setup = make_setup(YjsClient)
 yjsmod_setup = make_setup(YjsModClient)
 
 # Client server
+cot_setup = make_setup(COTClient, COTServer)
 jupiter_setup = make_setup(JupiterClient, JupiterServer, peer_to_peer=False)
 pot_setup = make_setup(POTClient, POTServer)
 soct3_setup = make_setup(SOCT3Client, SOCT3Server)
