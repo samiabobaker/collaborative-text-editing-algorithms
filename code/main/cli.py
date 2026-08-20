@@ -48,6 +48,7 @@ from algorithm_setup.algorithm_setup import (
 )
 from main.convergence import convergence_with_seed
 from main.interleaving import forward_interleaving_with_seed, interleaving_with_seed
+from main.probeconvergence import probe_convergence_with_seed
 from main.stronglistspec import stronglistspec_with_seed
 from main.weaklistspec import weaklistspec_with_seed
 
@@ -88,6 +89,7 @@ Check = Callable[..., bool]
 
 CHECKS: dict[str, Check] = {
     "convergence": convergence_with_seed,
+    "probe-convergence": probe_convergence_with_seed,
     "strong-list-spec": stronglistspec_with_seed,
     "weak-list-spec": weaklistspec_with_seed,
     "interleaving": interleaving_with_seed,
