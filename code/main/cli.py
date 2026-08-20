@@ -48,6 +48,7 @@ from algorithm_setup.algorithm_setup import (
 )
 from main.convergence import convergence_with_seed
 from main.interleaving import forward_interleaving_with_seed, interleaving_with_seed
+from main.originorder import origin_order_with_seed
 from main.stronglistspec import stronglistspec_with_seed
 from main.weaklistspec import weaklistspec_with_seed
 
@@ -92,6 +93,7 @@ CHECKS: dict[str, Check] = {
     "weak-list-spec": weaklistspec_with_seed,
     "interleaving": interleaving_with_seed,
     "forward-interleaving": forward_interleaving_with_seed,
+    "origin-order": origin_order_with_seed,
 }
 
 
