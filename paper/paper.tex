@@ -452,7 +452,9 @@ TIBOT avoids the need for TP2 by ensuring operations are delivered in a total or
 
 We implemented the LOGOOT algorithm .   The original version of this algorithm is knwon to have a divergence bug. That bug was fixed in the description of
 this algorithm when implementing LOGOOT. Although we could not find any more divergence bugs, the algorithm has a significant bug where it will get stuck in an 
-infinite loop. The paper is slightly ambiguous over how to insert at the beginning and end of the document. It mentions begin and end sentinels, but not their ids.
+infinite loop. We were able to reproduce this bug. Our implementation allows you to set the base of the ids. With a larger base, it becomes more difficult to reproduce the
+infinite loop bugs, because it relies on two random numbers hitting the same values. To reproduce the bug, we had to reduce the base to make this case more likely. There are many attempted fixes
+to this bug in open source implementations. Most lead to divergence, but the one that we could not reproduce any cases of divergence for was the Alchemy Book implementation. The paper is slightly ambiguous over how to insert at the beginning and end of the document. It mentions begin and end sentinels, but not their ids.
 We use the ids for the begin and end sentinels from previous implementations. 
 
 
@@ -476,6 +478,12 @@ The paper mentions that context can be represented either as a set of operations
 vector clocks. There are re-descriptions of this algorithm in later papers, but these do not fully describe the transform method in the algorithm, which is only
 fully described in the original paper. Although we do not consider performance, the paper notes that COT uses a very slow recursive algorithm -- too slow to model-check through even only a few hundred cases. 
 Memoising the recursive algorithm (as mentioned in the paper) was therefore necessary for us to model-check it (and necessary in any practical implementation).
+
+\subsection{LogootSplit}
+
+LogootSplit is based on Logoot, and comes in three variants -- LogootSplitNaive, LogootSplitString, and LogootSplitAVL. These are just changes in the data 
+structure, which only change performance, not the actual algorithm. We implement LogootSplitNaive. We find it satisfies the same properties as Logoot. We
+could not find any instance of the infinite loop bug that was present in Logoot.
 
 \subsection{Interleaving in OT algorithms}
 
