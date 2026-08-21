@@ -17,6 +17,7 @@ from gottombstone.gottombstoneclient import GOTTombstoneClient
 from jupiter.jupiterclient import JupiterClient
 from jupiter.jupiterserver import JupiterServer
 from logoot.logootclient import LogootClient
+from logootsplit.logootsplitclient import LogootSplitClient
 from markandretrace.markandretraceclient import MarkAndRetraceClient
 from pot.potclient import POTClient
 from pot.potserver import POTServer
@@ -90,6 +91,7 @@ fuguemax_setup = make_setup(FugueMaxClient)
 got_setup = make_setup(GOTClient)
 got_tombstone_setup = make_setup(GOTTombstoneClient)
 logoot_setup = make_setup(LogootClient)
+logoot_split_setup = make_setup(LogootSplitClient)
 markandretrace_setup = make_setup(MarkAndRetraceClient)
 rga_setup = make_setup(RGAClient)
 sync9_setup = make_setup(Sync9Client)
