@@ -452,7 +452,8 @@ TIBOT avoids the need for TP2 by ensuring operations are delivered in a total or
 
 We implemented the LOGOOT algorithm .   The original version of this algorithm is knwon to have a divergence bug. That bug was fixed in the description of
 this algorithm when implementing LOGOOT. Although we could not find any more divergence bugs, the algorithm has a significant bug where it will get stuck in an 
-infinite loop.
+infinite loop. The paper is slightly ambiguous over how to insert at the beginning and end of the document. It mentions begin and end sentinels, but not their ids.
+We use the ids for the begin and end sentinels from previous implementations. 
 
 
 \subsection{POT}
