@@ -22,6 +22,7 @@ from lseq.lseqclient import LSEQClient
 from markandretrace.markandretraceclient import MarkAndRetraceClient
 from pot.potclient import POTClient
 from pot.potserver import POTServer
+from pps.ppsclient import PPSClient
 from rga.rgaclient import RGAClient
 from soct2.soct2client import SOCT2Client
 from soct3.soct3client import SOCT3Client
@@ -95,6 +96,7 @@ logoot_setup = make_setup(LogootClient)
 logoot_split_setup = make_setup(LogootSplitClient)
 lseq_setup = make_setup(LSEQClient)
 markandretrace_setup = make_setup(MarkAndRetraceClient)
+pps_setup = make_setup(PPSClient)
 rga_setup = make_setup(RGAClient)
 sync9_setup = make_setup(Sync9Client)
 tibot_setup = make_setup(TIBOTClient)
