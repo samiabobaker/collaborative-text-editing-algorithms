@@ -30,6 +30,8 @@ from soct4.soct4server import SOCT4Server
 from sync9.sync9client import Sync9Client
 from tibot.tibotclient import TIBOTClient
 from tibot2.tibot2client import TIBOT2Client
+from twc.twcclient import TWCClient
+from twc.twcserver import TWCServer
 from woot.wootclient import WOOTClient
 from wooto.wootoclient import WOOTOClient
 from yjs.yjsclient import YjsClient
@@ -59,7 +61,8 @@ def make_setup(
     peer_to_peer: bool = True,
 ) -> DeviceSetup:
     # Builds the DeviceSetup for one algorithm.
-    # peer_to_peer: every client is told about its peers (all algorithms except Jupiter).
+    # peer_to_peer: every client is told about its peers; the algorithms whose clients
+    # never need the peer list pass False.
     # server_class: a server is built from the clients, and every client is told about it.
     def setup(num_of_clients: int) -> Devices:
         clients = [client_class(n) for n in range(num_of_clients)]
@@ -108,6 +111,7 @@ jupiter_setup = make_setup(JupiterClient, JupiterServer, peer_to_peer=False)
 pot_setup = make_setup(POTClient, POTServer)
 soct3_setup = make_setup(SOCT3Client, SOCT3Server)
 soct4_setup = make_setup(SOCT4Client, SOCT4Server)
+twc_setup = make_setup(TWCClient, TWCServer, peer_to_peer=False)
 
 
 # AdOPTed is parameterised by its transformation function, so it takes one more step.
