@@ -27,6 +27,7 @@ from soct3.soct3client import SOCT3Client
 from soct3.soct3server import SOCT3Server
 from soct4.soct4client import SOCT4Client
 from soct4.soct4server import SOCT4Server
+from sync7.sync7client import Sync7Client
 from sync9.sync9client import Sync9Client
 from tibot.tibotclient import TIBOTClient
 from tibot2.tibot2client import TIBOT2Client
@@ -94,6 +95,7 @@ logoot_setup = make_setup(LogootClient)
 logoot_split_setup = make_setup(LogootSplitClient)
 markandretrace_setup = make_setup(MarkAndRetraceClient)
 rga_setup = make_setup(RGAClient)
+sync7_setup = make_setup(Sync7Client)
 sync9_setup = make_setup(Sync9Client)
 tibot_setup = make_setup(TIBOTClient)
 tibot2_setup = make_setup(TIBOT2Client)
