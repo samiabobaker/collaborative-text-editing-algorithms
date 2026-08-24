@@ -9,6 +9,7 @@ from cot.cotclient import COTClient
 from cot.cotserver import COTServer
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
+from diffsync.diffsyncclient import DiffsyncClient
 from dopt.doptclient import dOPTClient
 from fugue.fugueclient import FugueClient
 from fuguemax.fuguemaxclient import FugueMaxClient
@@ -85,6 +86,7 @@ SOCT2_setup = make_setup(SOCT2Client)
 abt_setup = make_setup(ABTClient)
 adopted_tm11_setup = make_setup(AdOPTedTM11Client)
 adopted_tombstone_setup = make_setup(AdOPTedTombstoneClient)
+diffsync_setup = make_setup(DiffsyncClient)
 dOPT_setup = make_setup(dOPTClient)
 fugue_setup = make_setup(FugueClient)
 fuguemax_setup = make_setup(FugueMaxClient)
