@@ -485,6 +485,14 @@ LogootSplit is based on Logoot, and comes in three variants -- LogootSplitNaive,
 structure, which only change performance, not the actual algorithm. We implement LogootSplitNaive. We find it satisfies the same properties as Logoot. We
 could not find any instance of the infinite loop bug that was present in Logoot.
 
+\subsection{Partial persistent sequences (PPS)}
+
+A PPS represents position ids using rational numbers. An insertion between two characters simply involves finding a rational number between the character before and after. This idea is mentioned in other papers, but is generally dismissed because would require infinite precision
+for floating points. We find that the algorithm presented also has further issues in that it does not generate unique identifiers. If two users concurrently insert at the same position, there needs to be
+a scheme to ensure both users do not use the same identifier, while maintaing the dense property of rational numbers. The papers propose two schemes (giving each client their own subrange, or appending the client id to the digits of the identifier), and our checker finds that both schemes still lead
+to collisions, which lead to divergence. When clashes do not happen, we find the algorithm satisfies convergence, the weak and strong list specifications, and exhibits 
+interleaving behaviours.
+
 \subsection{Interleaving in OT algorithms}
 
 Many OT algorithms only exhibit interleaving in one direction but not the other. Switch the ordering of the priority scheme switches which
