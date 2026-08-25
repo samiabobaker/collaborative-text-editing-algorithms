@@ -60,6 +60,21 @@ def maximally_non_interleaving(
     for client_id in client_logs:
         client_log = client_logs[client_id]
         for state in client_log.states_after_events:
+            # The traces contain no deletes, so an origin can only be missing from a
+            # state when the algorithm lost the element. That violates the strong list
+            # spec assumed above, so it counts as a failure rather than an error when
+            # the conditions look the missing element up.
+            lost = find_lost_origin(state, characters)
+            if lost is not None:
+                origin, element = lost
+                if print_ops:
+                    print(f"Origin {origin} of element {element} is missing from the state.")
+                    for client_id in clients:
+                        print(f"CLIENT {client_id}")
+                        for state in client_logs[client_id].states_after_events:
+                            print(*state, sep="")
+                        print()
+                return False
             for A in state:
                 for B in state:
                     # To check 1 (forward non-interleaving)
@@ -146,6 +161,20 @@ def maximally_non_interleaving_from_client_logs(
                     # Algorithm is free to choose how to handle the case in condition 3, so this does not need to be checked.
 
     return True
+
+
+# Returns an origin that is missing from the state together with the element that
+# recorded it, or None when every origin is present.
+def find_lost_origin(state: list[UniqueChar], characters: dict[int, Character]) -> tuple[UniqueChar, UniqueChar] | None:
+    for element in state:
+        character = characters[element.id]
+        left_origin = character.left_origin
+        if left_origin != "start" and left_origin not in state:
+            return left_origin, element
+        right_origin = character.right_origin
+        if right_origin != "end" and right_origin not in state:
+            return right_origin, element
+    return None
 
 
 def check_condition_1(state: list[UniqueChar], characters: dict[int, Character], A: UniqueChar, B: UniqueChar) -> bool:
