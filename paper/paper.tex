@@ -379,8 +379,186 @@ For this reason, we present all claims about combinations of control algorithms 
 
 We do not claim that these properties are equal. 
 
+\section{Results of the model-checker}
+
+\subsection{Properties of each algorithm}
+
+\autoref{tab:algorithmproperties} shows the properties we found of every algorithm we implemented. We aimed to build a collection of all major published algorithms, as well as popular open-source implementations. When there is a choice of transformation functions,
+we choose transformation functions that would substantiate or disprove any known claims about the functions. We do not claim that all of these properties are of equal importance. We feel convergence, the weak list specification and forward non-interleaving are requirements for a useful
+collaborative text-editing algorithm. The strong list specification is less important. Maximal non-interleaving may only be of theoretical interest, as the scenario of backward interleaving may not be as relevant in many cases.
+
+\begin{table*}
+  \centering
+  \caption{Various collaborative text-editing algorithms and their properties. Key: $\checkmark$=The checker could not find violations for this property. $\square$=The checker
+    found violations for this property.}
+  \label{tab:algorithmproperties}
+    \begin{tabular}{lccccc}
+        \toprule
+        Algorithm & Convergence & \makecell{Weak List \\ Specification \cite{}} & \makecell{Strong List \\ Specification \cite{}} & \makecell{Forward \\ non-interleaving \cite{Weidner2025Fugue} }& \makecell{Maximal \\ non-interleaving \cite{Weidner2025Fugue}} \\
+        \midrule
+        ABT \cite{Li2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+
+        AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + Ressel \cite{Ressel1996} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + IMOR  \cite{Imine2003} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + Suleiman \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + TM1.1 \cite{Sun2017} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + Tombstone \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+
+        Automerge \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$  \\
+
+        COT \cite{Sun2009} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
+
+        dOPT + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+
+        
+        Fugue \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ \\
+        FugueMax \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+
+        GOT \cite{Sun1998TOCHI} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        GOTO \cite{Sun1998CSCW} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+
+        Jupiter \cite{Nichols1995} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
+
+        LBT \cite{Li2005} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\ 
+
+        Logoot \cite{Weiss2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+
+        LogootSplit & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
+
+        LSEQ \cite{Nedelec2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+
+        Mark \& Retrace \cite{Gu2005} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+
+        POT \cite{Xu2016} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
+
+        Partial Persistent Sequences \cite{Wu2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+
+        RGA \cite{Roh2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$  \\
+
+        SDT \cite{Li2008} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+
+        SOCT2 \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        SOCT2 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
+
+        SOCT3 \cite{Vidot2000} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        SOCT3 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
+        
+        SOCT4 \cite{Vidot2000} + TP1-satisfying functions \cite{} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
+
+        Sync9 \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ \\
+        
+
+        TIBOT \cite{Li2004ICPADS} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
+        TIBOT 2.0 \cite{Xu2014} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
+        
+        TreeDoc \cite{Preguica2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+
+        WOOT \cite{Oster2006WOOT} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+        WOOTO \cite{Weiss2007} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+      
+        Yjs \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$ \\
+        YjsMod \cite{...} & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$ \\
+
+
+        \textbf{TODO}: \\
+
+        Non-interleaving RGA \cite{...} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+
+        ProseMirror \cite{} \\
+        WOOTH \cite{} \\
+
+        Eg-walker \cite{} \\
+        Yrs \cite{} \\
+        Diamond Types \cite{} \\
+        Loro \cite{} \\
+        Collabs \cite{} \\
+
+        treeOPT \cite{} \\
+        
+        Differential Synchronisation \cite{} \\
+        Etherpad EasySync \cite{} \\
+        
+        
+        Chronofold \cite{} \\
+        Causal Trees / Weave \cite{} \\
+        Citrea / Swarm \cite{} \\
+
+
+
+        Causal Graph CRDT \cite{} \\
+        SECRO \cite{} \\
+
+        \bottomrule
+    \end{tabular}   
+\end{table*}
+
+\subsection{Properties of transformation functions}
+
+
+\autoref{tab:tfproperties} shows the TP1 and TP2 properties of all published transformation functions. It is important to note that these properties are only relevant to convergence, and make no guarantees about anything else. To determine these properties,
+we run the model-checker with the adOPTed algorithm, which is a TP2-requiring control algorithm. If no convergence violations are found on two clients, then the functions satisfy TP1. If no convergence violations are found on three or more clients,
+then they satisfy TP2.
+
+
+\begin{table*}
+  \caption{Various transformation functions and their properties. Key: $\checkmark$=The checker could not find violations for this property. $\square$=The checker
+    found violations for this property.}
+  \label{tab:tfproperties}
+    \begin{tabular}{lcc}
+        \toprule
+        Algorithm & TP1 & TP2 \\
+        \midrule
+        Ressel \cite{Ressel1996}  \\
+        IMOR  \cite{} \\
+        Suleiman \cite{} \\
+        TM1.1 \cite{}  \\
+        Tombstone \cite{Oster2006TTF}  \\
+        GOT /  GOTO TFs \cite{} \\
+        Randolph's new IT \cite{} \\
+        Sun's String-wise TFs \cite{} \\
+        Suleiman's extended TFs \cite{} \\
+
+        \bottomrule
+    \end{tabular}   
+\end{table*}
+
+
+
+\subsection{Assumptions made by each algorithm}  \label{sec:assumptions}
+
+%% Assumptions made about the server / network 
+%% Assumptions made about the transformation functions (TP1 or TP2)
+
+
+
+One reason it has been difficult to compare the algorithms fairly is that their assumptions about the network are often very different. Some algorithms make stronger
+assumptions about the network, and ignoring these assumptions can lead to making misleading claims.
+
+The first kind of assumption is about the existence of a server. This is not necessarily bad, but the server can act as a point of failure. Previous work has made the
+distinction between a transformation-based server and a non-transformation-based server. We feel this is not a useful distinction as any algorithm with a transformation-based
+server can easily be made into one with a non-transformation-based server by having the server only be used to serialise the operations, and the clients can simulate the 
+work of the server.
+
+The second, strictly worse assumption is that the algorithms assumes all clients are online. If one client crashes, the whole algorithm stops and no more messages are delivered until 
+all clients are back online. Now instead of having a single point of failure, the algorithm has many points of failure. It is better to use an algorithm that has a server than an
+algorithm that makes this strict assumption, even if it does not have a server.
+
+Some algorithms have not been explicit about which of these assumptions are satisfied. Algorithms, such as COT, POT and TIBOT have been listed as not requiring a server, even though they do. The most common example are the TP2-avoiding algorithms. One approach for these is to 
+ensure that every client receives the operations in the same order. This is known as total order broadcast, and implementing that often involves making one of these assumptions. That is,
+either by introducing a server, or making the system no longer fault-tolerant (for example, by waiting until a message is received from all clients). Note there is a third option to use a fault-tolerant consensus
+algorithm, such as the RAFT algorithm. Previous work has incorrectly conflated causal-order broadcast with total-order broadcast. Causal order broadcast is much simpler to 
+implement asynchronously; it is most commonly done in these algorithms using vector clocks.
+
+
+Table ... lists the algorithms we implemented, which made any of these assumptions. 
+
+
+
 
 \section{Algorithm implementations}
+
+This sections explains some of the results and gives important points about some of the algorithms presented in \autoref{tab:algorithmproperties}.
 
 \subsection{dOPT}
 
@@ -498,191 +676,6 @@ interleaving behaviours.
 Many OT algorithms only exhibit interleaving in one direction but not the other. Switch the ordering of the priority scheme switches which
 direction of interleaving occurs. Such algorithms cannot satisfy maximal non-interleaving, but choosing the right direction of priority can mean the
 algorithm only exhibits backward interleaving, therefore satisfying forward non-interleaving.
-
-\section{Results of the model-checker}
-
-\subsection{Properties of each algorithm}
-
-\begin{table*}
-  \caption{Various collaborative text-editing algorithms and their properties. Key: $\checkmark$=The checker could not find violations for this property. $\square$=The checker
-    found violations for this property.}
-  \label{tab:algorithmproperties}
-    \begin{tabular}{lccccc}
-        \toprule
-        Algorithm & Convergence & \makecell{Weak List \\ Specification \cite{}} & \makecell{Strong List \\ Specification \cite{}} & \makecell{Forward \\ non-interleaving \cite{Weidner2025Fugue} }& \makecell{Maximal \\ non-interleaving \cite{Weidner2025Fugue}} \\
-        \midrule
-        Jupiter \cite{} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
-        Fugue \cite{} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ \\
-        FugueMax \cite{} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
-        TIBOT \cite{} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
-        AdOPTed \cite{} + Ellis \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Ressel \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + IMOR  \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Suleiman \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + TM1.1 \cite{} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Tombstone \cite{} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-        
-        dOPT + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        Jupiter \cite{Nichols1995} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
-        AdOPTed + Ressel \cite{Ressel1996} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        
-
-        %AdOPTed + IMOR  \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        %AdOPTed + Suleiman \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        %AdOPTed + TM1.1 \cite{} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        %AdOPTed + Tombstone \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-
-
-
-        GOT \cite{Sun1998TOCHI} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-
-
-        GOTO \cite{Sun1998CSCW} \\
-
-
-        SOCT2 + TTF \cite{Suleiman1997} \\
-
-
-        SOCT3 \cite{Vidot2000} \\
-        SOCT4 \cite{Vidot2000} \\
-
-        WOOT \cite{Oster2006WOOT} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-
-
-
-        Fugue \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ \\
-        FugueMax \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
-        TIBOT \cite{Li2004ICPADS} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
-        AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-      
-        Yjs \cite{} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$ \\
-        YjsMod \cite{} & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$ \\
-        Sync9 \cite{} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$ \\
-        RGA \cite{Roh2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$  \\
-        Non-interleaving RGA \cite{} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        TreeDoc \cite{} \\
-        Mark \& Retrace \cite{} \\
-
-
-
-        ProseMirror \cite{} \\
-        
-        COT \cite{} \\
-        POT  \cite{} \\
-        
-        
-        TIBOT 2.0 \cite{} \\
-        LOGOOT \cite{} \\
-        LSEQ \cite{} \\
-        
-        WOOTO \cite{} \\
-        WOOTH \cite{} \\
-        
-        NICE \cite{} \\
-        Google OT \cite{} \\
-
-        Automerge \cite{} \\
-        Yrs \cite{} \\
-        Diamond Types \cite{} \\
-        Loro \cite{} \\
-        Collabs \cite{} \\
-
-        SDT \cite{} \\
-        ABT \cite{} \\
-        LBT \cite{} \\
-        ABTS \cite{} \\
-        ABTSO \cite{} \\
-        MOT2 \cite{} \\
-        CJupiter \cite{} \\
-        XJupiter \cite{} \\
-        AJupiter \cite{} \\
-        AbsJupiter \cite{} \\
-        
-        Differential Synchronisation \cite{} \\
-        Etherpad EasySync \cite{} \\
-        Apache Wave OT \cite{} \\
-        A\_strong \cite{} \\
-        A\_weak \cite{} \\
-        treeOPT \cite{} \\
-        Eg-walker \cite{} \\
-        Chronofold \cite{} \\
-        Causal Trees / Weave \cite{} \\
-        Citrea / Swarm \cite{} \\
-        Peritext \cite{} \\
-        Automerge \cite{} \\
-        LogootSplit \cite{} \\
-        Logoot-undo \cite{} \\
-        RenamableLogootSplit \cite{} \\
-        RGASplit \cite{} \\
-        RGATreeSplit \cite{} \\
-        LogootTreeList \cite{} \\
-        RGASS \cite{} \\
-        Causal Graph CRDT \cite{} \\
-        SECRO \cite{} \\
-        RDSL \cite{} \\
-        Layered Undo CRDT \cite{} \\
-        \bottomrule
-    \end{tabular}   
-\end{table*}
-
-\subsection{Properties of transformation functions}
-
-\begin{table*}
-  \caption{Various transformation functions and their properties. Key: $\checkmark$=The checker could not find violations for this property. $\square$=The checker
-    found violations for this property.}
-  \label{tab:tfproperties}
-    \begin{tabular}{lcc}
-        \toprule
-        Algorithm & TP1 & TP2 \\
-        \midrule
-        Ressel \cite{Ressel1996}  \\
-        IMOR  \cite{} \\
-        Suleiman \cite{} \\
-        TM1.1 \cite{}  \\
-        Tombstone \cite{Oster2006TTF}  \\
-        GOT /  GOTO TFs \cite{} \\
-        Randolph's new IT \cite{} \\
-        Sun's String-wise TFs \cite{} \\
-        Suleiman's extended TFs \cite{} \\
-
-        \bottomrule
-    \end{tabular}   
-\end{table*}
-
-\subsection{Assumptions made by each algorithm}  \label{sec:assumptions}
-
-%% Assumptions made about the server / network 
-%% Assumptions made about the transformation functions (TP1 or TP2)
-
-
-
-One reason it has been difficult to compare the algorithms fairly is that their assumptions about the network are often very different. Some algorithms make stronger
-assumptions about the network, and ignoring these assumptions can lead to making misleading claims.
-
-The first kind of assumption is about the existence of a server. This is not necessarily bad, but the server can act as a point of failure. Previous work has made the
-distinction between a transformation-based server and a non-transformation-based server. We feel this is not a useful distinction as any algorithm with a transformation-based
-server can easily be made into one with a non-transformation-based server by having the server only be used to serialise the operations, and the clients can simulate the 
-work of the server.
-
-The second, strictly worse assumption is that the algorithms assumes all clients are online. If one client crashes, the whole algorithm stops and no more messages are delivered until 
-all clients are back online. Now instead of having a single point of failure, the algorithm has many points of failure. It is better to use an algorithm that has a server than an
-algorithm that makes this strict assumption, even if it does not have a server.
-
-Some algorithms have not been explicit about which of these assumptions are satisfied. Algorithms, such as COT, POT and TIBOT have been listed as not requiring a server, even though they do. The most common example are the TP2-avoiding algorithms. One approach for these is to 
-ensure that every client receives the operations in the same order. This is known as total order broadcast, and implementing that often involves making one of these assumptions. That is,
-either by introducing a server, or making the system no longer fault-tolerant (for example, by waiting until a message is received from all clients). Note there is a third option to use a fault-tolerant consensus
-algorithm, such as the RAFT algorithm. Previous work has incorrectly conflated causal-order broadcast with total-order broadcast. Causal order broadcast is much simpler to 
-implement asynchronously; it is most commonly done in these algorithms using vector clocks.
-
-
-Table ... lists the algorithms we implemented, which made any of these assumptions. 
-
-
-
-
-\subsection{}
-
-Many of the OT transformation functions have a choice over which operation to place first if both operations are insertion operations. 
 
 
 %% Bibliography
