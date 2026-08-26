@@ -10,6 +10,8 @@ from cot.cotserver import COTServer
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from dopt.doptclient import dOPTClient
+from easysync.easysyncclient import EasySyncClient
+from easysync.easysyncserver import EasySyncServer
 from fugue.fugueclient import FugueClient
 from fuguemax.fuguemaxclient import FugueMaxClient
 from got.gotclient import GOTClient
@@ -108,6 +110,7 @@ yjsmod_setup = make_setup(YjsModClient)
 
 # Client server
 cot_setup = make_setup(COTClient, COTServer)
+easysync_setup = make_setup(EasySyncClient, EasySyncServer, peer_to_peer=False)
 jupiter_setup = make_setup(JupiterClient, JupiterServer, peer_to_peer=False)
 pot_setup = make_setup(POTClient, POTServer)
 soct3_setup = make_setup(SOCT3Client, SOCT3Server)
