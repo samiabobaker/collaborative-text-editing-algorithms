@@ -204,6 +204,10 @@ TP2 applies when there are three or more clients. $IT(IT(O_3, O_1), O_2') = IT(I
 Finding transformation functions which satisfy TP2 has been a challenge. There are many that claim to satisfy TP2 in the literature, but many are shown to not
 work, or are unchecked. One alternative to finding TP2-satisfying transformation functions is for the control algorithms that do not require TP2 -- these are sometimes called TP2-avoiding algorithms. 
 
+
+Previous work has made claims that no IT functions satisfy TP2, and given proofs of these. However, that work is clear that they only consider a specific scenario, and their claim no longer applies when including
+additional parameters with the operations (which many of the IT functions we investigate do). 
+
 \subsection{Exclusion Transformations}
 
 
@@ -670,6 +674,17 @@ for floating points. We find that the algorithm presented also has further issue
 a scheme to ensure both users do not use the same identifier, while maintaing the dense property of rational numbers. The papers propose two schemes (giving each client their own subrange, or appending the client id to the digits of the identifier), and our checker finds that both schemes still lead
 to collisions, which lead to divergence. When clashes do not happen, we find the algorithm satisfies convergence, the weak and strong list specifications, and exhibits 
 interleaving behaviours.
+
+\subsection{TM1.1}
+
+The TM1.1 functions claim to satisfy TP2. We were unable to find any convergence violations when testing these with adOPTed, so we do not dispute the claim they satisfy TP2. However, we find that these
+functions do lead to weak and strong list specification violations. The issue occurs because the functions delete an extra character that no client intentionally deletes. This makes them not very practical.
+
+\subsection{Randolph functions}
+
+The Randolph functions are another set of functions that claim to satisfy TP2. They give a proof, but we could not find any other verification of this claim. Using the functions, we could not find any convergence or strong/weak list specification violations. Therefore, not only do
+they seem to satisfy TP2; they seem to be more practical than the TM1.1 functions. Note that these functions implicitly assuming a total ordering of the characters, and we simply achieve this by adding the client id and a per-client counter to
+each character.
 
 \subsection{Interleaving in OT algorithms}
 
