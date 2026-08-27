@@ -203,9 +203,10 @@ class SuleimanTransform(AdOPTedTransform):
                     return AdOPTedInsertionOperation(i, x, pr1, b1, a1, {})
                 elif i > j or len(b1.intersection(a2)) != 0:
                     return AdOPTedInsertionOperation(i + 1, x, pr1, b1, a1, {})
-                elif len(a1.intersection(b2)) != 0 or x.char < y.char:
+                # Suleiman et al. insert the character with the higher code first.
+                elif len(a1.intersection(b2)) != 0 or x.char > y.char:
                     return AdOPTedInsertionOperation(i, x, pr1, b1, a1, {})
-                elif x.char > y.char:
+                elif x.char < y.char:
                     return AdOPTedInsertionOperation(i + 1, x, pr1, b1, a1, {})
                 else:
                     return AdOPTedNoOperation()
