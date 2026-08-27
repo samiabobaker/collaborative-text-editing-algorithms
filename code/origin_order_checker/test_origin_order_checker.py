@@ -4,6 +4,7 @@ from algorithm_setup.algorithm_setup import (
     DeviceSetup,
     fugue_setup,
     fuguemax_setup,
+    loro_setup,
     rga_setup,
     sync9_setup,
     yjs_setup,
@@ -33,7 +34,7 @@ def _client_dict(setup: DeviceSetup, num_of_clients: int) -> dict[int, ClientDev
 
 # Every algorithm in the family reproduces its declared scheme and key on random traces.
 def test_algorithms_match_their_declared_cells():
-    for setup in [fugue_setup, fuguemax_setup, rga_setup, sync9_setup, yjs_setup, yjsmod_setup]:
+    for setup in [fugue_setup, fuguemax_setup, loro_setup, rga_setup, sync9_setup, yjs_setup, yjsmod_setup]:
         for seed in range(25):
             random.seed(seed)
             assert origin_order_checker(_client_dict(setup, 3), None, 30)
@@ -98,7 +99,7 @@ def test_fugue_vs_fuguemax_divergences_are_scheme_only():
 def test_both_anchorings_are_declared_and_hold():
     assert anchoring_of(yjs_setup) == AFTER
     assert anchoring_of(fugue_setup) == BEFORE
-    for setup in [fugue_setup, fuguemax_setup, rga_setup, sync9_setup, yjs_setup, yjsmod_setup]:
+    for setup in [fugue_setup, fuguemax_setup, loro_setup, rga_setup, sync9_setup, yjs_setup, yjsmod_setup]:
         assert anchoring_checker(setup)
 
 

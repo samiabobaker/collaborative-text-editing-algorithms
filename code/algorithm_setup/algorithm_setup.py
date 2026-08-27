@@ -21,6 +21,7 @@ from jupiter.jupiterclient import JupiterClient
 from jupiter.jupiterserver import JupiterServer
 from logoot.logootclient import LogootClient
 from logootsplit.logootsplitclient import LogootSplitClient
+from loro.loroclient import LoroClient
 from lseq.lseqclient import LSEQClient
 from markandretrace.markandretraceclient import MarkAndRetraceClient
 from pot.potclient import POTClient
@@ -98,6 +99,7 @@ got_setup = make_setup(GOTClient)
 got_tombstone_setup = make_setup(GOTTombstoneClient)
 logoot_setup = make_setup(LogootClient)
 logoot_split_setup = make_setup(LogootSplitClient)
+loro_setup = make_setup(LoroClient)
 lseq_setup = make_setup(LSEQClient)
 markandretrace_setup = make_setup(MarkAndRetraceClient)
 pps_setup = make_setup(PPSClient)
