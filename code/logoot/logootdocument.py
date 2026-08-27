@@ -82,9 +82,20 @@ class LogootDocument:
         index = 0
         interval = 0
 
-        while interval < N:
-            index += 1
-            interval = self.prefix(q, index) - self.prefix(p, index) - 1
+        # The digits of q can compare lower than the digits of p while q still sorts after p
+        # on sites alone, and then no digit interval ever opens. New positions in that case
+        # extend the digits of p, which sorts them after p and before q at the identifier
+        # where p and q already differ. The check must look past both lengths: digits of q
+        # that extend the digits of p through a 0 still open an interval further down.
+        depth = max(len(p), len(q))
+        if self.prefix(q, depth) > self.prefix(p, depth):
+            while interval < N:
+                index += 1
+                interval = self.prefix(q, index) - self.prefix(p, index) - 1
+        else:
+            while interval < N:
+                index += 1
+                interval = self.BASE ** max(index - len(p), 0) - 1
 
         step = interval // N
         r = self.prefix(p, index)

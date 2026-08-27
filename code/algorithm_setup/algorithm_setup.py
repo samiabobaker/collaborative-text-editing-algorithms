@@ -3,13 +3,18 @@ from typing import Any, Protocol, cast
 
 from abt.abtclient import ABTClient
 from adopted.adoptedclient import AdOPTedClient
+from adoptedrandolph.adoptedrandolphclient import AdOPTedRandolphClient
 from adoptedtm11.adoptedtm11client import AdOPTedTM11Client
 from adoptedtombstone.adoptedtombstoneclient import AdOPTedTombstoneClient
 from automerge.automergeclient import AutomergeClient
+from cot.cotclient import COTClient
+from cot.cotserver import COTServer
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from diamondtypes.diamondtypesclient import DiamondTypesClient
 from dopt.doptclient import dOPTClient
+from easysync.easysyncclient import EasySyncClient
+from easysync.easysyncserver import EasySyncServer
 from fugue.fugueclient import FugueClient
 from fuguemax.fuguemaxclient import FugueMaxClient
 from got.gotclient import GOTClient
@@ -17,10 +22,13 @@ from gottombstone.gottombstoneclient import GOTTombstoneClient
 from jupiter.jupiterclient import JupiterClient
 from jupiter.jupiterserver import JupiterServer
 from logoot.logootclient import LogootClient
+from logootsplit.logootsplitclient import LogootSplitClient
 from loro.loroclient import LoroClient
+from lseq.lseqclient import LSEQClient
 from markandretrace.markandretraceclient import MarkAndRetraceClient
 from pot.potclient import POTClient
 from pot.potserver import POTServer
+from pps.ppsclient import PPSClient
 from rga.rgaclient import RGAClient
 from soct2.soct2client import SOCT2Client
 from soct3.soct3client import SOCT3Client
@@ -83,6 +91,7 @@ def make_setup(
 # Peer to peer
 SOCT2_setup = make_setup(SOCT2Client)
 abt_setup = make_setup(ABTClient)
+adopted_randolph_setup = make_setup(AdOPTedRandolphClient)
 adopted_tm11_setup = make_setup(AdOPTedTM11Client)
 adopted_tombstone_setup = make_setup(AdOPTedTombstoneClient)
 automerge_setup = make_setup(AutomergeClient)
@@ -93,8 +102,11 @@ fuguemax_setup = make_setup(FugueMaxClient)
 got_setup = make_setup(GOTClient)
 got_tombstone_setup = make_setup(GOTTombstoneClient)
 logoot_setup = make_setup(LogootClient)
+logoot_split_setup = make_setup(LogootSplitClient)
 loro_setup = make_setup(LoroClient)
+lseq_setup = make_setup(LSEQClient)
 markandretrace_setup = make_setup(MarkAndRetraceClient)
+pps_setup = make_setup(PPSClient)
 rga_setup = make_setup(RGAClient)
 sync9_setup = make_setup(Sync9Client)
 tibot_setup = make_setup(TIBOTClient)
@@ -105,6 +117,8 @@ yjs_setup = make_setup(YjsClient)
 yjsmod_setup = make_setup(YjsModClient)
 
 # Client server
+cot_setup = make_setup(COTClient, COTServer)
+easysync_setup = make_setup(EasySyncClient, EasySyncServer, peer_to_peer=False)
 jupiter_setup = make_setup(JupiterClient, JupiterServer, peer_to_peer=False)
 pot_setup = make_setup(POTClient, POTServer)
 soct3_setup = make_setup(SOCT3Client, SOCT3Server)
