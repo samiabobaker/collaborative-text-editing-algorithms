@@ -23,12 +23,15 @@ from algorithm_setup.algorithm_setup import (
     DeviceSetup,
     SOCT2_setup,
     abt_setup,
+    adopted_randolph_setup,
     adopted_setup,
     adopted_tm11_setup,
     adopted_tombstone_setup,
     collabs_setup,
     cot_setup,
+    diffsync_setup,
     dOPT_setup,
+    easysync_setup,
     fugue_setup,
     fuguemax_setup,
     got_setup,
@@ -36,11 +39,16 @@ from algorithm_setup.algorithm_setup import (
     jupiter_setup,
     logoot_setup,
     logoot_split_setup,
+    loro_setup,
+    lseq_setup,
     markandretrace_setup,
     pot_setup,
+    pps_setup,
     rga_setup,
+    sharedb_setup,
     soct3_setup,
     soct4_setup,
+    sync7_setup,
     sync9_setup,
     tibot2_setup,
     tibot_setup,
@@ -51,6 +59,7 @@ from algorithm_setup.algorithm_setup import (
 )
 from main.convergence import convergence_with_seed
 from main.interleaving import forward_interleaving_with_seed, interleaving_with_seed
+from main.originorder import origin_order_with_seed
 from main.stronglistspec import stronglistspec_with_seed
 from main.weaklistspec import weaklistspec_with_seed
 
@@ -60,6 +69,7 @@ ALGORITHMS: dict[str, DeviceSetup] = {
     "abt": abt_setup,
     "adopted-ellis": adopted_setup(EllisTransform),
     "adopted-imor": adopted_setup(IMORTransform),
+    "adopted-randolph": adopted_randolph_setup,
     "adopted-ressel": adopted_setup(ResselTransform),
     "adopted-suleiman": adopted_setup(SuleimanTransform),
     "adopted-tm11-transform": adopted_setup(TM11Transform),
@@ -67,7 +77,9 @@ ALGORITHMS: dict[str, DeviceSetup] = {
     "adopted-tombstone": adopted_tombstone_setup,
     "collabs": collabs_setup,
     "cot": cot_setup,
+    "diffsync": diffsync_setup,
     "dopt": dOPT_setup,
+    "easysync": easysync_setup,
     "fugue": fugue_setup,
     "fuguemax": fuguemax_setup,
     "got": got_setup,
@@ -75,12 +87,17 @@ ALGORITHMS: dict[str, DeviceSetup] = {
     "jupiter": jupiter_setup,
     "logoot": logoot_setup,
     "logoot-split": logoot_split_setup,
+    "loro": loro_setup,
+    "lseq": lseq_setup,
     "markandretrace": markandretrace_setup,
     "pot": pot_setup,
+    "pps": pps_setup,
     "rga": rga_setup,
+    "sharedb": sharedb_setup,
     "soct2": SOCT2_setup,
     "soct3": soct3_setup,
     "soct4": soct4_setup,
+    "sync7": sync7_setup,
     "sync9": sync9_setup,
     "tibot": tibot_setup,
     "tibot2": tibot2_setup,
@@ -99,6 +116,7 @@ CHECKS: dict[str, Check] = {
     "weak-list-spec": weaklistspec_with_seed,
     "interleaving": interleaving_with_seed,
     "forward-interleaving": forward_interleaving_with_seed,
+    "origin-order": origin_order_with_seed,
 }
 
 
