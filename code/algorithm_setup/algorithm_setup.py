@@ -30,6 +30,7 @@ from pot.potclient import POTClient
 from pot.potserver import POTServer
 from pps.ppsclient import PPSClient
 from rga.rgaclient import RGAClient
+from rgas4.rgas4client import RGAS4Client
 from sharedb.sharedbclient import ShareDBClient
 from sharedb.sharedbserver import ShareDBServer
 from soct2.soct2client import SOCT2Client
@@ -114,6 +115,7 @@ lseq_setup = make_setup(LSEQClient)
 markandretrace_setup = make_setup(MarkAndRetraceClient)
 pps_setup = make_setup(PPSClient)
 rga_setup = make_setup(RGAClient)
+rgas4_setup = make_setup(RGAS4Client)
 sync7_setup = make_setup(Sync7Client)
 sync9_setup = make_setup(Sync9Client)
 tibot_setup = make_setup(TIBOTClient)
