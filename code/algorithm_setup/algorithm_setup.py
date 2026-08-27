@@ -7,11 +7,13 @@ from adoptedrandolph.adoptedrandolphclient import AdOPTedRandolphClient
 from adoptedtm11.adoptedtm11client import AdOPTedTM11Client
 from adoptedtombstone.adoptedtombstoneclient import AdOPTedTombstoneClient
 from automerge.automergeclient import AutomergeClient
+from collabs.collabsclient import CollabsClient
 from cot.cotclient import COTClient
 from cot.cotserver import COTServer
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
 from diamondtypes.diamondtypesclient import DiamondTypesClient
+from diffsync.diffsyncclient import DiffsyncClient
 from dopt.doptclient import dOPTClient
 from easysync.easysyncclient import EasySyncClient
 from easysync.easysyncserver import EasySyncServer
@@ -30,14 +32,19 @@ from pot.potclient import POTClient
 from pot.potserver import POTServer
 from pps.ppsclient import PPSClient
 from rga.rgaclient import RGAClient
+from sharedb.sharedbclient import ShareDBClient
+from sharedb.sharedbserver import ShareDBServer
 from soct2.soct2client import SOCT2Client
 from soct3.soct3client import SOCT3Client
 from soct3.soct3server import SOCT3Server
 from soct4.soct4client import SOCT4Client
 from soct4.soct4server import SOCT4Server
+from sync7.sync7client import Sync7Client
 from sync9.sync9client import Sync9Client
 from tibot.tibotclient import TIBOTClient
 from tibot2.tibot2client import TIBOT2Client
+from twc.twcclient import TWCClient
+from twc.twcserver import TWCServer
 from woot.wootclient import WOOTClient
 from wooto.wootoclient import WOOTOClient
 from yjs.yjsclient import YjsClient
@@ -67,7 +74,8 @@ def make_setup(
     peer_to_peer: bool = True,
 ) -> DeviceSetup:
     # Builds the DeviceSetup for one algorithm.
-    # peer_to_peer: every client is told about its peers (all algorithms except Jupiter).
+    # peer_to_peer: every client is told about its peers; the algorithms whose clients
+    # never need the peer list pass False.
     # server_class: a server is built from the clients, and every client is told about it.
     def setup(num_of_clients: int) -> Devices:
         clients = [client_class(n) for n in range(num_of_clients)]
@@ -95,7 +103,9 @@ adopted_randolph_setup = make_setup(AdOPTedRandolphClient)
 adopted_tm11_setup = make_setup(AdOPTedTM11Client)
 adopted_tombstone_setup = make_setup(AdOPTedTombstoneClient)
 automerge_setup = make_setup(AutomergeClient)
+collabs_setup = make_setup(CollabsClient)
 diamondtypes_setup = make_setup(DiamondTypesClient)
+diffsync_setup = make_setup(DiffsyncClient)
 dOPT_setup = make_setup(dOPTClient)
 fugue_setup = make_setup(FugueClient)
 fuguemax_setup = make_setup(FugueMaxClient)
@@ -108,6 +118,7 @@ lseq_setup = make_setup(LSEQClient)
 markandretrace_setup = make_setup(MarkAndRetraceClient)
 pps_setup = make_setup(PPSClient)
 rga_setup = make_setup(RGAClient)
+sync7_setup = make_setup(Sync7Client)
 sync9_setup = make_setup(Sync9Client)
 tibot_setup = make_setup(TIBOTClient)
 tibot2_setup = make_setup(TIBOT2Client)
@@ -121,8 +132,10 @@ cot_setup = make_setup(COTClient, COTServer)
 easysync_setup = make_setup(EasySyncClient, EasySyncServer, peer_to_peer=False)
 jupiter_setup = make_setup(JupiterClient, JupiterServer, peer_to_peer=False)
 pot_setup = make_setup(POTClient, POTServer)
+sharedb_setup = make_setup(ShareDBClient, ShareDBServer, peer_to_peer=False)
 soct3_setup = make_setup(SOCT3Client, SOCT3Server)
 soct4_setup = make_setup(SOCT4Client, SOCT4Server)
+twc_setup = make_setup(TWCClient, TWCServer, peer_to_peer=False)
 
 
 # AdOPTed is parameterised by its transformation function, so it takes one more step.
