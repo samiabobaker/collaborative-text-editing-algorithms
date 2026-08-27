@@ -42,6 +42,97 @@ def forward_non_interleaving(
     return True
 
 
+def forward_non_interleaving_with_deletes(
+    clients: dict[int, ClientDevice],
+    server: ServerDevice | None = None,
+    num_of_ops: int = 30,
+    print_ops: bool = False,
+) -> bool:
+    """Soundly check forward non-interleaving on traces containing deletes.
+
+    Deleted elements are absent from visible states, but any ordering that was observed
+    while they were visible remains part of the strong-list-specification witness order.
+    A violation is reported only when that partial order proves that the condition applies;
+    unresolved pairs are therefore conservative rather than false positives. As with the
+    insert-only checker, this assumes that the algorithm satisfies the strong list spec.
+    """
+    client_logs, characters = build_random_trace(clients, server, num_of_ops, print_ops, with_deletes=True)
+    return forward_non_interleaving_with_deletes_from_client_logs(client_logs, characters, print_ops)
+
+
+def forward_non_interleaving_with_deletes_from_client_logs(
+    client_logs: dict[int, ClientTrace], characters: dict[int, Character], print_ops: bool = False
+) -> bool:
+    # Assume algorithm satisfies the strong list spec, so the observed order has at least
+    # one totalization. The predicate below reports only violations present in all of them.
+    list_order = transitive_closure(build_observed_list_order(client_logs))
+
+    for client_log in client_logs.values():
+        for state in client_log.states_after_events:
+            for A in state:
+                for B in state:
+                    if check_condition_1_with_deletes(state, characters, list_order, A, B):
+                        continue
+                    if print_ops:
+                        print(f"Failed forward interleaving with deletes at {A} {B}.")
+                        print_client_logs(client_logs)
+                    return False
+    return True
+
+
+def build_observed_list_order(client_logs: dict[int, ClientTrace]) -> set[tuple[UniqueChar, UniqueChar]]:
+    """Record every ordered pair that was co-visible in an observed state."""
+    list_order: set[tuple[UniqueChar, UniqueChar]] = set()
+    for client_log in client_logs.values():
+        for state in client_log.states_after_events:
+            for i, left in enumerate(state):
+                for right in state[i + 1 :]:
+                    list_order.add((left, right))
+    return list_order
+
+
+def transitive_closure(list_order: set[tuple[UniqueChar, UniqueChar]]) -> set[tuple[UniqueChar, UniqueChar]]:
+    closure = set(list_order)
+    changed = True
+    while changed:
+        changed = False
+        additions = {(left, right) for left, middle in closure for middle_2, right in closure if middle == middle_2}
+        if not additions.issubset(closure):
+            closure.update(additions)
+            changed = True
+    return closure
+
+
+def check_condition_1_with_deletes(
+    state: list[UniqueChar],
+    characters: dict[int, Character],
+    list_order: set[tuple[UniqueChar, UniqueChar]],
+    A: UniqueChar,
+    B: UniqueChar,
+) -> bool:
+    """Check condition 1 only when its premise is certain in every totalization."""
+    if characters[B.id].left_origin != A:
+        return True
+
+    for sibling in characters[A.id].left_origin_of:
+        if sibling == B:
+            continue
+        if (sibling, B) in list_order:
+            return True
+        if (B, sibling) not in list_order:
+            return True
+
+    return state.index(A) + 1 == state.index(B)
+
+
+def print_client_logs(client_logs: dict[int, ClientTrace]) -> None:
+    for client_id, client_log in client_logs.items():
+        print(f"CLIENT {client_id}")
+        for state in client_log.states_after_events:
+            print(*state, sep="")
+        print()
+
+
 def maximally_non_interleaving(
     clients: dict[int, ClientDevice], server: ServerDevice | None = None, num_of_ops: int = 30, print_ops: bool = False
 ):
