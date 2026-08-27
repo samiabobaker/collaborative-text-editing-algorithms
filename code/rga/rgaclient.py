@@ -14,6 +14,7 @@ from rga.rgatree import RGATree
 from unique_char.uniquechar import UniqueChar
 
 
+# Timestamped Insertion Trees
 class RGAClient(ClientDevice):
     client_id: int
 
