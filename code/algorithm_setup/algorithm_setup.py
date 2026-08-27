@@ -29,6 +29,8 @@ from pot.potclient import POTClient
 from pot.potserver import POTServer
 from pps.ppsclient import PPSClient
 from rga.rgaclient import RGAClient
+from sharedb.sharedbclient import ShareDBClient
+from sharedb.sharedbserver import ShareDBServer
 from soct2.soct2client import SOCT2Client
 from soct3.soct3client import SOCT3Client
 from soct3.soct3server import SOCT3Server
@@ -119,6 +121,7 @@ cot_setup = make_setup(COTClient, COTServer)
 easysync_setup = make_setup(EasySyncClient, EasySyncServer, peer_to_peer=False)
 jupiter_setup = make_setup(JupiterClient, JupiterServer, peer_to_peer=False)
 pot_setup = make_setup(POTClient, POTServer)
+sharedb_setup = make_setup(ShareDBClient, ShareDBServer, peer_to_peer=False)
 soct3_setup = make_setup(SOCT3Client, SOCT3Server)
 soct4_setup = make_setup(SOCT4Client, SOCT4Server)
 
