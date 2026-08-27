@@ -6,11 +6,13 @@ from adopted.adoptedclient import AdOPTedClient
 from adoptedrandolph.adoptedrandolphclient import AdOPTedRandolphClient
 from adoptedtm11.adoptedtm11client import AdOPTedTM11Client
 from adoptedtombstone.adoptedtombstoneclient import AdOPTedTombstoneClient
+from automerge.automergeclient import AutomergeClient
 from collabs.collabsclient import CollabsClient
 from cot.cotclient import COTClient
 from cot.cotserver import COTServer
 from device.clientdevice import ClientDevice
 from device.serverdevice import ServerDevice
+from diamondtypes.diamondtypesclient import DiamondTypesClient
 from diffsync.diffsyncclient import DiffsyncClient
 from dopt.doptclient import dOPTClient
 from easysync.easysyncclient import EasySyncClient
@@ -101,7 +103,9 @@ abt_setup = make_setup(ABTClient)
 adopted_randolph_setup = make_setup(AdOPTedRandolphClient)
 adopted_tm11_setup = make_setup(AdOPTedTM11Client)
 adopted_tombstone_setup = make_setup(AdOPTedTombstoneClient)
+automerge_setup = make_setup(AutomergeClient)
 collabs_setup = make_setup(CollabsClient)
+diamondtypes_setup = make_setup(DiamondTypesClient)
 diffsync_setup = make_setup(DiffsyncClient)
 dOPT_setup = make_setup(dOPTClient)
 fugue_setup = make_setup(FugueClient)
