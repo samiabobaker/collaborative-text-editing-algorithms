@@ -1,6 +1,9 @@
 \documentclass[sigplan]{acmart}
-
+\def\sectionautorefname{Section}
 \usepackage{makecell}
+\usepackage{amsthm}
+
+\newtheorem{property}{Property}
 
 \acmConference[EuroSys'27]{European Conference on Computer Systems}{April 19--23, 2027}{Rabat, Morocco}
 
@@ -16,6 +19,10 @@
 
 \author{Martin Kleppmann}
 
+\author{Aryan Shah}
+
+\author{Musaab Khan}
+
 %% Abstract
 
 \begin{abstract}
@@ -30,360 +37,312 @@
 
 \section{Introduction}
 
-Collaborative text-editing algorithms allow multiple users to edit the same text document concurrently. These algorithms are used in popular
-software such as Google Docs and Overleaf. There have been many of these algorithms suggested, in academia, industry and as
-open source implementations. Many of these algorithms are published without proof of the properties they satisfy, or with
-proofs that were later found to be incorrect. Existing work has found bugs in many of these algorithms, so there is reason to believe
-other algorithms may also not work. 
-
-This paper aims to collate the existing work on collaborative text-editing algorithms, to determine which algorithms satisfy which
-properties, and to determine which published algorithms work. Many published algorithms have no publically available implementation, so we provide
-an implementation for each of the algorithms. The only way to be certain about an algorithm's properties is to write a formal mechanised proof. This is difficult, time-consuming, and only checks an idealised model of the algorithm, not an actual implementation. We help with these
-problems by providing a model-checker specialised for the task of testing properties of collaborative text-editing algorithms. This model-checker has been used to find the properties
-of each of our implementations, and would also be useful for verifying any future algorithms. This model-checker also provides a more factual way to compare these algorithms.
+Collaborative text-editing algorithms allow multiple users to edit the same text document concurrently; they are used in popular software such as Google Docs and Overleaf. In the field
+of collaborative text-editing algorithms, there is an over-arching issue of correctness. There are many published algorithms, and many open source implementations, yet
+it is not very well-studied the correctness properties of many of these algorithms. In fact, there are algorithms shown after publication to simply not work \cite{Oster2005Proving}. A lot of these algorithms come without proof of their correctness properties, and some
+come with incorrect hand-written proofs \cite{Oster2005Proving}. Many algorithms pre-date the correctness properties, with no one going back to check whether or not the algorithm satisfies it. To add to these issues, there are many algorithms with no publically available implementation. This has led to claims based on algorithms for which no one has
+externally verified their correctness. To help combat these issues, we provide three things: a model-checker designed for the task of testing correctness properties
+of collaborative text-editing algorithms; a collection of implementations of all major algorithms in research and open-source; and a set of results on the correctness properties
+and issues we found with all the algorithms we implement. These should act as a guide for other attempting to implement these algorithms, without wanting to search through results through many decades of
+academic papers. We hope these mean that similar correctness issues are avoided in future work, and for others to add to this collection
+with future algorithms and properties. 
 
 
-The main focus is on correctness. There are many additional things we choose not to consider, not because we do not consider them important, but because they ultimately do not matter if the algorithm is correct. The first
-of these is considering performance. We do not do a performance overview of our implementations. In fact, such a check would not be very useful at this stage, because many of our implementations do not attempt to have the best
-performance, for example, we often choose to stick to base algorithm, rather than including performance optimisations. Our model-checker also considers a simple model of the algorithms, which does not include
-certain additional features, such as undo or rich-text.
+Our model-checker uses randomised testing to test a very large number of states in an algorithm. We check whether these states satisfy known properties 
+of collaborative text-editing algorithms: convergence, weak list specification, strong list specification \cite{Attiya2016}, forward non-interleaving and maximal non-interleaving \cite{Weidner2025Fugue}.
+An alternative would have been to write a formal mechanised proof of the algorithms. This has the advantage that it provides certainty of the algorithm's correctness
+compared to our model checker, which can only check a finite number of cases. However, the benefit of using model-checking is that writing a proof is time-consuming
+and easy to get wrong. There are examples of algorithms being proven correct, to later be found wrong \cite{Oster2005Proving}. Another benefit is that model-checking checks a real implementation rather
+than an idealised model of the algorithm, which helps to spot both implementation bugs and bugs in the underlying algorithms. Our model-checker requires no
+additional effort beyond implementing the algorithm.
+
+Our collection of implementations aim to reduce the ambiguity in the descriptions of some of these algorithms. We find some papers give vague descriptions of
+certain components of an algorithm. Some algorithms have many variants or interpretations in different papers, which go by the same name. Some algorithms have bugs with fixes in open-source implementations, but not clearly documented
+anywhere. Some of these fixes also inadvertently lead to issues elsewhere. We aim to document these kinds of issues that we found to avoid confusions for others in the future. Our implementations focus on the correctness of the base algorithms, so we leave performance
+optimisations and additional features (such as string-wise operations \cite{Lv2016}, undoing, moving \cite{Kleppmann2020} and rich-text \cite{Litt2022}) out of scope of our work. Similarly, we leave the use of these algorithms
+for non-plain text documents (such as graphics editing \cite{Sun2002}, and XML \cite{Davis2002}) out of scope. We give some motivation for why we avoid some of these in future sections.
 
 
-We feel the main benefit of this paper is the collection of implementations and property-checkers we provide. We encourage others to add algorithms and properties to this collection, and we hope that this approach will make
-work on collaborative text-editing more easily accessible, and will help future work to avoid the correctness problems that have appeared in the past.
+Our set of results appear in the form of a table of algorithms and their respective properties, which we find using our model-checker. This aims to collate
+all the existing work on collaborative text-editing algorithms, to provide a clear place to see which algorithms satisfy which properties and which do not.
 
 
-\section{Background}
-
-This section provides background on collaborative text-editing algorithms, and on the properties of these algorithms that are checked by the model-checker
-
-\subsection{Types of algorithms}
-
-
-Collaborative text-editing algorithms can be roughly categorised into Operational Transform (OT) algorithms and Conflict-free Replicated Datatypes (CRDTs).
-OT algorithms will transform incoming operations 
+\autoref{sec:background} and \autoref{sec:otbackground} provide background of the relevant concepts we check for in our model-checker. These are the main concepts
+require to understand our results and implementations, and provides the context and approach by which we approach this research. \autoref{sec:modelcheckerimplementation} gives a description of the implementation of our model-checker. To our knowledge, 
+it is the first implementation of these properties, and we describe the features and issues of this model-checker. \autoref{sec:modelcheckerresults} gives the results of our model-checker,
+showing which algorithms satisfy which properties. \autoref{sec:algorithmimplementations} describes the important things we found when implementing these algorithms, including counter-examples
+to properties, ambiguities in the algorithm and known bugs. 
 
 
-\subsection{Properties}
 
-The most basic requirement of an algorithm convergence. That is, every client reaches the same version of the document state after all messages in the network have been received. Convergence is not enough because it is important that the version of the document reached matches the intention of the user.
-The weak list specification, strong list specification \cite{Attiya2016} and non-interleaving properties \cite{Weidner2025Fugue} attempt to formalise what `intention' means.
+\section{Background} \label{sec:background}
+
+This section provides background on collaborative text-editing algorithms, and on the properties of these algorithms that we check with our 
+model-checker. 
+
+\subsection{Introduction to collaborative text-editing algorithms}
+
+The goal of a collaborative text-editing algorithms is to allow for users to edit a single text document concurrently in real-time. When a user makes a changes to the
+document, network messages are sent so that every other user sees this change. We consider two types of changes: $\mathit{ins}(i, x)$ means that $x$ is inserted in the document at position $i$, $\mathit{del}(i)$ means that the character at position $i$ is deleted.
+
+These algorithms must have a response user interface even if the network is slow. That means when a user makes a change, it should be applied instantly to the local document, without waiting for any other client in the network. This means, when a clients receives a message of another client's change, the state of their document may be very different from the document those changes were originally executed on. The main difficulty is ensuring this situation
+is handled correctly in all scenarios.
+
+There are two general approaches to solving this problem: operational transform (OT) and conflict-free replicated data types (CRDTs). We describe OT more in \autoref{sec:otbackground}. A CRDT is a data structure specially designed to handle changes being made concurrently. The operations are represented in a way such that they have the same effect regardless of the order they are executed.
+
+Another way to categorise these algorithms is by the assumptions they make about the network. Some algorithms assume the existence of a server, and some are decentralised. Generally, the logic becomes simpler when there is a server, but it is a single point of failure, and not having a server may be preferred in many cases. Another assumption some algorithms make is that all clients are online, and the algorithm stops working if one client is disconnected from the rest of the network. This is a much worse assumption to make than assuming a server exists, since now every device is a point of failure. 
 
 \subsection{CCI Model}
 
-Early work on OT proposed the CCI model for collaborative text-editing algorithms. CCI stands for convergence, causality preservation, and intention preservation. Convergence says that all documents should reach
-the same state once all network messages have been received. Causality preservation says that if $O_b$ causally depends on $O_a$ then $O_a$ must be executed before executing $O_b$. Intention preservation 
-says that when executing an operation, the change must satisfy the original intention of the user.
-
-The main flaw with the CCI model is that the definition of intention preservation is not formal. There is no way to formally check whether an algorithm satisfies intention preservation, so this model
-is not useful to reason with. For this reason, we move away from this model and use Attiya et al's weak list and strong list specifications, which attempt to formalise `intention'.
+The CCI model \cite{Sun1996} was devised in early work on these algorithms to define what it means for an algorithm to be correct. The three properties it describes are convergence, causality-preservation and intention-preservation. Convergence means that all clients eventually reach the same document state, once all network messages have been received. Causality-preservation means that if 
+an operation $O_b$ is causally dependent on $O_a$, then $O_a$ must be executed before $O_b$ on all clients. Intention-preservation says that when an operation is executed, the intention
+of the user must be preserved. The CCI model is not formally checkable because the idea of `intention' is vague. In the context of text-editing, a more formally checkable set of properties are the
+weak and strong list specifications \cite{Attiya2016}, so we use these in our model-checker.    
 
 \subsubsection{Weak and Strong List Specification}
 
-Attiya et al \cite{Attiya2016} formalised the problem of collaborative text editing as the weak and strong list specification.
 
-The main idea is that if a character $a$ appears before a character $b$ in some client's document states, $a$ must appear before $b$ in every client's document
-state. The difference between weak and strong is that the weak list is more relaxed about the orderings of deleted characters. Satisfying the strong list specification
-is not as important as satisfying the weak list specification.
+Convergence is not a strong enough requirement. The trivial way to achieve convergence is to have all clients always delete the entire document. The weak and strong list
+specifications describe what must appear in the document, and in what order. The first main idea is that a character must appear in the document if and only if an insertion operation
+of it has been seen, and a deletion operation has not been seen. The second is that if a character $a$ appears before a character $b$ in some client's document states, $a$ must appear before $b$ in every client's document
+state. The difference between weak and strong is that the weak list is more relaxed about the orderings of deleted characters.
 
 
-We quote the relevant parts of these specifications here, but refer to the original paper
+We quote the relevant parts of these specifications here, but refer to the original paper \cite{Attiya2016}
 for the full properties.
 
-They model three kind of events that a client (or server) can perform in an algorithm:
-
-\begin{enumerate}
-  \item
-    $do(op, w)$ - The operation $op$ is executed locally, and the document state after is $w$. The two kinds of operations we consider
-    are $ins(i, x)$ (insert character $x$ at position $i$) and $del(i, x)$ (delete character $x$ at position $i$).
-  \item
-    $send(m)$ - The client sends the message $m$.
-  \item
-    $receive(m)$ - The client receives the message $m$.
-\end{enumerate}
 
 
-An algorithm satisfies the strong list specification if there exists a relation $lo$ satisfying the properties:
-
-For all events $e=do(op, w)$ where $w = a_0 \dots a_{n-1}$:
-\begin{enumerate}
-  \item
-    \begin{enumerate}
-      \item
-        $w$ contains exactly the elements visible to $e$ that have been inserted, but not deleted.
-
-
-      \item
-        The order of the elements is consistent with the list order.
-      \item
-        Elements are inserted at the specified position.
-    \end{enumerate}
-  \item
-    $lo$ is transitive, irreflexive and total.
-\end{enumerate}
-
-
-
-The weak list specification only changes condition 2. 
+\begin{property}[Strong List Specification]
+  There exists a binary relation $lo$ on the characters of the state, called the list order, such that:
+  \begin{enumerate}
+    \item
+      Each event $e = do(op, w)$ returns a sequence of elements $w = a_0 \dots a_{n-1}$, such that:
+      \begin{enumerate}
+        \item
+          $w$ contains exactly the elements visible to $e$ that have been inserted, but not deleted.
+        \item
+          The order of these elements is consistent with the list order:
+          $\forall i,j. (i < j) \implies (a_i, a_j) \in lo$.
+        \item
+          Elements are inserted at the specified position: if $op = ins(a, k)$, the $a = a_{min\{k, n-1\}}$.
+      \end{enumerate}
+    \item
+      The list order $lo$ is transitive, irreflexive and total, and thus determines the order of all insert operations in the execution.
+  \end{enumerate}
+\end{property}
 
 
-
-
-
-
-
-
+\begin{property}[Weak List Specification]
+  There exists a binary relation $lo$ on the characters of the state, called the list order, such that:
+  \begin{enumerate}
+    \item
+      Same as strong list specification.
+    \item
+      The list order $lo$ is irreflexive and, for all events $e = do(op, w)$, it is transitive and total on $\{a \mid a \in w \}$.
+  \end{enumerate}
+\end{property}
 
 \subsubsection{Interleaving}
 
 One limitation of the weak and strong list specifications is that they allow for interleaving behaviour. When the users insert text concurrently at the same position, some algorithms may interleave those changes
-within one another, rather than display the changes separately. This issue was noticed, but not properly formalised until the forward non-interleaving and maximal non-interleaving, which restrict the algorithm to only give non-interleaving
-orders.
+within one another, rather than display the changes separately. This issue was known, but not properly formalised until the forward non-interleaving and maximal non-interleaving properties \cite{Weidner2025Fugue}, which restrict the algorithm to only give non-interleaving
+orders. There are two kinds of interleaving: forward and backward. Forward interleaving occurs when text is written in the forward direction (typing ``cat'' by typing
+`c' then `a' then `t'). Backwards interleaving occurs when text is written in the backward direction (typing ``cat'' by typing `t' then `a' then `c'). Forward non-interleaving
+attempts to disallow the forward interleaving case. There are cases when it is impossible to disallow both forward and backward interleaving, so maximal non-interleaving disallows 
+allows both when possible, but prefers forward non-interleaving if disallowing both is not possible.
 
-Weidner and Kleppmann \cite{Weidner2025Fugue} formalised the non-interleaving properties. These properties define what it means
-for an algorithm to not have the non-interleaving problem. 
+We quote the relevant properties below, but refer to the original paper for the full details.
 
+\begin{definition}[Left Origin]
+  The left origin of an element is the element directly preciding its insertion position at the time of insertion. If the element was inserted by 
+  an $ins(i, x)$ call, then its left origin was at index $i-1$ at the time of this call. If $i=0$, then its left origin is a special symbol
+  $\mathit{start}$
+\end{definition}
 
+\begin{definition}[Right Origin]
+  The right origin of an element is the element directly following its insertion position at the time of insertion, in the list including tombstones. If the element was inserted by 
+  an $ins(i, x)$ call, then its left origin was at index $i+1$ at the time of this call. If $i$ is the end of the list, then its right origin is a special symbol
+  $\mathit{end}$
+\end{definition}
 
-The left origin of an inserted character is the character immediately before it at the time of insertion. If a character was inserted at
-position $i$, then the character at position $i-1$ (in the state immediately after insertion) is its left origin. If $i=0$, then a special 
-character $\mathit{start}$ is its left origin.
+\begin{property}[Forward non-interleaving]
+  An algorithm is forward non-interleaving if it satisfies the strong list specification and the following holds for all list elements $A$ and $B$ in all possible list
+  states: if $A$ is the left origin of $B$, and $B$ appears earlier in the list than any other element that has $A$ as left origin, then $A$ and $B$ are consecutive list
+  elements.
+\end{property}
 
-Similarly, the right origin is the character immediately after it at the time of insertion including tombstones, or a special character $end$. There is a subtlety here that
-the right origin can be a deleted character because it includes tombstones. These properties are not clear for what the right origin is when there are no tombstones. 
+\begin{property}[Maximal non-interleaving]
+  An algorithm is maximal non-interleaving if it satisfies the strong list specification and the following holds for all list elements $A$ and $B$ in all possible states:
+  \begin{enumerate}
+    \item
+      (Forward non-interleaving) If $A$ is the left origin of $B$, and $B$ appears earlier in the list than any other element that has $A$ as left origin, then $A$ and $B$ 
+      are consecutive list elements.
+    \item
+      (Backward non-interleaving) If $B$ is right origin of $A$, and $A$ appears later in the list than any other element that has $B$ as right origin, then $A$ and $B$ are
+      consecutive list elements. There is an exceptional case where this does not need to be true (see the original paper).
+    \item
+      If $A$ and $B$ have the same left origin and the same right origin, then the element with the lower ID appears earlier in the list.
+  \end{enumerate}
+\end{property}
 
-
-%Forward
-
-An algorithm satisfies forward non-interleaving if for every pair of characters $a$ and $b$, if $a$ is the left origin of $b$, and $b$ is the earliest character 
-in the state that has $a$ as left origin, then $a$ must appear immediately before $b$ in the state.
-
-%Maximal
-
-It is not enough to satisfy backward non-interleaving, and then have maximal non-interleaving be satisfied when both forward and backward non-interleaving are.
-There are cases where both cannot be satisfied at the same time. In this case, the maximal non-interleaving property prefers that forward non-interleaving is the one that 
-is satisfied.
-
-
-\begin{enumerate}
-  \item 
-    The algorithm satisifies forward non-interleaving.
-  \item
-    The algorithm satisfies backward non-interleaving, with exceptions. For all pairs of characters $a$ and $b$, if $b$ is the right origin of $a$
-
-    ...
-\end{enumerate}
-
-\section{OT background}
+\section{OT background} \label{sec:otbackground}
 
 This section gives an overview of the common terminology and properties used by OT algorithms.
 
-
-
-OT algorithms have been typically expressed in two parts -- a control algorithm, and a set of transformation functions. The intent is that
-the control algorithm makes certain assumptions about the properties of the transformation functions, and any functions that satisfy these properties
+The idea of OT is to transform incoming remote operations with respect to local operations that have already been performed. For example, if a client receives an 
+$del(3)$ operation, but it has performed $ins(2,x)$, then the original character has shifted one to the right so the deletion is now transformed to $del(4)$. The functions
+which describe these transformations are called transformation functions. Transformations functions are paired with a control algorithm, which describes when and how to call these 
+transformation functions.  The intent is that the control algorithm makes certain assumptions about the properties of the transformation functions, and any functions that satisfy these properties
 can be used with that algorithm.
 
 \subsection{Inclusion Transformations}
 
 
+The first kind of transformation function is an inclusion transformation, which is what is used by all control algorithms. 
 
-For two operations $O_1$ and $O_2$ generated from the same state, we write $O_1' = IT(O_1, O_2)$ to mean that $O_1'$ is the transformed operation of $O_1$, now taking into account the effect of $O_2$.
+\begin{definition}[Inclusion Transformation]
+  For two operations $O_1$ and $O_2$ generated from the same state, we write $O_1' = IT(O_1, O_2)$. $O_1'$ is the transformed operation
+  of $O_1$, now taking into account the effects of $O_2$. For example, $del(4) = IT(del(3), ins(2, x))$.
+\end{definition}
 
-There are two properties that have appeared in the literature for inclusion transformation functions. These are TP1 and TP2.
+There are two properties that have appeared in the literature for inclusion transformation functions, which are often required for the control algorithms to converge. These are TP1 and TP2.
 
+\begin{property}[TP1]
+  If $O_1$ and $O_2$ are operations, and $O_1' = IT(O_1, O_2)$ and $O_2' = IT(O_2, O_1)$, then $IT$ satisfies TP1 if 
+  $O_2' \circ O_1 = O_1' \circ O_2$. That is, for all document states, executing $O_1$ then $O_2'$ will always result in the same
+  document state as executing $O_2$ then $O_1'$.
+\end{property}
 
-TP1 says that if $O_1' = IT(O_1, O_2)$ and $O_2' = IT(O_2, O_1)$, then $O_1' \circ O_2 = O_2' \circ O_1$. This ensures that when
-two clients use $IT$, they will both reach the same state.
+TP1 is the basic property that ensure that using $IT$ will lead the clients to converge. However, when there are more than two clients, it turns out this is not
+enough. This leads to a second property TP2.
 
+\begin{property}[TP2]
+  If $O_1$ and $O_2$ are operations, and $O_1' = IT(O_1, O_2)$ and $O_2' = IT(O_2, O_1)$, then $IT$ satisfies TP2 if 
+  for all operations $O$, $IT(IT(O, O_1), O_2') = IT(IT(O, O_2), O_1')$.
+\end{property}
 
-TP2 applies when there are three or more clients. $IT(IT(O_3, O_1), O_2') = IT(IT(O_3, O_2), O_1')$ where $O_1'$ and $O_2'$ are as before.
-
-
-
-Finding transformation functions which satisfy TP2 has been a challenge. There are many that claim to satisfy TP2 in the literature, but many are shown to not
-work, or are unchecked. One alternative to finding TP2-satisfying transformation functions is for the control algorithms that do not require TP2 -- these are sometimes called TP2-avoiding algorithms. 
-
-
-Previous work has made claims that no IT functions satisfy TP2, and given proofs of these. However, that work is clear that they only consider a specific scenario, and their claim no longer applies when including
-additional parameters with the operations (which many of the IT functions we investigate do). 
+Finding transformation functions that satisfy TP2 has been a challenge. Previous work has shown that TP2 cannot be satisfied without introducing additional parameters into the operations \cite{Randolph2015}. Many functions claim to satisfy TP2, but were later shown to not \cite{Oster2005Proving} or are unchecked by others
+\cite{Randolph2015, Sun2017}. It is important to note that, for many control algorithms, satisfying TP2 is not a requirement. TP2-avoiding algorithms are algorithms that 
+are designed to avoid the issues that require TP2. With these algorithms, it is fine to use functions that do not satisfy TP2.
 
 \subsection{Exclusion Transformations}
 
 
-Some algorithms propose the idea of an exclusion transform, which essentially intends to be the inverse of $IT$.
+A few algorithms additionally use exclusion transformations, which are the inverse of $IT$.
 
-For two sequential operations $O_1$ and $O_2$, we write $O_2' = ET(O_2, O_1)$ means that $O_2'$ is the transformation of $O_2$ with the effect
-of $O_1$ removed.
-
-The reversibility requirement states that $ET$ acts as the inverse of $IT$. That is, $ET(IT(O_1, O_2), O_2) = O_1$ and $IT(ET(O_1, O_2), O_2) = O_1$.
-
-
-For context, the reason $ET$ is used in algorithms is to reorder operation buffers. Suppose executing $O_1$ then $O_2$ takes a document from
-state $S$ to state $S'$. Then $ET$ can be used to give a pair $O_1'$ and $O_2'$ such that executing $O_2'$ then $O_1'$ also takes a document from $S$ to $S'$. This is
-done by calculating $O_2' = ET(O_2, O_1)$ the $O_1' = IT(O_1, O_2')$.  This ability to swap can be used to re-order any sequence of operations into any permutation.
+\begin{definition}[Exclusion Transformations]
+  For two operations $O_1$ and $O_2$ where $O_2$ is generated from the resulting state of $O_1$, we write $O_2' = ET(O_2, O_1)$. $O_2'$ is the transformed operation of $O_2$,
+  now exluding the effects of $O_1$.
+\end{definition}
 
 
-Reversibility is a less common requirement than TP1 and TP2, but similar to TP2, we find transformation functions that incorrectly claim this property.
+Exclusion transformations must satisfy the reversibility requirement, which enforces that $ET$ and $IT$ are inverses.
+
+\begin{property}[Reversibility Requirement]
+  If $O_1$ and $O_2$ are operations, then:
+  \begin{enumerate}
+    \item $ET(IT(O_1, O_2), O_2) = O_1$
+    \item $IT(ET(O_1, O_2), O_2) = O_1$
+  \end{enumerate}
+\end{property}
 
 
+This only relevant to a few algorithms. Nonetheless, there are transformation functions which claim to satisfy the reversibility requirements, but actually do not (see \autoref{sec:gotimplementation}).
+Note some papers use the terms forward and backward transpositions. These roughly correspond to inclusion and exclusion transformations.
 
-Note that inclusion/exclusion transformations have also been called forward/backward transposition, but these concepts are equivalent.
+\section{Model-checker implementation} \label{sec:modelcheckerimplementation}
 
-\section{Model assumed by model-checker}
+In this section, we describe our implementation of the model-checker. To our knowledge, no published checker has been implemented for the strong and weak list specifications and for the non-interleaving properties, so this is the main contribution of our work.
 
+\subsection{Interface between algorithms and model-checker}
 
+We start by describing the interface between our algorithms and the model-checker, which determines the assumptions the model-checker has of the algorithms.
+Our implementations represents algorithms using the \verb|ClientDevice| and \verb|ServerDevice| (if the algorithm uses a server) interfaces. The interfaces provide
+some mechanisms for the model-checker to interact with the devices.
 
-In this paper we only consider character-wise implementations of the algorithm. There are suggestions the field should move away character-wise algorithms into string-wise algorithms.
-One reason for this is that string-wise algorithms avoid issues of interleaving since the user's changes are joined into one string. We do not agree with this argument, because ...
+The first is the method \verb|perform_operation|, which allows the model-checker to execute a \verb|ClientOperation| or \verb|ServerOperation|. These operations
+include local changes to the document (such as \verb|ClientInsertOperation| and \verb|ClientDeleteOperation|), and also receiving operations from other devices
+(such as \verb|ClientReceiveFromClientOperation|). By including receiving operations, the model-checker has control over the order in which messages are delivered to 
+which device at which time, allowing it to model a wide range of network scenarios. Note that not all operations have to be relevant to all algorithms; for example, we include a \verb|ClientTimestepOperation| only relevant to the TIBOT and TIBOT 2.0 algorithms.
 
+One important point is that the local operations generated by the checker are only character-wise, not string-wise. 
 
+Another point is that \verb|perform_operation| returns a list of operations seen by the client. This allows the model-checker to known what operations were actually received when a client receives a messages from another device.
 
+A second mechanism are the methods \verb|can_receive_from| and \verb|can_receive_from_server|. Algorithms tend to restrict the delivery order of operations. The most common way is to use a causal order, enforced by vector clocks. We give the choice of restriction to the algorithm and that is exposed to the model-checker through these methods that return what other devices a client can receive from.
 
+Finally, there is the method \verb|read_state| which the model-checker can use to see the document state of the client. The state is represented by the type 
+\verb|list[UniqueChar]|. It is simply a list of unique characters. \verb|UniqueChar| is just a character with a unique id attached to it, which we use because many 
+of the algorithms and specifications assume every character is unique.
 
+\subsection{Generating operations}
 
+The model-checking generally follows the following steps. It first generates an operation to be executed on one of the clients or the server. It executes that operation, and records which operations were performed on which, what the states of the clients were after each operation and other useful information (for example, the left and right origins of each character). It repeats this with more operations to produce a trace of the execution. After the trace is fully generated, it is passed to one of the checkers which will decide whether or not the property being checked is satisfied.
 
-\section{Model-checker implementation}
-The model-checker checks condition 1a by maintaining a set of characters. The set is initially empty. The model-checker
-iterates through each local operation generated by the checker. If it was an insertion operation, the character inserted is added to the set.
-If it was a deletion operation, the deleted character is removed from the set. This set provides the set of characters that are visible in the state,
-so the model-checker ensures that the state of the client matches up with this set at each point.
-
-The model-checker checks condition 1c for each insertion operation generated by the checker. It simply checks whether the state afterwards contains the relevant character
-in the correct position.
-
-
-Conditions 1b and condition 2 are more difficult to check. The specification states there exists a $\mathit{lo}$ relation, but does not say what it is. Either the checker
-needs to construct this relation, or it needs to prove that it cannot exist. The strategy is to work backwards from the conditions to find what the relation must be, and if
-there is a contradiction, then that can be used to say that the strong list specification cannot be satisfied.
-
-The relation is represented as a set of pairs of characters. This set is initially empty. Working backwards from
-condition 1b, the checker adds every pair of a characters $(a,b)$ to this set where $a$ and $b$ are characters such that
-$a$ appears before $b$ in some document state. Condition 2 states this relation must be transitive, and this is enforce by applying
-the transitive closure to this set. Condition 2 states this relation must be irreflexive, and this can be checked by iterating through the list,
-and checking there are no pairs of the form $(a,a)$. If there are, this is the contradiction to say that the strong list specification is not satisfied.
-
-The only remaining part of condition 2 says that the relation must be a total relation. An irreflexive, transitive and total relation can always be constructed
-from an irreflexive and transitive one by just arbitrarily adding edges to make the relation total without introducing a cycle. Therefore, if the model-checker
-has found an irreflexive and transitive relation, then it can say that the strong list specification is satisfied.
-
-
-To summarise, the model-checker:
-
-Iterates through every state in every client after every operation. For every character $a$ that appears before another
-character $b$, adds the pair $(a,b)$ to the list order. Apply the transitive closure to the list order. Check for irreflexivity.
-If the list order is irreflexive, this execution satisfies the strong list specification, otherwise, it does not.
-
-
-\subsection{Checking for the weak list specification}
-
-This is similar to checking for the strong list specification, with the difference being in condition 2. The transitive closure
-should now only be applied on the subsets $\{a \mid a \in w \}$ for each document state $w$. Everything else works the same.
-
-
-\subsection{Non-interleaving properties}
-
-The non-interleaving properties assume that the algorithms use tombstones, and they are not well-defined for algorithms that do not use
-tombstones. For this reason, the model-checker does not apply any deletion operations when checking for non-interleaving. 
-
-...
-
-There is no published model-checker for these properties, so this implementation is the first. This section gives an overview
-of the components and functionality of the checker.
+The possible choices for an operation to be generated are an insertion or deletion at every position in the state, or receiving a message
+from one of the other clients or server. We then can choose these operations at random, or check each one exhaustively up to a certain depth.
+We implement both, but focus mainly on random generation.
 
 \subsection{Checking for convergence}
 
-To check for convergence, the model-checker receives all incoming messages in the network. It then checks that all document states are
-equal.
+Checking for convergence is very simple. The checker ensures that all network messages have been delivered by having each client/server receive operations
+until there is nothing left to receive. The checker then checks that all the document states of the clients are equal, and reports a violation if not.
 
 \subsection{Checking for the strong list specification}
 
-For each local insertion or deletion operation generated by the checker, the model-checker records the client's document state after it performed that local operation. Also, whenever the client receives
-a message, the model-checker records what operation(s) were in that message. 
+The strong list specification checker takes in a trace containing the state of each client after each operation. It also contains what operations were visible
+to each client at each point (which is determined by what is returned from \verb|perform_operation|). It can use this trace to check each condition.
 
+Condition 1a is checked by maintaining an initially empty set of characters.For each client, the model-checker
+iterates through each local operation generated by the checker. If it was an insertion operation, the inserted character is added to the set.
+If it was a deletion operation, the deleted character is removed from the set. At each point, the checker tests whether this set is equal the set of characters in the client state. If not, it reports a strong list specification violation.
 
+Condition 1c is checked only for states following a local insertion operation. The checker tests whether the character at the position of insertion is equal
+to the inserted character, and reports a violation if not.
 
-The model-checker checks condition 1a by maintaining a set of characters. The set is initially empty. The model-checker
-iterates through each local operation generated by the checker. If it was an insertion operation, the character inserted is added to the set.
-If it was a deletion operation, the deleted character is removed from the set. This set provides the set of characters that are visible in the state,
-so the model-checker ensures that the state of the client matches up with this set at each point.
+The other conditions use the list order $\mathit{lo}$. The specification says there exists a list order, but does not specify how to construct it. This makes it more
+difficult to check, but what we do is backwards from the conditions to construct the list order satisfying them. Either the checker successfully constructs a list order, or it finds a contradiction showing that one cannot exist, and reports a strong list specification violation.
 
-The model-checker checks condition 1c for each insertion operation generated by the checker. It simply checks whether the state afterwards contains the relevant character
-in the correct position.
+The list order is represented as a set of pairs of characters. It is initially empty. Working backwards from condition 1b, the checker adds every pair of a characters $(a,b)$ to this set where $a$ and $b$ are characters such that $a$ appears before $b$ in some document state. Working backwards from the requirement that $\mathit{lo}$ is transitive, the checker applies the transitive closure to the list order. For the requirement that $\mathit{lo}$ is irreflexive, this can be done by iterating through the set of pairs and checking there are no pairs of the form $(a,a)$. If there are this is the contradiction to say that a list order cannot exist satisfying these properties.
 
+The only remaining part is that $\mathit{lo}$ must be a total relation. An irreflexive, transitive and total relation can always be constructed from an irreflexive and transitive one by arbitrarily adding pairs to make the relation total without breaking irreflexivity. Therefore, if the model-checker has found an irreflexive and transitive relation, then it can say an irreflexive, transitive and total list order must also exist, and the specification is satisfied.
 
-Conditions 1b and condition 2 are more difficult to check. The specification states there exists a $\mathit{lo}$ relation, but does not say what it is. Either the checker
-needs to construct this relation, or it needs to prove that it cannot exist. The strategy is to work backwards from the conditions to find what the relation must be, and if
-there is a contradiction, then that can be used to say that the strong list specification cannot be satisfied.
-
-The relation is represented as a set of pairs of characters. This set is initially empty. Working backwards from
-condition 1b, the checker adds every pair of a characters $(a,b)$ to this set where $a$ and $b$ are characters such that
-$a$ appears before $b$ in some document state. Condition 2 states this relation must be transitive, and this is enforce by applying
-the transitive closure to this set. Condition 2 states this relation must be irreflexive, and this can be checked by iterating through the list,
-and checking there are no pairs of the form $(a,a)$. If there are, this is the contradiction to say that the strong list specification is not satisfied.
-
-The only remaining part of condition 2 says that the relation must be a total relation. An irreflexive, transitive and total relation can always be constructed
-from an irreflexive and transitive one by just arbitrarily adding edges to make the relation total without introducing a cycle. Therefore, if the model-checker
-has found an irreflexive and transitive relation, then it can say that the strong list specification is satisfied.
-
-
-To summarise, the model-checker:
-
-Iterates through every state in every client after every operation. For every character $a$ that appears before another
-character $b$, adds the pair $(a,b)$ to the list order. Apply the transitive closure to the list order. Check for irreflexivity.
-If the list order is irreflexive, this execution satisfies the strong list specification, otherwise, it does not.
-
+Essentially, this is building a graph where the nodes are characters in the state and an edge from $a$ to $b$ means that $a$ appears before $b$ in some state. If this graph is acyclic, then the strong list specification is satisfied. If it contains a cycle, it is not satisfied.
 
 \subsection{Checking for the weak list specification}
 
-This is similar to checking for the strong list specification, with the difference being in condition 2. The transitive closure
-should now only be applied on the subsets $\{a \mid a \in w \}$ for each document state $w$. Everything else works the same.
+Checking for the weak list specification is mostly the same as checking for the strong list. Now the list order only has to be transitive on the subsets of characters
+$\{a \mid a \in w \}$ for each $w$, where $w$ is the state of some client after a local operation. This translates to having to do the transitive closure, once for each
+state and only on the characters in that state. As before, there is a single check for irreflexivity at the end.
 
+\subsection{Issues with checking for non-interleaving}
 
-\subsection{Non-interleaving properties}
+The non-interleaving properties assume that the algorithms use tombstones, because the right origin may be a tombstone. We find this causes difficulties when the algorithm does not use tombstones, as the properties are not explicit in that case. It is not straightforward to add tombstones to an algorithm that does not use it, as the position of the tombstones is not well-defined. It may need to be considered further to what extent these properties can be tested
+on those algorithms. We avoid these issues by considering insertion-only when checking for interleaving, leaving deletions for future work. The behaviour of deletions is still checked in the strong and weak list specifications, so we consider this an acceptable omission.
 
-The non-interleaving properties assume that the algorithms use tombstones, and they are not well-defined for algorithms that do not use
-tombstones. For this reason, the model-checker does not apply any deletion operations when checking for non-interleaving. 
+Another issue this avoids is that the properties use the list order from the strong list specification. It is difficult to construct this order in this scenario. When checking for the strong and weak list specifications, we constructed part of the list order, but left out the part enforcing that it was total. It was sufficient to say
+the list order could be made total by adding arbitrary pair. That argument does not work here, because we actually need a specific instance of the list order. There are many choices to make when adding arbitrary pairs, and those choices will affect whether or not the order is interleaving. We avoid this issue by only considering insertions, since the order can be easily determined by the final document states after all clients converge.
 
-...
+\subsection{Checking for non-interleaving}
 
+The trace used in the non-interleaving checkers is the same as that for the strong and weak list specifications, but now includes the left and right origins of each characters. This is straightforward to determine by simply checking the elements immediately before and after the character at the time of insertions. Since there are no deletions, it is not possible for the right origin to be a tombstone.
 
+Knowing these, the condition for forward non-interleaving is easy to check. The checker loops over all pairs of characters $A$ and $B$. If $A$ is the left origin of $B$, and $B$ appears earlier in the list than all other characters for which $A$ is left origin, but $A$ and $B$ are not consecutive, then a forward non-interleaving
+violation is reported.
 
-We do not claim that these properties are equal. 
-
-\subsection{Checking for forward non-interleaving}
-
-
-For each local insertion operation, the model-checker records the left origin of that character by recording the character
-immediately before it at the point in which it was inserted. The forward non-interleaving condition can then by simply checked by iterating
-over every pair of characters $a,b$. If $a$ is the left origin of $b$, $b$ appears earlier than any other element that
-has $a$ as left origin, but $a$ and $b$ are not consecutive elements, then this means forward non-interleaving is not satisfied.
-If this does not occur for all pair, then forward non-interleaving is satisfied.
-
-\subsection{Checking for maximal non-interleaving}
-
-The check for maximal non-interleaving is analagous to the checks for forward non-interleaving. These are straightforward iterations over
-all pairs of characters, ensuring the relevant conditions are satisfied.
-
-
+For maximal non-interleaving, the condition for backward non-interleaving can be checked analagously. Maximal non-interleaving's third condition defines the ordering 
+of characters with the same left and right origin. Mathematically, this was included to ensure a unique ordering. It mentions an ID but does not enforce what that ID is.  We leave the choice of this ID to the algorithm as the one piece of freedom it has on the ordering of characters. For that reason, we do not check condition 3
+of maximal non-interleaving.  
 
 \subsection{Checking properties of transformation functions}
 
+One may suggest the need for a TP1 and TP2 checker of transformation functions. However, we push against considering transformation functions individually from the control algorithm. This is contrary to most OT literature, which often views the two as separate layers; control algorithm are a generic algorithm which can be used with many domain-specific transformation functions. For this reason, some papers will specify a control algorithm, and not give any transformation functions, leaving it as an implementation detail. When there is a bug in an OT algorithm, it is unclear whether the issue is in the transformation functions or the control algorithm.
 
-OT literature commonly suggests that the two parts of an OT algorithms -- the control algorithm and the transformation functions -- can be considered individually as two separate layers of the algorithm. This would
-suggest verifying the properties of transformation functions on their own rather than with a control algorithm. We choose to push away from this because we feel that the two components
-cannot be separated as cleanly as previous work suggests. Two transformation functions can both satisfy TP1 and TP2, yet lead to different behaviour when tested against the same
-control algorithm. Furthermore, OT papers often give control algorithms, but do not give concrete transformation functions. When an OT algorithm is shown to not work, the issue has often
-lied with the transformation functions.  Transformation functions should be considered as a key part of the algorithm, not merely as an implementation detail, or an application-specific concern.
-For this reason, we present all claims about combinations of control algorithms and transformation functions, 
+This is based on the premise that, as long as the transformation functions satisfy certain properties, the control algorithm will work as expected. We find that the transformation functions cannot be separated from the control algorithm so cleanly. In \autoref{sec:tm11andrandolphfunctions}, we find two transformation functions that both satisfy TP1 and TP2 but give different properties when tested with a control algorithm. This would suggest that the transformation functions are equally important to deciding the behaviour of an algorithm. Therefore, in this specific context of text-editing, we feel it is better to only consider OT algorithms 
+as a pair of control algorithm and transformation functions, rather than attempt to consider the two separately.
 
-\section{Results of the model-checker}
-
-\subsection{Properties of each algorithm}
-
-We do not claim that these properties are equal. 
-
-\section{Results of the model-checker}
+\section{Results of the model-checker} \label{sec:modelcheckerresults}
 
 \subsection{Properties of each algorithm}
 
@@ -560,7 +519,7 @@ Table ... lists the algorithms we implemented, which made any of these assumptio
 
 
 
-\section{Algorithm implementations}
+\section{Algorithm implementations} \label{sec:algorithmimplementations}
 
 This sections explains some of the results and gives important points about some of the algorithms presented in \autoref{tab:algorithmproperties}.
 
@@ -596,7 +555,7 @@ strong assumption that all clients are online, which is not made by SOCT2 and SO
 
 
 
-\subsection{GOT}
+\subsection{GOT} \label{sec:gotimplementation}
 
 The GOT algorithm claims to be a TP2-avoiding algorithm that does not use a server. We find this algorithm is entirely broken, failing to converge. On top of this, the transformation functions
 given in the paper do not satisfy the reversibility requirements they claim to satisfy. We provide an example of this.
