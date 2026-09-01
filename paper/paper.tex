@@ -343,13 +343,29 @@ One may suggest the need for a TP1 and TP2 checker of transformation functions. 
 This is based on the premise that, as long as the transformation functions satisfy certain properties, the control algorithm will work as expected. We find that the transformation functions cannot be separated from the control algorithm so cleanly. In \autoref{sec:tm11andrandolphfunctions}, we find two transformation functions that both satisfy TP1 and TP2 but give different properties when tested with a control algorithm. This would suggest that the transformation functions are equally important to deciding the behaviour of an algorithm. Therefore, in this specific context of text-editing, we feel it is better to only consider OT algorithms 
 as a pair of control algorithm and transformation functions, rather than attempt to consider the two separately.
 
+\section{Evaluating the model-checker}
+
+...
+
+%Being able to reproduce known bugs.
+
+%Best configurations. Number of operations? Number of clients?
+
+%Random vs exhaustive? Justisfy use of random checking.
+
 \section{Results of the model-checker} \label{sec:modelcheckerresults}
+
+
+
 
 \subsection{Properties of each algorithm}
 
 \autoref{tab:algorithmproperties} shows the properties we found of every algorithm we implemented. We aimed to build a collection of all major published algorithms, as well as popular open-source implementations. When there is a choice of transformation functions,
 we choose transformation functions that would substantiate or disprove any known claims about the functions. We do not claim that all of these properties are of equal importance. We feel convergence, the weak list specification and forward non-interleaving are requirements for a useful
 collaborative text-editing algorithm. The strong list specification is less important. Maximal non-interleaving may only be of theoretical interest, as the scenario of backward interleaving may not be as relevant in many cases.
+
+%Include a description of how I determine this graph. I will give various sets of configurations, and I will run every set of configurations for every client for every algorithm for a minimum number of seeds.
+
 
 \begin{table*}
   \centering
@@ -363,8 +379,9 @@ collaborative text-editing algorithm. The strong list specification is less impo
         ABT \cite{Li2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
 
         AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Ressel \cite{Ressel1996} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
         AdOPTed + IMOR  \cite{Imine2003} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        AdOPTed + Randolph \cite{Randolph2015} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+        AdOPTed + Ressel \cite{Ressel1996} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
         AdOPTed + Suleiman \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
         AdOPTed + TM1.1 \cite{Sun2017} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
         AdOPTed + Tombstone \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
@@ -388,7 +405,7 @@ collaborative text-editing algorithm. The strong list specification is less impo
 
         Logoot \cite{Weiss2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
 
-        LogootSplit & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
+        LogootSplit \cite{Andre2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
 
         LSEQ \cite{Nedelec2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
 
@@ -460,29 +477,26 @@ collaborative text-editing algorithm. The strong list specification is less impo
 \subsection{Properties of transformation functions}
 
 
-\autoref{tab:tfproperties} shows the TP1 and TP2 properties of all published transformation functions. It is important to note that these properties are only relevant to convergence, and make no guarantees about anything else. To determine these properties,
-we run the model-checker with the adOPTed algorithm, which is a TP2-requiring control algorithm. If no convergence violations are found on two clients, then the functions satisfy TP1. If no convergence violations are found on three or more clients,
-then they satisfy TP2.
+\autoref{tab:tfproperties} shows the properties of published transformation functions. It is important to note that these properties are only relevant to convergence, and make no guarantees about anything else. To determine these properties, we run the model-checker with the adOPTed algorithm, which is a TP2-requiring control algorithm. If no convergence violations are found on two clients, then we say the functions satisfy TP1. If no convergence violations are found on three or more clients, then we say they satisfy TP2. 
 
+In addition to the table, we believe that the only functions that explicitly satisfy the reversibility requirement are the tombstone transformation functions \cite{Oster2006TTF}.
 
 \begin{table*}
   \caption{Various transformation functions and their properties. Key: $\checkmark$=The checker could not find violations for this property. $\square$=The checker
     found violations for this property.}
   \label{tab:tfproperties}
-    \begin{tabular}{lcc}
+    \begin{tabular}{lccc}
         \toprule
-        Algorithm & TP1 & TP2 \\
+        Algorithm & TP1 & TP2 & Reversibility Requirements \\
         \midrule
-        Ressel \cite{Ressel1996}  \\
-        IMOR  \cite{} \\
-        Suleiman \cite{} \\
-        TM1.1 \cite{}  \\
-        Tombstone \cite{Oster2006TTF}  \\
+        Ellis \cite{Ellis1989} & $\square$ & $\square$ \\
+        Ressel \cite{Ressel1996}  & $\checkmark$ & $\square$ \\
+        IMOR  \cite{Imine2003} & $\square$ & $\square$ \\
+        Suleiman \cite{Suleiman1997} & $\square$ & $\square$ \\
+        TM1.1 \cite{Sun2017} & $\checkmark$ & $\checkmark$   \\
+        Tombstone \cite{Oster2006TTF}  & $\checkmark$ & $\checkmark$ \\
         GOT /  GOTO TFs \cite{} \\
-        Randolph's new IT \cite{} \\
-        Sun's String-wise TFs \cite{} \\
-        Suleiman's extended TFs \cite{} \\
-
+        Randolph \cite{Randolph2015} & $\checkmark$ & $\checkmark$ \\
         \bottomrule
     \end{tabular}   
 \end{table*}
@@ -491,167 +505,145 @@ then they satisfy TP2.
 
 \subsection{Assumptions made by each algorithm}  \label{sec:assumptions}
 
-%% Assumptions made about the server / network 
-%% Assumptions made about the transformation functions (TP1 or TP2)
+Some algorithms made stronger assumptions about the network, which are important to consider when comparing their properties to other algorithms. 
+
+The first is the existence of a server. Some work \cite{Sun2020arxiv} has differentiated between a transformation-based server, and a non-transformation-based server, based on whether or not the server actually performs any transformations. We feel this is not a useful distiction because any algorithm with a transformation-based server can be implemented with a non-transformation-based server, by having the server simply serialise the operations, and the clients simulate what the server would do.  
+
+The second assumption is that all clients are online. This is strictly worse than assuming the existence of a server; a server is a single point of failure, but this assumption makes every point a point of failure. This is usually introduced by having the algorithm wait until it has received some message from every other client before continuing.
+
+Sometimes these assumptions are made implicitly. SOCT3 and SOCT4 use a sequencer, which can only be implemented by introducing one of these assumptions. Some TP2-avoiding algorithms do so by introducing a total order, which again can only be implemented by making one of these assumptions. 
+
+It is possible to avoid these assumptions by using a fault-tolerant consensus algorithm, but these algorithms often have a high communication overhead.
 
 
 
-One reason it has been difficult to compare the algorithms fairly is that their assumptions about the network are often very different. Some algorithms make stronger
-assumptions about the network, and ignoring these assumptions can lead to making misleading claims.
 
-The first kind of assumption is about the existence of a server. This is not necessarily bad, but the server can act as a point of failure. Previous work has made the
-distinction between a transformation-based server and a non-transformation-based server. We feel this is not a useful distinction as any algorithm with a transformation-based
-server can easily be made into one with a non-transformation-based server by having the server only be used to serialise the operations, and the clients can simulate the 
-work of the server.
+\autoref{tab:algorithmassumptions} provides a list of the algorithms we found that make any of these two assumptions.
 
-The second, strictly worse assumption is that the algorithms assumes all clients are online. If one client crashes, the whole algorithm stops and no more messages are delivered until 
-all clients are back online. Now instead of having a single point of failure, the algorithm has many points of failure. It is better to use an algorithm that has a server than an
-algorithm that makes this strict assumption, even if it does not have a server.
-
-Some algorithms have not been explicit about which of these assumptions are satisfied. Algorithms, such as COT, POT and TIBOT have been listed as not requiring a server, even though they do. The most common example are the TP2-avoiding algorithms. One approach for these is to 
-ensure that every client receives the operations in the same order. This is known as total order broadcast, and implementing that often involves making one of these assumptions. That is,
-either by introducing a server, or making the system no longer fault-tolerant (for example, by waiting until a message is received from all clients). Note there is a third option to use a fault-tolerant consensus
-algorithm, such as the RAFT algorithm. Previous work has incorrectly conflated causal-order broadcast with total-order broadcast. Causal order broadcast is much simpler to 
-implement asynchronously; it is most commonly done in these algorithms using vector clocks.
-
-
-Table ... lists the algorithms we implemented, which made any of these assumptions. 
-
-
+\begin{table}
+  \centering
+  \caption{Algorithms that require a central server, and algorithms that assume all clients are online. Algorithms with neither requirement are omitted.}
+  \label{tab:algorithmassumptions}
+  \begin{tabular}{ll}
+    \toprule
+    Assumptions & Algorithms \\
+    \midrule
+    Requires a central server & \makecell[l]{
+      COT \\ Jupiter \\ POT \\ SOCT3 \\ SOCT4 \\ EasySync (Etherpad)
+    } \\
+    \midrule
+    Assumes all clients are online & \makecell[l]{
+      SOCT4 \\ TIBOT
+    } \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 
 \section{Algorithm implementations} \label{sec:algorithmimplementations}
 
 This sections explains some of the results and gives important points about some of the algorithms presented in \autoref{tab:algorithmproperties}.
 
-\subsection{dOPT}
+\subsection{dOPT, Jupiter and adOPTed}
 
-The dOPT algorithm is the original OT algorithm. It is well known not to work because of an issue known in literature as the dOPT puzzle. When two clients become
-more than two operations out of sync, the algorithm does not handle this case correctly. 
+The dOPT algorithm \cite{Ellis1989}  is the original OT algorithm. It is well known not to work. The transformation functions proposed in the same paper do not satisfy TP1 or TP2. Furthermore, the algorithm has an issue which manifests because it calls its inclusion transformations with two operations that were not generated from the same state when two clients are out of sync by more than one operation. Similar issues are referred to in the literature as the dOPT puzzle \cite{Sun1998CSCW}. The original paper does mention the correctness issues and claims it is with the priority scheme, which decides which character should appear first when there are two concurrent insertions to the same location. They propose an alternative priority scheme, but this is also known not to work \cite{Sun1998CSCW}, so we do not implement it.
 
-The Jupiter and adOPTed algorithms fix the issues with the dOPT problem. 
+The Jupiter algorithm \cite{Nichols1995} is based on dOPT and uses a server, and claims to fix its issues. Our model-checker finds this algorithm converges and satisfies the weak list specification (which matches with proofs of these properties \cite{Wei2018}). The paper does not fully specify transformation functions, so we use a set of transformation functions, which were formally proven to converge with Jupiter \cite{Kleppmann2023}. The paper also does not specify fully the behaviour of the server, but this is clarified in future papers \cite{Xu2014}. We were able to also satisfy forward non-interleaving with this algorithm. A common pattern we found across OT algorithms is that they exhibited interleaving in one direction, but not the other. Flipping the priority scheme flipped which direction of interleaving was exhibited. Therefore, we choose the direction which leads to forward non-interleaving being satisfied.
 
-The Jupiter algorithm uses a server. The implementation was model-checked with transformation functions that were formally verified to work.  
+The adOPTed algorithm \cite{Ressel1996} is another algorithm based on dOPT. It does not use a server. It is a natural extension of the Jupiter algorithm to multiple clients, and now requires TP2-satisfying functions. The functions they give in the paper are also wrong and do not lead to convergence.This is the main algorithm we check with when checking whether a function satisfies TP2, since it is proven to converge when the functions satisfy TP2 (and that result aligns with our checker). 
 
-The adOPTed algorithm is decentralised. It requires the transformation functions to satisfy TP2. The paper provides transformation functions, but these were later shown to fail to satisfy
-TP2, and we are able to reproduce those violations in our implementation.
+\subsection{SOCT2, SOCT3 and SOCT4}
 
-
-\subsection{SOCT2}
-
-The SOCT2 is an OT algorithm that requires TP2 satisfying transformation functions. The functions in that paper claim to satisfy TP2, but actually
-do not. The algorithm works with the TTF functions, which do satisfy TP2. The SOCT2 algorithm and GOTO algorithm were published independently, but seem
-to be the exact same idea. SOCT2 requires the transformation functions to satisfy TP1, TP2 and the reversibility requirements. Note that the transformation functions
-given in the paper do not work -- they do not even satisfy TP1. The algorithm can be made to work using the tombstone transformation functions.
+SOCT2 is an OT algorithm requiring TP2-satisfying functions. The paper gives transformation functions, but our model-checker finds these do not satisfy TP2 (or even TP1), as they lead to divergence with adOPTed with both two or three clients. That aligns with known results \cite{Oster2005Proving}. Previous open source implementations \cite{...} have made the algorithm work using the tombstone transformation functions (TTF) \cite{Oster2006TTF}. We find this works also. SOCT2 also requires functions satisfying the reversibility requirements (though they use the terms forwards/backwards transposition rather than inclusion/exclusion), which TTF claims to satisfy.
 
 
-SOCT3 is a similar algorithm to SOCT2, with the main change being that the delivery of operations is now serialised by introducing a sequencer (which essentially requires a server). This means that SOCT3 drops
-the requirement for the transformation functions to satisfy TP2. This means SOCT3 claims to work with transformation functions that satisfy TP1 and the reversibility requirements,
-but not TP2. No transformation functions satisfy this specific combination, so we test it with the original SOCT2 transformation functions (which do not work), and also the tombstone
+SOCT3 is based on SOCT2, with the main change being that the delivery of operations is now serialised by introducing a sequencer (which essentially requires a server). This means that SOCT3 is now TP2-avoiding, and claims to work with transformation functions that satisfy TP1 and the reversibility requirements, but not TP2. We could not find any functions that satisfy this specific set of conditions to test the algorithm with, so we tested it with the original SOCT2 transformation functions (which do not work), and the tombstone
 transformation functions (which do work).
 
 
-SOCT4 drops further the reversibility requirements, so we found it works with transformation functions that only satisfy TP1. It is important to note that SOCT4 makes a very
-strong assumption that all clients are online, which is not made by SOCT2 and SOCT3.
+SOCT4 drops further the reversibility requirements, so we found it works with transformation functions we used for Jupiter that only satisfy TP1. SOCT4 makes a very strong assumption that all clients are online (and still uses a sequencer), which SOCT3 does not do.
+
+\subsection{GOT and GOTO} \label{sec:gotimplementation}
+
+The GOT \cite{Sun1998CSCW} algorithm claims to be a TP2-avoiding algorithm that does not use a server. We find this algorithm fails to converge with the transformation functions given in the paper. The functions given in the paper do not satisfy the reversibility requirements they claim to satisfy. We provide an example of this. We tried to implement the algorithm using TTF, and were able to achieve convergence, but still not achieve the weak list specification. 
+
+The GOTO \cite{Sun1998CSCW} algorithm is an optimised GOT algorithm, which now assumes TP2-satisfying functions. We believe the algorithm is equivalent to SOCT2, only differing in what names are given to the same concepts. Therefore, we consider GOTO and SOCT2 to be the same implementation, and have the same properties.
+
+\subsection{TIBOT and TIBOT 2.0}
+
+The TIBOT algorithm \cite{Li2004ICPADS} and TIBOT 2.0 \cite{Xu2014} are both TP2-avoiding functions that claim to work without a server. However, introduce a total order on the operations and have a time-interval mechanism for ensuring that operations are delivered in this total order. This means they both make the assumption that all clients are online, and the claim they do not use a server is slightly misleading.
+
+We find both algorithms work with the TP1-functions we used for Jupiter. Both algorithm deliver operations as a group rather than individually. However, the TIBOT 2.0 description does not fully describe how to handle these group operations. However, the machinery to handle this is all present in the TIBOT algorithm, so the description for single operations was easily translated to group operations in our implementation.
 
 
+\subsection{POT and COT}
 
-\subsection{GOT} \label{sec:gotimplementation}
+POT \cite{Xu2016} and COT \cite{Sun2009} are another pair of TP2-avoiding algorithms that claim to not use a server. Similar to TIBOT, they require the operations to be delivered in a total order (but allow for any method of implementing this), so the claim of not using a server is misleading.
 
-The GOT algorithm claims to be a TP2-avoiding algorithm that does not use a server. We find this algorithm is entirely broken, failing to converge. On top of this, the transformation functions
-given in the paper do not satisfy the reversibility requirements they claim to satisfy. We provide an example of this.
-We tried to implement the algorithm using TTF, and was able to achieve convergence, but still not achieve the weak list specification.
+Both algorithms work as expected. Although we did not consider performace, the COT algorithm does use a very slow recursive algorithm -- too slow to model-check through even only a few hundred cases. Memoising the algorithm (as mentioned in the paper) was therefore necessary for model-checking (and in any practical implementation).
+
+\subsection{SDT, ABT and LBT}
+
+SDT \cite{Li2004CSCW}, LBT \cite{Li2005} and ABT \cite{Li2010} are three algorithms proposed by the same author, claiming to be TP2-avoiding and not use a server. SDT was shown not to work \cite{Oster2005Proving}, but LBT and ABT have not been tested. We found that LBT fails, and we give a counter-example. We found that ABT does work with the transformation functions in that paper. This makes ABT the only truly decentralised TP2-avoiding algorithm we tested for which we could not find convergence or list specification violations. 
+
+\subsection{WOOT, WOOTO and WOOTH}
+
+We found the WOOT \cite{Oster2006WOOT} algorithm satisfies convergence and the weak and strong list specification. Its successors, WOOTO \cite{Weiss2007} and WOOTH \cite{AhmedNacer2011}, both satisfy the same properties, with the changes being in improving performance. WOOTH is not formally described in a paper, but given as open source code.
+
+\subsection{TM1.1 and Randolph functions}
+
+TM1.1 \cite{Sun2017} and Randolph \cite{Randolph2015} are two transformation fuctions that claim to satisfy TP2. Both have not been checked apart from in their original papers. We implement both with the adOPTed algorithms, and find both lead to convergence (including with more than two clients), indicating they both satisfy TP2. However, we find that with the TM1.1 functions, the algorithm does not satisfy the weak list specification, because the functions delete an extra character, unintended by the user. This makes the functions not practical. 
+
+In contrast, our model-checker could not find strong or weak list specification violations for the Randolph functions. When implementing these functions, we found they implicitly assume a total ordering on the characters, and achieved this by attaching the client-id and a per-client counter to each character.
+
+\subsection{Logoot}
+
+The Logoot \cite{Weiss2009} algorithm is known to have bug \cite{Sun2018} which we were able to reproduce. The algorithm has a BASE parameter, which affects how easy it was to reproduce the bug. We were not able to reproduce the bug with BASE being set to $2^{64}$, but
+by lowering the base to $2^4$, the bugs start to appear. This is because the bugs require for two random numbers to be equal to the same value, and with BASE=$2^{64}$, this happens with a really low probability. Note that setting BASE to a very high value is not a practical solution, 
 
 
+The first is a divergence bug in the original description of the algorithm. This bug was later fixed in later descriptions \cite{Weiss2010}. Another is a bug which causes the algorithm to be stuck in an infinite loop. We implemented the fixes of this bug we found in open source implementation.
 
+...
 
-\subsection{WOOT}
+\subsection{LogootSplit and LSEQ}
 
-We found the WOOT algorithm satisfies convergence and the weak and strong list specification. WOOT does have issues with performance, so it may be more
-useful to use one of its predecessors.
+LogootSplit \cite{Andre2013} and LSEQ \cite{Nedelec2013} are two variant of Logoot. LSEQ is simply a change to the allocation strategy, so all the issues with Logoot apply to LSEQ also. LogootSplit is a bigger change, and we found it does not have the same bugs as Logoot. LogootSplit has three variants -- LogootSplitNaive, LogootSplitString and LogootSplitAVL. We only implement LogootSplitNaive; the differences between the three are only in the data structures used to improve performance.
+
+\subsection{Partial persistent sequences (PPS)}
+
+A PPS \cite{Wu2010} represents positions using rational numbers. This is an idea mentioned prior \cite{Preguica2009}, but dismissed due to requiring infinite precision floating points. Even without considering that issue, we find that the algorithm fails to converge because it fails to give unique identifiers when two users concurrently insert at the same position. The two papers proposing this algorithm \cite{Wu2009, Wu2010} identify this issue and provide a separate fix each. We find that both fixes do not work entirely, and provide counter-examples. 
+
 
 
 \subsection{TreeDoc}
 
-We found that the TreeDoc algorithm satisfies the strong list specification. There is some ambiguity over what is meant by TreeDoc in the literature. The original paper
-represents a document as a binary tree. Each node in the binary tree can have mini-nodes. Other papers represent TreeDoc as a tree that is not binary. A node can have many right
+We found that the TreeDoc \cite{Preguica2009} algorithm satisfies the strong list specification. There is some ambiguity over what is meant by TreeDoc in the literature. The original paper
+represents a document as a binary tree with major nodes and mini nodes. Other papers \cite{Zawirski2011} represent TreeDoc as a tree that is not binary. A node can have many right
 children and many left children. Depending on the interpretation, this can lead to something closer to the Fugue algorithm. The original paper also 
 describes two kinds of ID schemes, which each have different ways of correctly handling deletions.
 
 
-\subsection{SDT, ABT and LBT}
 
-SDT, LBT and ABT are three algorithms proposed by . They claim to be TP2-avoiding, and do not use a server. SDT was shown not to work, but LBT and
-ABT have not been tested. We found that LBT fails, and we give a counter-example. We found that ABT does work with the transformation functions in that paper.
+\appendix
 
+\section{Counter-Examples}
 
-\subsection{TIBOT}
+\subsection{Suleiman TP1 and TP2 Counter Examples}
 
-TIBOT avoids the need for TP2 by ensuring operations are delivered in a total order, which means it is not fault-tolerant.
+...
 
+\subsection{GOT Counter Examples}
 
-\subsection{LOGOOT}
+...
 
-We implemented the LOGOOT algorithm .   The original version of this algorithm is knwon to have a divergence bug. That bug was fixed in the description of
-this algorithm when implementing LOGOOT. Although we could not find any more divergence bugs, the algorithm has a significant bug where it will get stuck in an 
-infinite loop. We were able to reproduce this bug. Our implementation allows you to set the base of the ids. With a larger base, it becomes more difficult to reproduce the
-infinite loop bugs, because it relies on two random numbers hitting the same values. To reproduce the bug, we had to reduce the base to make this case more likely. There are many attempted fixes
-to this bug in open source implementations. Most lead to divergence, but the one that we could not reproduce any cases of divergence for was the Alchemy Book implementation. The paper is slightly ambiguous over how to insert at the beginning and end of the document. It mentions begin and end sentinels, but not their ids.
-We use the ids for the begin and end sentinels from previous implementations. 
+\subsection{LBT Counter Examples}
 
+...
 
-\subsection{POT}
+\subsection{TM1.1 Counter Examples}
 
-We found the algorithm for POT works as expected. This algorithm is often listed as a decentralised algorithm that does not use a server. This is misleading. The algorithm 
-requires operations to be delivered in a total order (that is consistent with the causal order), but does not describe how such an order is implemented. Often, this requires a server
-or making a strong assumption about the clients.
-
-\subsection{TIBOT 2.0}
-
-TIBOT 2.0 is a modification of TIBOT, with the only difference being in how the algorithm handles receiving remote operations. The algorithm has the same issues as TIBOT of assuming all 
-clients are online. TIBOT works with group operations (which is a sequence of operations generated in the same time interval by the same client), but the TIBOT 2.0 description (while still
-claiming to retain this characteristic of using group operations) assumes that the received operation is a single operation. The way to handle this is already described in the original TIBOT
-paper (what it calls the SLOT algorithm), so we adapt the description to work with group operations in our implementation.
-
-\subsection{COT}
-
-Similarly to POT, COT is a TP2-avoiding algorithm that has been claimed to work without a server, but actually requires some total ordering mechanism on the operations,
-The paper mentions that context can be represented either as a set of operations or as a vector clock. This is merely an implementation detail we use
-vector clocks. There are re-descriptions of this algorithm in later papers, but these do not fully describe the transform method in the algorithm, which is only
-fully described in the original paper. Although we do not consider performance, the paper notes that COT uses a very slow recursive algorithm -- too slow to model-check through even only a few hundred cases. 
-Memoising the recursive algorithm (as mentioned in the paper) was therefore necessary for us to model-check it (and necessary in any practical implementation).
-
-\subsection{LogootSplit}
-
-LogootSplit is based on Logoot, and comes in three variants -- LogootSplitNaive, LogootSplitString, and LogootSplitAVL. These are just changes in the data 
-structure, which only change performance, not the actual algorithm. We implement LogootSplitNaive. We find it satisfies the same properties as Logoot. We
-could not find any instance of the infinite loop bug that was present in Logoot.
-
-\subsection{Partial persistent sequences (PPS)}
-
-A PPS represents position ids using rational numbers. An insertion between two characters simply involves finding a rational number between the character before and after. This idea is mentioned in other papers, but is generally dismissed because would require infinite precision
-for floating points. We find that the algorithm presented also has further issues in that it does not generate unique identifiers. If two users concurrently insert at the same position, there needs to be
-a scheme to ensure both users do not use the same identifier, while maintaing the dense property of rational numbers. The papers propose two schemes (giving each client their own subrange, or appending the client id to the digits of the identifier), and our checker finds that both schemes still lead
-to collisions, which lead to divergence. When clashes do not happen, we find the algorithm satisfies convergence, the weak and strong list specifications, and exhibits 
-interleaving behaviours.
-
-\subsection{TM1.1}
-
-The TM1.1 functions claim to satisfy TP2. We were unable to find any convergence violations when testing these with adOPTed, so we do not dispute the claim they satisfy TP2. However, we find that these
-functions do lead to weak and strong list specification violations. The issue occurs because the functions delete an extra character that no client intentionally deletes. This makes them not very practical.
-
-\subsection{Randolph functions}
-
-The Randolph functions are another set of functions that claim to satisfy TP2. They give a proof, but we could not find any other verification of this claim. Using the functions, we could not find any convergence or strong/weak list specification violations. Therefore, not only do
-they seem to satisfy TP2; they seem to be more practical than the TM1.1 functions. Note that these functions implicitly assuming a total ordering of the characters, and we simply achieve this by adding the client id and a per-client counter to
-each character.
-
-\subsection{Interleaving in OT algorithms}
-
-Many OT algorithms only exhibit interleaving in one direction but not the other. Switch the ordering of the priority scheme switches which
-direction of interleaving occurs. Such algorithms cannot satisfy maximal non-interleaving, but choosing the right direction of priority can mean the
-algorithm only exhibits backward interleaving, therefore satisfying forward non-interleaving.
-
+...
 
 %% Bibliography
 \bibliographystyle{ACM-Reference-Format}
