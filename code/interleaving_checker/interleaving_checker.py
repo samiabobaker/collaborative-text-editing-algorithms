@@ -1,4 +1,5 @@
 from device.clientdevice import ClientDevice
+from device.operations import ClientInsertOperation
 from device.serverdevice import ServerDevice
 from interleaving_checker.client_trace import Character, ClientTrace
 from interleaving_checker.random_trace import build_random_trace
@@ -68,10 +69,21 @@ def forward_non_interleaving_with_deletes_from_client_logs(
     list_order = transitive_closure(build_observed_list_order(client_logs))
 
     for client_log in client_logs.values():
-        for state in client_log.states_after_events:
+        observed_characters: set[UniqueChar] = set()
+        for state_index, state in enumerate(client_log.states_after_events):
+            # A character missing from this state can be a deleted sibling only if its
+            # insertion has already been delivered to this replica. Characters first
+            # delivered in a later event must not affect this state.
+            if state_index < len(client_log.events_seen):
+                observed_characters.update(
+                    operation.character
+                    for operation in client_log.events_seen[state_index].operation
+                    if isinstance(operation, ClientInsertOperation)
+                )
+            observed_characters.update(state)
             for A in state:
                 for B in state:
-                    if check_condition_1_with_deletes(state, characters, list_order, A, B):
+                    if check_condition_1_with_deletes(state, characters, list_order, observed_characters, A, B):
                         continue
                     if print_ops:
                         print(f"Failed forward interleaving with deletes at {A} {B}.")
@@ -92,14 +104,22 @@ def build_observed_list_order(client_logs: dict[int, ClientTrace]) -> set[tuple[
 
 
 def transitive_closure(list_order: set[tuple[UniqueChar, UniqueChar]]) -> set[tuple[UniqueChar, UniqueChar]]:
-    closure = set(list_order)
-    changed = True
-    while changed:
-        changed = False
-        additions = {(left, right) for left, middle in closure for middle_2, right in closure if middle == middle_2}
-        if not additions.issubset(closure):
-            closure.update(additions)
-            changed = True
+    adjacency: dict[UniqueChar, set[UniqueChar]] = {}
+    for left, right in list_order:
+        adjacency.setdefault(left, set()).add(right)
+        adjacency.setdefault(right, set())
+
+    closure: set[tuple[UniqueChar, UniqueChar]] = set()
+    for source, direct_successors in adjacency.items():
+        reachable: set[UniqueChar] = set()
+        pending = list(direct_successors)
+        while pending:
+            target = pending.pop()
+            if target in reachable:
+                continue
+            reachable.add(target)
+            pending.extend(adjacency[target])
+        closure.update((source, target) for target in reachable)
     return closure
 
 
@@ -107,15 +127,20 @@ def check_condition_1_with_deletes(
     state: list[UniqueChar],
     characters: dict[int, Character],
     list_order: set[tuple[UniqueChar, UniqueChar]],
+    observed_characters: set[UniqueChar],
     A: UniqueChar,
     B: UniqueChar,
 ) -> bool:
-    """Check condition 1 only when its premise is certain in every totalization."""
+    """Check condition 1 only when its premise is certain in every totalization.
+
+    ``observed_characters`` contains insertions delivered to the current replica through
+    this state, including characters subsequently deleted or inserted and deleted in one event.
+    """
     if characters[B.id].left_origin != A:
         return True
 
     for sibling in characters[A.id].left_origin_of:
-        if sibling == B:
+        if sibling == B or sibling not in observed_characters:
             continue
         if (sibling, B) in list_order:
             return True

@@ -80,7 +80,8 @@ def test_deleted_earlier_sibling_still_exempts_a_later_sibling():
     list_order = transitive_closure(build_observed_list_order({0: trace}))
 
     assert check_condition_1([a, c, x, y], characters, a, x) is False
-    assert check_condition_1_with_deletes([a, c, x, y], characters, list_order, a, x) is True
+    assert check_condition_1_with_deletes([a, c, x, y], characters, list_order, {a, b, c, x, y}, a, x) is True
+    assert forward_non_interleaving_with_deletes_from_client_logs({0: trace}, characters) is True
 
 
 def test_unresolved_sibling_order_is_conservatively_accepted():
@@ -97,7 +98,7 @@ def test_unresolved_sibling_order_is_conservatively_accepted():
     characters[a.id].add_to_left_origin_of(b)
     characters[a.id].add_to_left_origin_of(c)
 
-    assert check_condition_1_with_deletes([a, x, b], characters, set(), a, b) is True
+    assert check_condition_1_with_deletes([a, x, b], characters, set(), {a, b, c, x}, a, b) is True
 
 
 def test_transitive_order_can_make_a_violation_certain():
@@ -119,8 +120,88 @@ def test_transitive_order_can_make_a_violation_certain():
     trace.states_after_events = [[b, x], [x, c], [a, z, b]]
     observed_order = build_observed_list_order({0: trace})
 
-    assert check_condition_1_with_deletes([a, z, b], characters, observed_order, a, b) is True
-    assert check_condition_1_with_deletes([a, z, b], characters, transitive_closure(observed_order), a, b) is False
+    observed_characters = {a, b, c, x, z}
+    assert check_condition_1_with_deletes([a, z, b], characters, observed_order, observed_characters, a, b) is True
+    assert (
+        check_condition_1_with_deletes(
+            [a, z, b], characters, transitive_closure(observed_order), observed_characters, a, b
+        )
+        is False
+    )
+
+
+def test_future_sibling_does_not_hide_an_earlier_violation():
+    a = UniqueChar("a", 0)
+    b = UniqueChar("b", 1)
+    c = UniqueChar("c", 2)
+    x = UniqueChar("x", 3)
+    characters = {
+        a.id: Character(a, "start", "end"),
+        b.id: Character(b, a, "end"),
+        c.id: Character(c, a, "end"),
+        x.id: Character(x, "start", "end"),
+    }
+    characters[a.id].add_to_left_origin_of(b)
+    characters[a.id].add_to_left_origin_of(c)
+
+    trace = ClientTrace()
+    trace.states_after_events = [[a, x, b], [a, c, x, b]]
+
+    assert forward_non_interleaving_with_deletes_from_client_logs({0: trace}, characters) is False
+
+
+def test_sibling_observed_by_another_client_does_not_rewrite_a_state():
+    a = UniqueChar("a", 0)
+    b = UniqueChar("b", 1)
+    c = UniqueChar("c", 2)
+    x = UniqueChar("x", 3)
+    characters = {
+        a.id: Character(a, "start", "end"),
+        b.id: Character(b, a, "end"),
+        c.id: Character(c, a, "end"),
+        x.id: Character(x, "start", "end"),
+    }
+    characters[a.id].add_to_left_origin_of(b)
+    characters[a.id].add_to_left_origin_of(c)
+
+    first_client = ClientTrace()
+    first_client.states_after_events = [[a, x, b]]
+    second_client = ClientTrace()
+    second_client.states_after_events = [[a, c, b]]
+
+    assert (
+        forward_non_interleaving_with_deletes_from_client_logs({0: first_client, 1: second_client}, characters) is False
+    )
+
+
+def test_inserted_and_deleted_in_one_event_still_counts_as_observed():
+    a = UniqueChar("a", 0)
+    b = UniqueChar("b", 1)
+    c = UniqueChar("c", 2)
+    x = UniqueChar("x", 3)
+    characters = {
+        a.id: Character(a, "start", "end"),
+        b.id: Character(b, a, "end"),
+        c.id: Character(c, a, "end"),
+        x.id: Character(x, "start", "end"),
+    }
+    characters[a.id].add_to_left_origin_of(b)
+    characters[a.id].add_to_left_origin_of(c)
+
+    first_client = ClientTrace()
+    first_client.add_event(
+        Event(
+            [ClientInsertOperation(1, 1, c), ClientDeleteOperation(1, 1, c)],
+            performed_locally=False,
+        ),
+        [a, x, b],
+    )
+    second_client = ClientTrace()
+    second_client.states_after_events = [[a, c, b]]
+
+    assert (
+        forward_non_interleaving_with_deletes_from_client_logs({0: first_client, 1: second_client}, characters) is True
+    )
 
 
 def replay_yjs_family_counterexample(setup: DeviceSetup, with_delete: bool):
@@ -216,6 +297,9 @@ if __name__ == "__main__":
     test_deleted_earlier_sibling_still_exempts_a_later_sibling()
     test_unresolved_sibling_order_is_conservatively_accepted()
     test_transitive_order_can_make_a_violation_certain()
+    test_future_sibling_does_not_hide_an_earlier_violation()
+    test_sibling_observed_by_another_client_does_not_rewrite_a_state()
+    test_inserted_and_deleted_in_one_event_still_counts_as_observed()
     test_yjs_family_delete_trace_really_interleaves_consecutive_insertions()
     test_same_yjs_family_trace_without_delete_does_not_interleave()
     print("OK")
