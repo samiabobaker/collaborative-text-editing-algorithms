@@ -23,6 +23,7 @@ from got.gotclient import GOTClient
 from gottombstone.gottombstoneclient import GOTTombstoneClient
 from jupiter.jupiterclient import JupiterClient
 from jupiter.jupiterserver import JupiterServer
+from lbt.lbtclient import LBTClient
 from logoot.logootclient import LogootClient
 from logootsplit.logootsplitclient import LogootSplitClient
 from loro.loroclient import LoroClient
@@ -112,6 +113,7 @@ fugue_setup = make_setup(FugueClient)
 fuguemax_setup = make_setup(FugueMaxClient)
 got_setup = make_setup(GOTClient)
 got_tombstone_setup = make_setup(GOTTombstoneClient)
+lbt_setup = make_setup(LBTClient)
 logoot_setup = make_setup(LogootClient)
 logoot_split_setup = make_setup(LogootSplitClient)
 loro_setup = make_setup(LoroClient)
