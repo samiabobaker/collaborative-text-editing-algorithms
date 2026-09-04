@@ -1,5 +1,6 @@
 \documentclass[sigplan]{acmart}
 \def\sectionautorefname{Section}
+\def\subsectionautorefname{Subsection}
 \usepackage{makecell}
 \usepackage{amsthm}
 \usepackage[htt]{hyphenat}
@@ -12,7 +13,7 @@
 \begin{document}
 
 
-\title{Collaborative Text Editing}
+\title{A comprehensive set of correctness properties of collaborative text editing algorithms}
 
 %% Authors
 
@@ -41,12 +42,13 @@
 Collaborative text-editing algorithms allow multiple users to edit the same text document concurrently; they are used in popular software such as Google Docs and Overleaf. In the field
 of collaborative text-editing algorithms, there is an over-arching issue of correctness. There are many published algorithms, and many open source implementations, yet
 it is not very well-studied the correctness properties of many of these algorithms. In fact, there are algorithms shown after publication to simply not work \cite{Oster2005Proving}. A lot of these algorithms come without proof of their correctness properties, and some
-come with incorrect hand-written proofs \cite{Oster2005Proving}. Many algorithms pre-date the correctness properties, with no one going back to check whether or not the algorithm satisfies it. To add to these issues, there are many algorithms with no publically available implementation. This has led to claims based on algorithms for which no one has
-externally verified their correctness. To help combat these issues, we provide three things: a model-checker designed for the task of testing correctness properties
+come with incorrect hand-written proofs \cite{Oster2005Proving}. Many algorithms pre-date the correctness properties, with no one going back to check whether or not the algorithm satisfies it. To add to these issues, there are many algorithms with no publicly available implementation. This has led to claims based on algorithms for which no one has
+externally verified their correctness. These issues have meant that some work in this field has built up a reputation of being too complicated and not worth trying to understand.
+
+
+To help combat these issues, we provide three things: a model-checker designed for the task of testing correctness properties
 of collaborative text-editing algorithms; a collection of implementations of all major algorithms in research and open-source; and a set of results on the correctness properties
-and issues we found with all the algorithms we implement. These should act as a guide for other attempting to implement these algorithms, without wanting to search through results through many decades of
-academic papers. We hope these mean that similar correctness issues are avoided in future work, and for others to add to this collection
-with future algorithms and properties. 
+and issues we found with all the algorithms we implemented. These should act as a guide for others attempting to implement these algorithms, without wanting to search for results through many decades of academic papers. We hope these mean that similar correctness issues are avoided in future work, and for others to add to this collection with future algorithms and properties. 
 
 
 Our model-checker uses randomised testing to test a very large number of states in an algorithm. We check whether these states satisfy known properties 
@@ -58,19 +60,18 @@ than an idealised model of the algorithm, which helps to spot both implementatio
 additional effort beyond implementing the algorithm.
 
 Our collection of implementations aim to reduce the ambiguity in the descriptions of some of these algorithms. We find some papers give vague descriptions of
-certain components of an algorithm. Some algorithms have many variants or interpretations in different papers, which go by the same name. Some algorithms have bugs with fixes in open-source implementations, but not clearly documented
-anywhere. Some of these fixes also inadvertently lead to issues elsewhere. We aim to document these kinds of issues that we found to avoid confusions for others in the future. Our implementations focus on the correctness of the base algorithms, so we leave performance
+certain components of an algorithm. Some algorithms have many variants or interpretations in different papers, that are not clearly documented. Some algorithms have bugs with fixes in open-source implementations, but not clearly documented
+anywhere. Some of these fixes also inadvertently lead to issues elsewhere. We aim to document these kinds of issues that we found to avoid confusions for others in the future. We believe this collection is the most comprehensive collection of these algorithms. Our implementations focus on the correctness of the base algorithms, so we leave performance
 optimisations and additional features (such as string-wise operations \cite{Lv2016}, undoing, moving \cite{Kleppmann2020} and rich-text \cite{Litt2022}) out of scope of our work. Similarly, we leave the use of these algorithms
 for non-plain text documents (such as graphics editing \cite{Sun2002}, and XML \cite{Davis2002}) out of scope. We give some motivation for why we avoid some of these in future sections.
 
 
-Our set of results appear in the form of a table of algorithms and their respective properties, which we find using our model-checker. This aims to collate
-all the existing work on collaborative text-editing algorithms, to provide a clear place to see which algorithms satisfy which properties and which do not.
+Our set of results appear in the form of a table of algorithms and their respective properties, which we find using our model-checker. We also provide multiple previously unknown bugs to published algorithms. This aims to collate all the existing work on collaborative text-editing algorithms, to provide a clear place to see which algorithms satisfy which properties and which do not.
 
 
 \autoref{sec:background} and \autoref{sec:otbackground} provide background of the relevant concepts we check for in our model-checker. These are the main concepts
-require to understand our results and implementations, and provides the context and approach by which we approach this research. \autoref{sec:modelcheckerimplementation} gives a description of the implementation of our model-checker. To our knowledge, 
-it is the first implementation of these properties, and we describe the features and issues of this model-checker. \autoref{sec:modelcheckerresults} gives the results of our model-checker,
+required to understand our results and implementations. \autoref{sec:modelcheckerimplementation} gives a description of the implementation of our model-checker. To our knowledge, 
+it is the first implementation of these properties, and we describe the features and limitations of this model-checker. \autoref{sec:modelcheckerresults} gives the results of our model-checker,
 showing which algorithms satisfy which properties. \autoref{sec:algorithmimplementations} describes the important things we found when implementing these algorithms, including counter-examples
 to properties, ambiguities in the algorithm and known bugs. 
 
@@ -86,10 +87,10 @@ model-checker.
 The goal of a collaborative text-editing algorithms is to allow for users to edit a single text document concurrently in real-time. When a user makes a changes to the
 document, network messages are sent so that every other user sees this change. We consider two types of changes: $\mathit{ins}(i, x)$ means that $x$ is inserted in the document at position $i$, $\mathit{del}(i)$ means that the character at position $i$ is deleted.
 
-These algorithms must have a response user interface even if the network is slow. That means when a user makes a change, it should be applied instantly to the local document, without waiting for any other client in the network. This means, when a clients receives a message of another client's change, the state of their document may be very different from the document those changes were originally executed on. The main difficulty is ensuring this situation
+These algorithms must have a responsive user interface even if the network is slow. That means when a user makes a change, it should be applied instantly to the local document, without waiting for any other client in the network. Therefore, when a client receives a message of another client's change, the state of their document may be very different from the document those changes were originally executed on. The main difficulty is ensuring this situation
 is handled correctly in all scenarios.
 
-There are two general approaches to solving this problem: operational transform (OT) and conflict-free replicated data types (CRDTs). We describe OT more in \autoref{sec:otbackground}. A CRDT is a data structure specially designed to handle changes being made concurrently. The operations are represented in a way such that they have the same effect regardless of the order they are executed.
+There are two general approaches to solving this problem: operational transform (OT) \cite{Ellis1989} and conflict-free replicated data types (CRDTs) \cite{Preguica2009}. We describe OT more in \autoref{sec:otbackground}. A CRDT is a data structure specially designed to handle changes being made concurrently. The operations are represented in a way such that they have the same effect regardless of the order they are executed.
 
 Another way to categorise these algorithms is by the assumptions they make about the network. Some algorithms assume the existence of a server, and some are decentralised. Generally, the logic becomes simpler when there is a server, but it is a single point of failure, and not having a server may be preferred in many cases. Another assumption some algorithms make is that all clients are online, and the algorithm stops working if one client is disconnected from the rest of the network. This is a much worse assumption to make than assuming a server exists, since now every device is a point of failure. 
 
@@ -118,7 +119,7 @@ for the full properties.
   There exists a binary relation $lo$ on the characters of the state, called the list order, such that:
   \begin{enumerate}
     \item
-      Each event $e = do(op, w)$ returns a sequence of elements $w = a_0 \dots a_{n-1}$, such that:
+      Each locally executed operation $op$, which results in a sequence of elements $w = a_0 \dots a_{n-1}$, satisfies the properties:
       \begin{enumerate}
         \item
           $w$ contains exactly the elements visible to $e$ that have been inserted, but not deleted.
@@ -126,7 +127,7 @@ for the full properties.
           The order of these elements is consistent with the list order:
           $\forall i,j. (i < j) \implies (a_i, a_j) \in lo$.
         \item
-          Elements are inserted at the specified position: if $op = ins(a, k)$, the $a = a_{min\{k, n-1\}}$.
+          Elements are inserted at the specified position: if $op = ins(a, k)$, then $a = a_{min\{k, n-1\}}$.
       \end{enumerate}
     \item
       The list order $lo$ is transitive, irreflexive and total, and thus determines the order of all insert operations in the execution.
@@ -147,24 +148,23 @@ for the full properties.
 \subsubsection{Interleaving}
 
 One limitation of the weak and strong list specifications is that they allow for interleaving behaviour. When the users insert text concurrently at the same position, some algorithms may interleave those changes
-within one another, rather than display the changes separately. This issue was known, but not properly formalised until the forward non-interleaving and maximal non-interleaving properties \cite{Weidner2025Fugue}, which restrict the algorithm to only give non-interleaving
+within one another, rather than display the changes separately. This issue was known, but not properly formalised until the forward non-interleaving and maximal non-interleaving properties \cite{Weidner2025Fugue}, which restrict the specification to only allow non-interleaving
 orders. There are two kinds of interleaving: forward and backward. Forward interleaving occurs when text is written in the forward direction (typing ``cat'' by typing
 `c' then `a' then `t'). Backwards interleaving occurs when text is written in the backward direction (typing ``cat'' by typing `t' then `a' then `c'). Forward non-interleaving
-attempts to disallow the forward interleaving case. There are cases when it is impossible to disallow both forward and backward interleaving, so maximal non-interleaving disallows 
-allows both when possible, but prefers forward non-interleaving if disallowing both is not possible.
+attempts to disallow the forward interleaving case. There are cases when it is impossible to disallow both forward and backward interleaving, so maximal non-interleaving disallows both when possible, but prefers disallowing forward non-interleaving if disallowing both is not possible.
 
 We quote the relevant properties below, but refer to the original paper for the full details.
 
 \begin{definition}[Left Origin]
   The left origin of an element is the element directly preciding its insertion position at the time of insertion. If the element was inserted by 
   an $ins(i, x)$ call, then its left origin was at index $i-1$ at the time of this call. If $i=0$, then its left origin is a special symbol
-  $\mathit{start}$
+  $\mathit{start}$.
 \end{definition}
 
 \begin{definition}[Right Origin]
   The right origin of an element is the element directly following its insertion position at the time of insertion, in the list including tombstones. If the element was inserted by 
   an $ins(i, x)$ call, then its left origin was at index $i+1$ at the time of this call. If $i$ is the end of the list, then its right origin is a special symbol
-  $\mathit{end}$
+  $\mathit{end}$.
 \end{definition}
 
 \begin{property}[Forward non-interleaving]
@@ -191,7 +191,7 @@ We quote the relevant properties below, but refer to the original paper for the 
 
 This section gives an overview of the common terminology and properties used by OT algorithms.
 
-The idea of OT is to transform incoming remote operations with respect to local operations that have already been performed. For example, if a client receives an 
+The idea of OT is to transform incoming remote operations with respect to local operations that have already been performed. For example, if a client receives a
 $del(3)$ operation, but it has performed $ins(2,x)$, then the original character has shifted one to the right so the deletion is now transformed to $del(4)$. The functions
 which describe these transformations are called transformation functions. Transformations functions are paired with a control algorithm, which describes when and how to call these 
 transformation functions.  The intent is that the control algorithm makes certain assumptions about the properties of the transformation functions, and any functions that satisfy these properties
@@ -200,7 +200,7 @@ can be used with that algorithm.
 \subsection{Inclusion Transformations}
 
 
-The first kind of transformation function is an inclusion transformation, which is what is used by all control algorithms. 
+The first kind of transformation functions are inclusion transformations, which are used by all control algorithms. 
 
 \begin{definition}[Inclusion Transformation]
   For two operations $O_1$ and $O_2$ generated from the same state, we write $O_1' = IT(O_1, O_2)$. $O_1'$ is the transformed operation
@@ -234,7 +234,7 @@ A few algorithms additionally use exclusion transformations, which are the inver
 
 \begin{definition}[Exclusion Transformations]
   For two operations $O_1$ and $O_2$ where $O_2$ is generated from the resulting state of $O_1$, we write $O_2' = ET(O_2, O_1)$. $O_2'$ is the transformed operation of $O_2$,
-  now exluding the effects of $O_1$.
+  now excluding the effects of $O_1$.
 \end{definition}
 
 
@@ -249,7 +249,7 @@ Exclusion transformations must satisfy the reversibility requirement, which enfo
 \end{property}
 
 
-This only relevant to a few algorithms. Nonetheless, there are transformation functions which claim to satisfy the reversibility requirements, but actually do not (see \autoref{sec:gotimplementation}).
+$ET$ is only relevant to a few algorithms. Nonetheless, there are transformation functions which claim to satisfy the reversibility requirements, but actually do not (see \autoref{sec:gotimplementation}).
 Note some papers use the terms forward and backward transpositions. These roughly correspond to inclusion and exclusion transformations.
 
 \section{Model-checker implementation} \label{sec:modelcheckerimplementation}
@@ -429,7 +429,7 @@ collaborative text-editing algorithm. The strong list specification is less impo
 
         RGA (Timestamped-insertion trees) \cite{Attiya2016} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$  \\
 
-        RGA (Non-interleaving fix) \cite{Kleppman2019} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        RGA (Non-interleaving fix) \cite{Kleppmann2019} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
 
         SDT \cite{Li2008} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
 
@@ -443,7 +443,7 @@ collaborative text-editing algorithm. The strong list specification is less impo
         
         SOCT4 \cite{Vidot2000} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
 
-        Sync7 & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+        Sync7 \cite{...} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
 
         Sync9 \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ \\
         
