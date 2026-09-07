@@ -425,6 +425,8 @@ collaborative text-editing algorithm. The strong list specification is less impo
 
         Partial Persistent Sequences \cite{Wu2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
 
+        ProseMirror \cite{...} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
+
         RGA (with S4 Vectors) \cite{Roh2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$  \\
 
         RGA (Timestamped-insertion trees) \cite{Attiya2016} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$  \\
@@ -466,7 +468,7 @@ collaborative text-editing algorithm. The strong list specification is less impo
 
         
 
-        ProseMirror \cite{} \\
+        
         WOOTH \cite{} \\
 
 
@@ -625,6 +627,10 @@ We found that the TreeDoc \cite{Preguica2009} algorithm satisfies the strong lis
 represents a document as a binary tree with major nodes and mini nodes. Other papers \cite{Zawirski2011} represent TreeDoc as a tree that is not binary. A node can have many right
 children and many left children. Depending on the interpretation, this can lead to something closer to the Fugue algorithm. The original paper also 
 describes two kinds of ID schemes, which each have different ways of correctly handling deletions.
+
+\subsection{ProseMirror}
+
+We ported the ProseMirror \cite{...} implementation into our checker. We found that the algorithm exhibits weak list specification violations. We provide in the repository a reproduction of this violation, which calls the original ProseMirror library.
 
 \section{Related algorithms}
 
