@@ -47,6 +47,7 @@ from sync7.sync7client import Sync7Client
 from sync9.sync9client import Sync9Client
 from tibot.tibotclient import TIBOTClient
 from tibot2.tibot2client import TIBOT2Client
+from treedoc.treedocclient import TreedocClient
 from twc.twcclient import TWCClient
 from twc.twcserver import TWCServer
 from woot.wootclient import WOOTClient
@@ -128,6 +129,7 @@ sync7_setup = make_setup(Sync7Client)
 sync9_setup = make_setup(Sync9Client)
 tibot_setup = make_setup(TIBOTClient)
 tibot2_setup = make_setup(TIBOT2Client)
+treedoc_setup = make_setup(TreedocClient)
 woot_setup = make_setup(WOOTClient)
 wooto_setup = make_setup(WOOTOClient)
 yjs_setup = make_setup(YjsClient)
