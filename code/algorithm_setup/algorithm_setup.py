@@ -32,6 +32,8 @@ from markandretrace.markandretraceclient import MarkAndRetraceClient
 from pot.potclient import POTClient
 from pot.potserver import POTServer
 from pps.ppsclient import PPSClient
+from prosemirror.prosemirrorclient import ProseMirrorClient
+from prosemirror.prosemirrorserver import ProseMirrorServer
 from rga.rgaclient import RGAClient
 from rgas4.rgas4client import RGAS4Client
 from sharedb.sharedbclient import ShareDBClient
@@ -136,6 +138,7 @@ cot_setup = make_setup(COTClient, COTServer)
 easysync_setup = make_setup(EasySyncClient, EasySyncServer, peer_to_peer=False)
 jupiter_setup = make_setup(JupiterClient, JupiterServer, peer_to_peer=False)
 pot_setup = make_setup(POTClient, POTServer)
+prosemirror_setup = make_setup(ProseMirrorClient, ProseMirrorServer, peer_to_peer=False)
 sharedb_setup = make_setup(ShareDBClient, ShareDBServer, peer_to_peer=False)
 soct3_setup = make_setup(SOCT3Client, SOCT3Server)
 soct4_setup = make_setup(SOCT4Client, SOCT4Server)
