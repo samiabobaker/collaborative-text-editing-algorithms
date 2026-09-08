@@ -22,22 +22,7 @@ def strong_list_specification_checker(
         )
         return False
 
-    for client_id in clients:
-        if not check_condition1a(client_log[client_id]):
-            return False
-        if not check_condition1c(client_log[client_id]):
-            return False
-
-    list_order = build_list_order_for_condition1b(client_log)
-    if not check_condition2_strong(list_order):
-        """for client_id in clients:
-            print(f"CLIENT {client_id}")
-            for state in client_log[client_id].states_after_events:
-                print(*state, sep="")
-            print()"""
-        return False
-
-    return True
+    return strong_list_specification_checker_for_client_log(client_log)
 
 
 def strong_list_specification_checker_for_client_log(client_log: dict[int, ClientTrace]) -> bool:
@@ -70,16 +55,19 @@ def weak_list_specification_checker(
             f"This algorithm does not satisfy the list specification ({type(e).__name__} while applying an operation: {e})."
         )
         return False
+    return weak_list_specification_checker_for_client_log(client_log)
 
+
+def weak_list_specification_checker_for_client_log(client_log: dict[int, ClientTrace]) -> bool:
     list_order = build_list_order_for_condition1b(client_log)
 
-    for client_id in clients:
+    for client_id in client_log:
         if not check_condition1a(client_log[client_id]):
             return False
         if not check_condition1c(client_log[client_id]):
             return False
         if not check_condition2_weak_for_client(client_log[client_id], list_order):
-            for client_id in clients:
+            for client_id in client_log:
                 print(f"CLIENT {client_id}")
                 for state in client_log[client_id].states_after_events:
                     print(*state, sep="")
