@@ -40,42 +40,39 @@
 
 \section{Introduction}
 
-Collaborative text-editing algorithms allow multiple users to edit the same text document concurrently; they are used in popular software such as Google Docs and Overleaf. In the field
-of collaborative text-editing algorithms, there is an over-arching issue of correctness. There are many published algorithms, and many open source implementations, yet
-it is not very well-studied the correctness properties of many of these algorithms. In fact, there are algorithms shown after publication to simply not work \cite{Oster2005Proving}. A lot of these algorithms come without proof of their correctness properties, and some
-come with incorrect hand-written proofs \cite{Oster2005Proving}. Many algorithms pre-date the correctness properties, with no one going back to check whether or not the algorithm satisfies it. To add to these issues, there are many algorithms with no publicly available implementation. This has led to claims based on algorithms for which no one has
-externally verified their correctness. These issues have meant that some work in this field has built up a reputation of being too complicated and not worth trying to understand.
+Collaborative text-editing algorithms allow multiple users on different machines to edit the same text document concurrently; they are used in popular software such as Google Docs and Overleaf.
+Since Ellis and Gibbs' seminal paper on Operational Transformation (OT) in 1989~\cite{Ellis1989}, dozens of such algorithms have been published in papers or open source implementations, and new algorithms have continued to appear in recent years.
+Unfortunately, the field has been bedevilled by persistent correctness issues.
+Not only was the original OT paper wrong, but several subsequent attempts to fix it were also shown to simply not work \cite{Oster2005Proving}, despite having been published in peer-reviewed venues. 
+Many algorithms have been published without proof of their correctness, and some that were published with proofs also later turned out to be incorrect due to mistakes in the proofs \cite{Oster2005Proving}.
 
+To add to the confusion, for decades there was no formal specification of what it means for a collaborative text editing algorithm to be correct.
+The main property algorithms focussed on was convergence (i.e., all replicas eventually end up in the same state), but convergence alone is not sufficient to be useful: for example, a text editor could drop or reorder characters, resulting in garbled text, while still converging.
+The CCI model from 1996 \cite{Sun1996} relies on a notion of ``intention-preservation'' that is too vague to be checkable.
+It was only in 2016 that Attiya et al.~\cite{Attiya2016} proposed the first formal specification of collaborative text editing, which in 2025 was extended with a further important property, non-interleaving \cite{Weidner2025Fugue}.
+However, executable checkers for these specifications are not available, and only a few algorithms have been evaluated against these formal specifications so far.
+As a result, there is a large collection of algorithms for collaborative text editing, historical and new, whose correctness properties are unknown.
 
-To help combat these issues, we provide three things: a model-checker designed for the task of testing correctness properties
-of collaborative text-editing algorithms; a collection of implementations of all major algorithms in research and open-source; and a set of results on the correctness properties
-and issues we found with all the algorithms we implemented. These should act as a guide for others attempting to implement these algorithms, without wanting to search for results through many decades of academic papers. We hope these mean that similar correctness issues are avoided in future work, and for others to add to this collection with future algorithms and properties. 
+This problem is exacerbated by the fact that for many algorithms, no implementation is publicly available, and the descriptions of the algorithms in papers are sometimes complex, vague, and/or incomplete, making it difficult to independently check them for correctness.
+As a result, some work in this field has gained a reputation of being full of errors, too complicated, and not worth trying to understand.
 
+To address this situation, this paper makes the following contributions:
+\begin{itemize}
+    \item We implement a specialised model checker for testing collaborative text editing algorithms, which includes checks for convergence, Attiya et al.'s strong and weak list specification \cite{Attiya2016}, and the forward non-interleaving and maximal non-interleaving properties \cite{Weidner2025Fugue}.
+    \item We implement a corpus of collaborative text editing algorithms covering most of the research literature and open source libraries, and use our model checker to test these algorithms against the aforementioned properties. % TODO: say how many algorithms are in the corpus
+        For many of these algorithms, this is the first publicly available implementation, and the first time its properties have been independently checked.
+        Our results provide, for the first time, a comprehensive survey of the collaborative text editing literature from a correctness point of view, and for several published algorithms we find novel bugs that have not been reported previously.
+    \item We evaluate our model checker based on its ability to reproduce known results, and we compare its performance in an exhaustive checking mode with a randomised mode that probabilistically searches for violations of consistency properties.
+\end{itemize}
 
-Our model-checker uses randomised testing to test a very large number of states in an algorithm. We check whether these states satisfy known properties 
-of collaborative text-editing algorithms: convergence, weak list specification, strong list specification \cite{Attiya2016}, forward non-interleaving and maximal non-interleaving \cite{Weidner2025Fugue}.
-An alternative would have been to write a formal mechanised proof of the algorithms. This has the advantage that it provides certainty of the algorithm's correctness
-compared to our model checker, which can only check a finite number of cases. However, the benefit of using model-checking is that writing a proof is time-consuming
-and easy to get wrong. There are examples of algorithms being proven correct, to later be found wrong \cite{Oster2005Proving}. Another benefit is that model-checking checks a real implementation rather
-than an idealised model of the algorithm, which helps to spot both implementation bugs and bugs in the underlying algorithms. Our model-checker requires no
-additional effort beyond implementing the algorithm.
+As with any model checker, our tool can only explore a finite state space to establish that either an algorithm does not satisfy some property, or that it satisfies the property within bounded executions.
+Making any guarantees about unbounded executions would require a formal proof.
+However, the advantage of our model checker is that adding new algorithms and checking them against our properties is quick and easy, making it possible to quickly rule out algorithms that are obviously broken.
+We hope that our tool and our algorithm corpus will therefore become a standard part of future research on collaborative editing algorithms, allowing formal verification efforts to focus on those algorithms that have been shown by the model checker to be plausible.
 
-Our collection of implementations aim to reduce the ambiguity in the descriptions of some of these algorithms. We find some papers give vague descriptions of
-certain components of an algorithm. Some algorithms have many variants or interpretations in different papers, that are not clearly documented. Some algorithms have bugs with fixes in open-source implementations, but not clearly documented
-anywhere. Some of these fixes also inadvertently lead to issues elsewhere. We aim to document these kinds of issues that we found to avoid confusions for others in the future. We believe this collection is the most comprehensive collection of these algorithms. Our implementations focus on the correctness of the base algorithms, so we leave performance
-optimisations and additional features (such as string-wise operations \cite{Lv2016}, undoing, moving \cite{Kleppmann2020} and rich-text \cite{Litt2022}) out of scope of our work. Similarly, we leave the use of these algorithms
-for non-plain text documents (such as graphics editing \cite{Sun2002}, and XML \cite{Davis2002}) out of scope. We give some motivation for why we avoid some of these in future sections.
-
-
-Our set of results appear in the form of a table of algorithms and their respective properties, which we find using our model-checker. We also provide multiple previously unknown bugs to published algorithms. This aims to collate all the existing work on collaborative text-editing algorithms, to provide a clear place to see which algorithms satisfy which properties and which do not.
-
-
-\autoref{sec:background} and \autoref{sec:otbackground} provide background of the relevant concepts we check for in our model-checker. These are the main concepts
-required to understand our results and implementations. \autoref{sec:modelcheckerimplementation} gives a description of the implementation of our model-checker. To our knowledge, 
-it is the first implementation of these properties, and we describe the features and limitations of this model-checker. \autoref{sec:modelcheckerresults} gives the results of our model-checker,
-showing which algorithms satisfy which properties. \autoref{sec:algorithmimplementations} describes the important things we found when implementing these algorithms, including counter-examples
-to properties, ambiguities in the algorithm and known bugs. 
-
+The scope of this paper is focussed on the correctness of collaborative text editing with single-character insertions and deletions, and it includes both the OT and the CRDT family of algorithms.
+We leave an evaluation of algorithm performance, and additional features (such as multi-character operations \cite{Lv2016}, undo \cite{Ressel1999}, move \cite{Kleppmann2020}, and rich text \cite{Litt2022}) for future work.
+Similarly, the use of these algorithms for file types other than plain text (such as graphics editing \cite{Sun2002} and XML \cite{Davis2002}) is beyond the scope of this paper.
 
 
 \section{Background} \label{sec:background}
