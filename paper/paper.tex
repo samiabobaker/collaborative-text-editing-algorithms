@@ -5,7 +5,9 @@
 \usepackage{amsthm}
 \usepackage[htt]{hyphenat}
 
-\newtheorem{property}{Property}
+% acmart creates the shared `theorem` counter (numbered within section) in an
+% \AtEndPreamble hook, so defer this to make Property share it with Definition.
+\AtEndPreamble{\newtheorem{property}[theorem]{Property}}
 
 \setcopyright{cc}
 \acmConference[EuroSys'27]{European Conference on Computer Systems}{April 19--23, 2027}{Rabat, Morocco}
