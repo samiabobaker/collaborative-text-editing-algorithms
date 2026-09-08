@@ -18,7 +18,12 @@ def forward_non_interleaving(
     # right-origin
     # list of characters for which it is a right origin
     client_logs, characters = build_random_trace(clients, server, num_of_ops, print_ops)
+    return forward_non_interleaving_for_client_log(client_logs, characters, print_ops)
 
+
+def forward_non_interleaving_for_client_log(
+    client_logs: dict[int, ClientTrace], characters: dict[int, Character], print_ops: bool = False
+) -> bool:
     # For all states
     for client_id in client_logs:
         client_log = client_logs[client_id]
@@ -29,7 +34,7 @@ def forward_non_interleaving(
                     if not check_condition_1(state, characters, A, B):
                         if print_ops:
                             print(f"Failed forward interleaving at {A} {B}.")
-                            for client_id in clients:
+                            for client_id in client_logs:
                                 print(f"CLIENT {client_id}")
                                 for state in client_logs[client_id].states_after_events:
                                     print(*state, sep="")
@@ -55,7 +60,12 @@ def maximally_non_interleaving(
     # right-origin
     # list of characters for which it is a right origin
     client_logs, characters = build_random_trace(clients, server, num_of_ops, print_ops)
+    return maximally_non_interleaving_for_client_log(client_logs, characters, print_ops)
 
+
+def maximally_non_interleaving_for_client_log(
+    client_logs: dict[int, ClientTrace], characters: dict[int, Character], print_ops: bool = False
+) -> bool:
     # For all states
     for client_id in client_logs:
         client_log = client_logs[client_id]
@@ -69,7 +79,7 @@ def maximally_non_interleaving(
                 origin, element = lost
                 if print_ops:
                     print(f"Origin {origin} of element {element} is missing from the state.")
-                    for client_id in clients:
+                    for client_id in client_logs:
                         print(f"CLIENT {client_id}")
                         for state in client_logs[client_id].states_after_events:
                             print(*state, sep="")
@@ -81,7 +91,7 @@ def maximally_non_interleaving(
                     if not check_condition_1(state, characters, A, B):
                         if print_ops:
                             print(f"Failed forward interleaving at {A} {B}.")
-                            for client_id in clients:
+                            for client_id in client_logs:
                                 print(f"CLIENT {client_id}")
                                 for state in client_logs[client_id].states_after_events:
                                     print(*state, sep="")
@@ -96,7 +106,7 @@ def maximally_non_interleaving(
                     if not check_condition_2(state, characters, A, B):
                         if print_ops:
                             print(f"Failed backward interleaving at {A} {B}")
-                            for client_id in clients:
+                            for client_id in client_logs:
                                 print(f"CLIENT {client_id}")
                                 for state in client_logs[client_id].states_after_events:
                                     print(*state, sep="")
@@ -105,57 +115,6 @@ def maximally_non_interleaving(
                                 character = characters[character_id]
                                 if print_ops:
                                     print(character)
-                        return False
-
-                    # Algorithm is free to choose how to handle the case in condition 3, so this does not need to be checked.
-
-    return True
-
-
-def maximally_non_interleaving_from_client_logs(
-    client_logs: dict[int, ClientTrace], characters: dict[int, Character], print_ops: bool = False
-):
-    # Assume algorithm satisfies the strong list spec
-
-    # Build a trace of a random execution.
-    # Need state at each point of execution.
-    # For each character, need its:
-    #  left-origin,
-    # list of characters for which it is a left origin of,
-    # right-origin
-    # list of characters for which it is a right origin
-    # For all states
-    for client_id in client_logs:
-        client_log = client_logs[client_id]
-        for state in client_log.states_after_events:
-            for A in state:
-                for B in state:
-                    # To check 1 (forward non-interleaving)
-                    if not check_condition_1(state, characters, A, B):
-                        if print_ops:
-                            print(f"Failed forward interleaving at {A} {B}.")
-                            for client_id in client_logs:
-                                print(f"CLIENT {client_id}")
-                                for state in client_logs[client_id].states_after_events:
-                                    print(*state, sep="")
-                                print()
-                            for character_id in characters:
-                                character = characters[character_id]
-                                print(character)
-                        return False
-
-                    # To check 2(backward non-interleaving)
-                    if not check_condition_2(state, characters, A, B):
-                        if print_ops:
-                            print(f"Failed backward interleaving at {A} {B}")
-                            for client_id in client_logs:
-                                print(f"CLIENT {client_id}")
-                                for state in client_logs[client_id].states_after_events:
-                                    print(*state, sep="")
-                                print()
-                            for character_id in characters:
-                                character = characters[character_id]
-                                print(character)
                         return False
 
                     # Algorithm is free to choose how to handle the case in condition 3, so this does not need to be checked.

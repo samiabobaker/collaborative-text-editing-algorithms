@@ -6,6 +6,8 @@
 #    python -m main.cli strong-list-spec --all --seeds 200
 #    python -m main.cli convergence tibot2 --seed 22
 #    python -m main.cli convergence tibot2 --forever
+#    python -m main.cli strong-list-spec rga --exhaustive --depth 6
+#    python -m main.cli weak-list-spec --all --exhaustive --depth 5 --clients 2
 #
 # Exits 1 if any case failed, so it can be used from a script or from CI.
 
@@ -65,6 +67,7 @@ from algorithm_setup.algorithm_setup import (
     yjsmod_setup,
 )
 from main.convergence import convergence_with_seed
+from main.exhaustive import EXHAUSTIVE_CHECKS
 from main.interleaving import forward_interleaving_with_seed, interleaving_with_seed
 from main.originorder import origin_order_with_seed
 from main.stronglistspec import stronglistspec_with_seed
@@ -207,6 +210,29 @@ def run_seeds(
     return failures, errors, first_exception
 
 
+def run_exhaustive_case(
+    check_name: str, setup: DeviceSetup, num_of_clients: int, depth: int, verbose: bool, timeout: float = 0
+) -> tuple[str, int]:
+    # The exhaustive counterpart of run_case. Returns the outcome and how many traces were
+    # checked, so that a pass can report the size of the space it covered and a timeout can
+    # report how far it got. Unlike run_case the timeout bounds the whole search rather than
+    # one trace, so the drivers catch it themselves and report the count.
+    captured = io.StringIO()
+    check = EXHAUSTIVE_CHECKS[check_name]
+    try:
+        with case_timeout(timeout):
+            if verbose:
+                outcome, checked = check(setup, num_of_clients, depth)
+            else:
+                with contextlib.redirect_stdout(captured):
+                    outcome, checked = check(setup, num_of_clients, depth)
+    except Exception as exception:
+        if verbose:
+            traceback.print_exc()
+        return type(exception).__name__, 0
+    return "passed" if outcome else "failed", checked
+
+
 def seed_list(seeds: list[int], limit: int = 10) -> str:
     # The first few failing seeds, each of which --seed will reproduce on its own.
     shown = " ".join(str(seed) for seed in seeds[:limit])
@@ -228,6 +254,37 @@ def run_forever(check: Check, setup: DeviceSetup, first_seed: int, num_of_client
             return seed
 
 
+def run_exhaustive(
+    check_name: str, names: list[str], num_of_clients: int, depth: int, verbose: bool, timeout: float
+) -> int:
+    # One sweep per algorithm. Unlike the seed sweeps there is nothing to reproduce a
+    # failure with, because the search is deterministic given the depth and client count.
+    total_failures = 0
+    for name in names:
+        started = time.time()
+        outcome, checked = run_exhaustive_case(check_name, ALGORITHMS[name], num_of_clients, depth, verbose, timeout)
+        elapsed = time.time() - started
+
+        if outcome == "passed":
+            print(f"{name:24s} {'ok':>7s}  {checked} traces to depth {depth}  ({elapsed:5.1f}s)")
+        elif outcome == "failed":
+            total_failures += 1
+            print(f"{name:24s} {'failed':>7s}  after {checked} traces to depth {depth}  ({elapsed:5.1f}s)")
+        elif outcome == "timeout":
+            # Not a pass and not a violation: the search was cut short, so it says nothing
+            # about the property. Counted as a non-pass so a sweep does not read as clean.
+            total_failures += 1
+            print(
+                f"{name:24s} {'timeout':>7s}  after {checked} traces, depth {depth} not covered"
+                f"  ({elapsed:5.1f}s, raise --timeout)"
+            )
+        else:
+            total_failures += 1
+            print(f"{name:24s} {'raised':>7s}  {outcome} at depth {depth}  ({elapsed:5.1f}s)")
+
+    return 1 if total_failures else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="python -m main.cli",
@@ -242,18 +299,34 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--seed", type=int, help="run this single seed, e.g. to reproduce a failure")
     parser.add_argument("--clients", type=int, default=3, help="clients per case (default 3)")
     parser.add_argument("--ops", type=int, default=30, help="operations per case (default 30)")
+    parser.add_argument(
+        "--exhaustive",
+        action="store_true",
+        help="enumerate every execution up to --depth instead of sampling random ones",
+    )
+    parser.add_argument("--depth", type=int, default=5, help="operations per execution when --exhaustive (default 5)")
     parser.add_argument("--forever", action="store_true", help="keep going until a case fails")
     parser.add_argument("--stop-early", action="store_true", help="stop an algorithm at its first failure")
     parser.add_argument("--verbose", action="store_true", help="show each failing case in full")
     parser.add_argument(
-        "--timeout", type=float, default=10.0, help="seconds before a case is given up on, 0 for no limit (default 10)"
+        "--timeout",
+        type=float,
+        default=None,
+        help="seconds before a case is given up on, 0 for no limit "
+        "(default 10 per random case, 600 for a whole exhaustive search)",
     )
     args = parser.parse_args(argv)
+
+    # A random case is one trace, where 10s catches an implementation that loops rather
+    # than finishing. An exhaustive case is the entire search, where 10s would cut off
+    # every depth worth running, so the two modes need different budgets.
+    timeout = args.timeout if args.timeout is not None else (600.0 if args.exhaustive else 10.0)
 
     if args.list:
         print("checks:")
         for name in sorted(CHECKS):
-            print(f"    {name}")
+            exhaustive = " (also --exhaustive)" if name in EXHAUSTIVE_CHECKS else ""
+            print(f"    {name}{exhaustive}")
         print("algorithms:")
         for name in sorted(ALGORITHMS):
             print(f"    {name}")
@@ -264,8 +337,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.algorithm is None and not args.all:
         parser.error("an algorithm is required (or use --all)")
 
-    check = CHECKS[str(args.check)]
+    check_name = str(args.check)
     names: list[str] = sorted(ALGORITHMS) if args.all else [str(args.algorithm)]
+
+    if args.exhaustive:
+        if check_name not in EXHAUSTIVE_CHECKS:
+            parser.error(f"--exhaustive does not support {check_name}, only {', '.join(sorted(EXHAUSTIVE_CHECKS))}")
+        if args.forever:
+            parser.error("--exhaustive and --forever are alternatives: an exhaustive search is already finite")
+        return run_exhaustive(check_name, names, args.clients, args.depth, args.verbose, timeout)
+
+    check = CHECKS[check_name]
     seeds = [args.seed] if args.seed is not None else range(args.from_seed, args.from_seed + args.seeds)
 
     if args.forever:
@@ -282,7 +364,7 @@ def main(argv: list[str] | None = None) -> int:
     for name in names:
         started = time.time()
         failures, errors, exception = run_seeds(
-            check, ALGORITHMS[name], seeds, args.clients, args.ops, args.stop_early, args.verbose, args.timeout
+            check, ALGORITHMS[name], seeds, args.clients, args.ops, args.stop_early, args.verbose, timeout
         )
         total_failures += len(failures) + len(errors)
         elapsed = time.time() - started

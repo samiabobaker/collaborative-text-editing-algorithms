@@ -19,3 +19,6 @@ class UniqueChar:
         c = UniqueChar(char, UniqueChar.now)
         UniqueChar.now += 1
         return c
+
+    def __deepcopy__(self, memo: dict[int, object]) -> UniqueChar:
+        return self

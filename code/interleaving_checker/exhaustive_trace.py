@@ -106,9 +106,9 @@ def build_exhaustive_trace_clients(
 
             queue_item_copy.depth += 1
 
-            if queue_item_copy.depth == num_of_operations:
-                yield queue_item_copy.clients_trace, queue_item_copy.characters
-            else:
+            yield queue_item_copy.clients_trace, queue_item_copy.characters
+
+            if queue_item_copy.depth != num_of_operations:
                 queue.append(queue_item_copy)
 
 
@@ -187,14 +187,13 @@ def build_exhaustive_trace_client_server(
 
             queue_item_copy.depth += 1
 
-            if queue_item_copy.depth == num_of_operations:
-                yield queue_item_copy.clients_trace, queue_item_copy.characters
-            else:
-                yield queue_item_copy.clients_trace, queue_item_copy.characters
+            yield queue_item_copy.clients_trace, queue_item_copy.characters
+
+            if queue_item_copy.depth != num_of_operations:
                 queue.append(queue_item_copy)
 
 
-def build_exhaustive_trace(
+def build_exhaustive_interleaving_trace(
     clients: dict[int, ClientDevice],
     server: ServerDevice | None = None,
     num_of_operations: int = 30,
