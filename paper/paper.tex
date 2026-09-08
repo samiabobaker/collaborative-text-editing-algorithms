@@ -50,7 +50,7 @@ Many algorithms have been published without proof of their correctness, and some
 
 To add to the confusion, for decades there was no formal specification of what it means for a collaborative text editing algorithm to be correct.
 The main property algorithms focussed on was convergence (i.e., all replicas eventually end up in the same state), but convergence alone is not sufficient to be useful: for example, a text editor could drop or reorder characters, resulting in garbled text, while still converging.
-The CCI model from 1996 \cite{Sun1996} relies on a notion of ``intention-preservation'' that is too vague to be checkable.
+The CCI model from 1996 \cite{Sun1996} relies on a notion of ``intention preservation'' that is too vague to be checkable.
 It was only in 2016 that Attiya et al.~\cite{Attiya2016} proposed the first formal specification of collaborative text editing, which in 2025 was extended with a further important property, non-interleaving \cite{Weidner2025Fugue}.
 However, executable checkers for these specifications are not available, and only a few algorithms have been evaluated against these formal specifications so far.
 As a result, there is a large collection of algorithms for collaborative text editing, historical and new, whose correctness properties are unknown.
@@ -60,7 +60,7 @@ As a result, some work in this field has gained a reputation of being full of er
 
 To address this situation, this paper makes the following contributions:
 \begin{itemize}
-    \item We implement a specialised model checker for testing collaborative text editing algorithms, which includes checks for convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, and the forward non-interleaving and maximal non-interleaving properties \cite{Weidner2025Fugue}.
+    \item We implement a specialised model checker for testing collaborative text editing algorithms, which includes checks for five properties: convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}.
     \item We implement a corpus of collaborative text editing algorithms covering most of the research literature and open source libraries, and use our model checker to test these algorithms against the aforementioned properties. % TODO: say how many algorithms are in the corpus
         For many of these algorithms, this is the first publicly available implementation, and the first time their properties have been independently checked.
         Our results provide, for the first time, a comprehensive survey of the collaborative text editing literature from a correctness point of view, and for several published algorithms we find novel bugs that have not been reported previously.
@@ -79,33 +79,34 @@ Similarly, the use of these algorithms for file types other than plain text (suc
 
 \section{Background} \label{sec:background}
 
-This section provides background on collaborative text-editing algorithms, and on the properties of these algorithms that we check with our 
-model checker. 
+\subsection{Introduction to collaborative text editing}
 
-\subsection{Introduction to collaborative text-editing algorithms}
+The goal of a collaborative text-editing algorithm is to allow several users to edit a shared text document in real time. When a user makes a change to the
+document, network messages are sent to their collaborators so that they also see this change. We consider two types of changes: $\mathit{ins}(i, x)$ means the character $x$ is inserted in the document at index $i$, and $\mathit{del}(i)$ means the character at index $i$ is deleted.
 
-The goal of a collaborative text-editing algorithm is to allow users to edit a single text document concurrently in real time. When a user makes a change to the
-document, network messages are sent so that every other user sees this change. We consider two types of changes: $\mathit{ins}(i, x)$ means that $x$ is inserted in the document at position $i$, $\mathit{del}(i)$ means that the character at position $i$ is deleted.
+These algorithms must have a responsive user interface even if the network is slow. Thus, when a user makes a change, it should be applied instantly to their local copy of the document, without waiting for any network round-trips. When a client receives a message about another client's change, the state of their document may be different from the document on which those changes were originally performed.
+In particular, an index may now refer to a different position in the text.
+The main difficulty of collaborative text editing is ensuring that clients nevertheless converge to a valid state.
 
-These algorithms must have a responsive user interface even if the network is slow. That means when a user makes a change, it should be applied instantly to the local document, without waiting for any other client in the network. Therefore, when a client receives a message about another client's change, the state of their document may be very different from the document those changes were originally executed on. The main difficulty is ensuring this situation
-is handled correctly in all scenarios.
+There are two general approaches to solving this problem: Operational Transformation (OT) \cite{Ellis1989} and Conflict-free Replicated Data Types (CRDTs) \cite{Preguica2009}. We describe OT in more detail in \autoref{sec:otbackground}. A CRDT is a data structure specially designed to handle changes being made concurrently. The operations are represented in such a way that concurrent operations commute, i.e.\ they have the same effect regardless of the order in which they are executed.
 
-There are two general approaches to solving this problem: Operational Transformation (OT) \cite{Ellis1989} and Conflict-free Replicated Data Types (CRDTs) \cite{Preguica2009}. We describe OT in more detail in \autoref{sec:otbackground}. A CRDT is a data structure specially designed to handle changes being made concurrently. The operations are represented in a way such that they have the same effect regardless of the order in which they are executed.
+Another way to categorise these algorithms is by the assumptions they make about the network. Some algorithms assume the existence of a server, and some are decentralised. Generally, the logic becomes simpler when there is a server, but it is a single point of failure, and avoiding a server may be preferred in some cases, such as peer-to-peer networks. Another assumption some algorithms make is that all clients are online, and the algorithm stops working if one client is disconnected from the rest of the network. This is a much more drastic assumption to make than assuming a server exists, since now every device is a single point of failure. 
 
-Another way to categorise these algorithms is by the assumptions they make about the network. Some algorithms assume the existence of a server, and some are decentralised. Generally, the logic becomes simpler when there is a server, but it is a single point of failure, and not having a server may be preferred in many cases. Another assumption some algorithms make is that all clients are online, and the algorithm stops working if one client is disconnected from the rest of the network. This is a much worse assumption to make than assuming a server exists, since now every device is a point of failure. 
+\subsection{Defining the correctness of an algorithm}
 
-\subsection{CCI Model}
-
-The CCI model \cite{Sun1996} was devised in early work on these algorithms to define what it means for an algorithm to be correct. The three properties it describes are convergence, causality-preservation, and intention-preservation. Convergence means that all clients eventually reach the same document state, once all network messages have been received. Causality-preservation means that if 
-an operation $O_b$ is causally dependent on $O_a$, then $O_a$ must be executed before $O_b$ on all clients. Intention-preservation says that when an operation is executed, the intention
-of the user must be preserved. The CCI model is not formally checkable because the idea of `intention' is vague. In the context of text editing, more formally checkable properties are the
-weak and strong list specifications \cite{Attiya2016}, so we use these in our model checker.    
+The CCI model \cite{Sun1996} was an early proposal aiming to define what it means for a collaborative text editing algorithm to be correct.
+The three properties it describes are convergence, causality preservation, and intention preservation. Convergence means that all clients eventually reach the same document state, once all network messages have been received. Causality preservation means that if 
+an operation $O_b$ is causally dependent on $O_a$, then $O_a$ must be executed before $O_b$ on all clients. Intention preservation says that when an operation is executed, the intention
+of the user must be preserved.
+While the first two properties are well-defined, the meaning of ``intention'' in this model is unclear, making it impossible to formally check compliance with the CCI model.
 
 \subsubsection{Weak and Strong List Specification}
 
+The weak and strong list specifications of Attiya et al.~\cite{Attiya2016} are precise correctness properties for collaborative text editing (or, more generally, a list object supporting insertion and deletion at arbitrary positions) that go beyond convergence and causality preservation.
+We use these properties in our model checker.
 
-Convergence is not a strong enough requirement. The trivial way to achieve convergence is to have all clients always delete the entire document. The weak and strong list
-specifications describe what must appear in the document, and in what order. The first main idea is that a character must appear in the document if and only if an insertion operation
+The weak and strong list specifications describe what characters must appear in the document, and in what order, at every point in the execution.
+Firstly, a character must appear in the document if and only if an insertion operation
 of it has been seen, and a deletion operation has not been seen. The second is that if a character $a$ appears before a character $b$ in some client's document state, $a$ must appear before $b$ in every client's document
 state. The difference between the two is that the weak list specification is more relaxed about the ordering of deleted characters.
 
@@ -122,7 +123,7 @@ for the full properties.
       Each locally executed operation $op$, which results in a sequence of elements $w = a_0 \dots a_{n-1}$, satisfies the properties:
       \begin{enumerate}
         \item
-          $w$ contains exactly the elements visible to $e$ that have been inserted, but not deleted.
+          $w$ contains exactly the elements visible to $e$ that have been inserted, but not deleted. % TODO: this refers to a variable $e$ that is not defined in the strong list spec context, only on the definition of the weak list
         \item
           The order of these elements is consistent with the list order:
           $\forall i,j. (i < j) \implies (a_i, a_j) \in lo$.
@@ -147,13 +148,21 @@ for the full properties.
 
 \subsubsection{Interleaving}
 
-One limitation of the weak and strong list specifications is that they allow for interleaving behaviour. When users insert text concurrently at the same position, some algorithms may interleave those changes
-with one another, rather than displaying the changes separately. This issue was known, but not properly formalised until the forward non-interleaving and maximal non-interleaving properties \cite{Weidner2025Fugue}, which restrict the specification to only allow non-interleaving
-orders. There are two kinds of interleaving: forward and backward. Forward interleaving occurs when text is written in the forward direction (typing ``cat'' by typing
-`c' then `a' then `t'). Backward interleaving occurs when text is written in the backward direction (typing ``cat'' by typing `t' then `a' then `c'). Forward non-interleaving
-attempts to disallow the forward interleaving case. There are cases when it is impossible to disallow both forward and backward interleaving, so maximal non-interleaving disallows both when possible, but prefers disallowing forward interleaving if disallowing both is not possible.
+One limitation of the weak and strong list specifications is that they allow interleaving behaviour. When users concurrently insert text at the same position, some algorithms may interleave those changes
+with each other, rather than keeping the new passages separate.
+The weak and strong list specifications allow arbitrary interleaving, even though this can lead to unusable garbled text \cite{Kleppmann2019}.
 
-We quote the relevant properties below, but refer to the original paper for the full details.
+Forward interleaving \cite{Weidner2025Fugue} occurs when both insertions are performed in the forward direction (typing ``cat'' by typing `c' then `a' then `t'), and the merged state exhibits interleaving.
+Backward interleaving occurs when text is written in the backward direction (typing ``cat'' by typing `t' then `a' then `c'), and the merged state is interleaved.
+Since backward insertions happen rarely in typical text editing behaviour, backward interleaving is not an important practical concern, but forward interleaving is.
+
+It has recently been shown that it is impossible for an algorithm to guarantee both forward and backward non-interleaving \cite{Weidner2025Fugue}.
+Maximal non-interleaving is a strengthening of forward non-interleaving that also disallows backward interleaving when possible, but which prioritises forward non-interleaving in cases when it is not possible to prevent both interleaving directions.
+
+In this paper we check for forward non-interleaving as well as maximal non-interleaving, and to our knowledge our model checker is the first implementation of these properties.
+We expect that an algorithm that satisfies forward non-interleaving but not maximal non-interleaving is good enough for most practical applications, but we report the results for maximal non-interleaving as well because backward insertion may be more frequent in some applications.
+
+We quote the relevant properties below, but refer to the Fugue paper \cite{Weidner2025Fugue} for the full details.
 
 \begin{definition}[Left Origin]
   The left origin of an element is the element directly preceding its insertion position at the time of insertion. If the element was inserted by 
@@ -162,6 +171,7 @@ We quote the relevant properties below, but refer to the original paper for the 
 \end{definition}
 
 \begin{definition}[Right Origin]
+  % TODO: should we leave out the mention of tombstones in this definition, since we haven't explained the term yet, and our checker's implementation does not use deletions in the interleaving tests?
   The right origin of an element is the element directly following its insertion position at the time of insertion, in the list including tombstones. If the element was inserted by 
   an $ins(i, x)$ call, then its right origin was at index $i+1$ at the time of this call. If $i$ is the end of the list, then its right origin is a special symbol
   $\mathit{end}$.
@@ -607,7 +617,7 @@ The Logoot \cite{Weiss2009} algorithm is known to have bugs \cite{Sun2018}, whic
 by lowering the base to $2^4$, violations start to appear. This is because the bugs require two random numbers to be equal, and with BASE=$2^{64}$ this happens with very low probability. Note that setting BASE to a very high value is not a practical solution, as it only makes the bugs unlikely rather than impossible.
 
 
-The first bug leads to divergence; this bug was fixed in a later description of the algorithm \cite{Weiss2010}. The other causes the algorithm to get stuck in an infinite loop. We implemented the fix for this bug that we found in an open source implementation.
+The first bug leads to divergence; this bug was fixed in a later description of the algorithm \cite{Weiss2010}. The other causes the algorithm to get stuck in an infinite loop. We implemented the fix for this bug that we found in an open source implementation. % TODO: need reference to that open source implementation
 
 ...
 
