@@ -67,8 +67,6 @@ def build_exhaustive_trace_clients(
 
         random.shuffle(all_operations)
 
-        print(all_operations[0])
-
         for operation in all_operations:
             queue_item_copy = queue_item.copy()
 
@@ -83,9 +81,9 @@ def build_exhaustive_trace_clients(
 
             queue_item_copy.depth += 1
 
-            if queue_item_copy.depth == num_of_operations:
-                yield queue_item_copy.clients_trace
-            else:
+            yield queue_item_copy.clients_trace
+
+            if queue_item_copy.depth != num_of_operations:
                 queue.append(queue_item_copy)
 
 
@@ -132,10 +130,9 @@ def build_exhaustive_trace_client_server(
 
                 queue_item_copy.depth += 1
 
-                if queue_item_copy.depth == num_of_operations:
-                    yield queue_item_copy.clients_trace
-                else:
-                    yield queue_item_copy.clients_trace
+                yield queue_item_copy.clients_trace
+
+                if queue_item_copy.depth != num_of_operations:
                     queue.append(queue_item_copy)
             elif len(all_server_operations) != 0:
                 operation = all_server_operations.pop()
@@ -146,10 +143,9 @@ def build_exhaustive_trace_client_server(
 
                 queue_item_copy.depth += 1
 
-                if queue_item_copy.depth == num_of_operations:
-                    yield queue_item_copy.clients_trace
-                else:
-                    yield queue_item_copy.clients_trace
+                yield queue_item_copy.clients_trace
+
+                if queue_item_copy.depth != num_of_operations:
                     queue.append(queue_item_copy)
 
 
