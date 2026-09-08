@@ -36,6 +36,7 @@ from prosemirror.prosemirrorclient import ProseMirrorClient
 from prosemirror.prosemirrorserver import ProseMirrorServer
 from rga.rgaclient import RGAClient
 from rgas4.rgas4client import RGAS4Client
+from sdt.sdtclient import SDTClient
 from sharedb.sharedbclient import ShareDBClient
 from sharedb.sharedbserver import ShareDBServer
 from soct2.soct2client import SOCT2Client
@@ -125,6 +126,7 @@ markandretrace_setup = make_setup(MarkAndRetraceClient)
 pps_setup = make_setup(PPSClient)
 rga_setup = make_setup(RGAClient)
 rgas4_setup = make_setup(RGAS4Client)
+sdt_setup = make_setup(SDTClient)
 sync7_setup = make_setup(Sync7Client)
 sync9_setup = make_setup(Sync9Client)
 tibot_setup = make_setup(TIBOTClient)
