@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from algorithm_setup.algorithm_copy import copy_client_server, copy_clients
 from device.clientdevice import ClientDevice
-from device.operations import ClientDeleteOperation, ClientInsertOperation
+from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation, ServerOperation
 from device.serverdevice import ServerDevice
 from exhaustive_operation_generator.exhaustive_operation_generator import (
     generate_all_client_client_operations,
@@ -53,7 +53,7 @@ class ClientServerQueueItem:
 
 
 def build_exhaustive_trace_clients(
-    clients: dict[int, ClientDevice], num_of_operations: int = 4, randomised: bool = False
+    clients: dict[int, ClientDevice], num_of_operations: int = 4, randomised: bool = False, depth_first: bool = False
 ) -> Generator[tuple[dict[int, ClientTrace], dict[int, Character]]]:
     initial_clients_trace: dict[int, ClientTrace] = {}
 
@@ -67,9 +67,12 @@ def build_exhaustive_trace_clients(
     queue.append(initial_queue_items)
 
     while queue != []:
-        queue_item = queue.pop(-1)
+        queue_item = queue.pop(-1) if depth_first else queue.pop(0)
 
         all_operations = generate_all_client_client_operations(list(queue_item.clients.values()), with_deletes=False)
+
+        if randomised:
+            random.shuffle(all_operations)
 
         for operation in all_operations:
             queue_item_copy = queue_item.copy()
@@ -113,7 +116,11 @@ def build_exhaustive_trace_clients(
 
 
 def build_exhaustive_trace_client_server(
-    clients: dict[int, ClientDevice], server: ServerDevice, num_of_operations: int = 4, randomised: bool = False
+    clients: dict[int, ClientDevice],
+    server: ServerDevice,
+    num_of_operations: int = 4,
+    randomised: bool = False,
+    depth_first: bool = False,
 ) -> Generator[tuple[dict[int, ClientTrace], dict[int, Character]]]:
 
     initial_clients_trace: dict[int, ClientTrace] = {}
@@ -128,69 +135,69 @@ def build_exhaustive_trace_client_server(
     queue.append(initial_queue_items)
 
     while queue != []:
-        queue_item = queue.pop(-1)
+        queue_item = queue.pop(-1) if depth_first else queue.pop(0)
 
         all_server_operations, all_client_operations = generate_all_client_server_operations(
             queue_item.server, list(queue_item.clients.values()), with_deletes=False
         )
 
+        all_operations: list[ClientOperation | ServerOperation] = all_client_operations + all_server_operations
+
         if randomised:
-            # print("RANDOMISED")
-            random.shuffle(all_client_operations)
-            random.shuffle(all_server_operations)
+            random.shuffle(all_operations)
 
-        for operation in all_client_operations:
-            queue_item_copy = queue_item.copy()
+        for operation in all_operations:
+            if isinstance(operation, ClientOperation):
+                queue_item_copy = queue_item.copy()
 
-            client = queue_item_copy.clients[operation.client_id]
-            operation_seen = client.perform_operation(operation)
+                client = queue_item_copy.clients[operation.client_id]
+                operation_seen = client.perform_operation(operation)
 
-            assert not isinstance(operation_seen, ClientDeleteOperation)
+                assert not isinstance(operation_seen, ClientDeleteOperation)
 
-            state = list(client.read_state())
-            if isinstance(operation, ClientInsertOperation):
-                char = operation.character
+                state = list(client.read_state())
+                if isinstance(operation, ClientInsertOperation):
+                    char = operation.character
 
-                left_origin = state[operation.position - 1] if operation.position > 0 else "start"
-                right_origin = state[operation.position + 1] if operation.position < len(state) - 1 else "end"
+                    left_origin = state[operation.position - 1] if operation.position > 0 else "start"
+                    right_origin = state[operation.position + 1] if operation.position < len(state) - 1 else "end"
 
-                if left_origin != "start":
-                    left_origin_character = queue_item_copy.characters[left_origin.id]
-                    left_origin_character.add_to_left_origin_of(char)
+                    if left_origin != "start":
+                        left_origin_character = queue_item_copy.characters[left_origin.id]
+                        left_origin_character.add_to_left_origin_of(char)
 
-                if right_origin != "end":
-                    right_origin_character = queue_item_copy.characters[right_origin.id]
-                    right_origin_character.add_to_right_origin_of(char)
+                    if right_origin != "end":
+                        right_origin_character = queue_item_copy.characters[right_origin.id]
+                        right_origin_character.add_to_right_origin_of(char)
 
-                character = Character(char, left_origin, right_origin)
+                    character = Character(char, left_origin, right_origin)
 
-                queue_item_copy.characters[character.char.id] = character
+                    queue_item_copy.characters[character.char.id] = character
 
-            if len(operation_seen) != 0:
-                performed_locally = isinstance(operation, ClientInsertOperation | ClientDeleteOperation)
-                queue_item_copy.clients_trace[operation.client_id].add_event(
-                    Event(operation_seen, performed_locally), list(client.read_state())
-                )
+                if len(operation_seen) != 0:
+                    performed_locally = isinstance(operation, ClientInsertOperation | ClientDeleteOperation)
+                    queue_item_copy.clients_trace[operation.client_id].add_event(
+                        Event(operation_seen, performed_locally), list(client.read_state())
+                    )
 
-            queue_item_copy.depth += 1
+                queue_item_copy.depth += 1
 
-            if queue_item_copy.depth == num_of_operations:
-                yield queue_item_copy.clients_trace, queue_item_copy.characters
+                if queue_item_copy.depth == num_of_operations:
+                    yield queue_item_copy.clients_trace, queue_item_copy.characters
+                else:
+                    yield queue_item_copy.clients_trace, queue_item_copy.characters
+                    queue.append(queue_item_copy)
             else:
+                queue_item_copy = queue_item.copy()
+
+                queue_item_copy.server.perform_operation(operation)
+
+                queue_item_copy.depth += 1
+
                 yield queue_item_copy.clients_trace, queue_item_copy.characters
-                queue.append(queue_item_copy)
 
-        for operation in all_server_operations:
-            queue_item_copy = queue_item.copy()
-
-            queue_item_copy.server.perform_operation(operation)
-
-            queue_item_copy.depth += 1
-
-            yield queue_item_copy.clients_trace, queue_item_copy.characters
-
-            if queue_item_copy.depth != num_of_operations:
-                queue.append(queue_item_copy)
+                if queue_item_copy.depth != num_of_operations:
+                    queue.append(queue_item_copy)
 
 
 def build_exhaustive_interleaving_trace(
@@ -198,8 +205,9 @@ def build_exhaustive_interleaving_trace(
     server: ServerDevice | None = None,
     num_of_operations: int = 30,
     randomised: bool = False,
+    depth_first: bool = False,
 ) -> Generator[tuple[dict[int, ClientTrace], dict[int, Character]]]:
     if server:
-        return build_exhaustive_trace_client_server(clients, server, num_of_operations, randomised)
+        return build_exhaustive_trace_client_server(clients, server, num_of_operations, randomised, depth_first)
     else:
-        return build_exhaustive_trace_clients(clients, num_of_operations, randomised)
+        return build_exhaustive_trace_clients(clients, num_of_operations, randomised, depth_first)

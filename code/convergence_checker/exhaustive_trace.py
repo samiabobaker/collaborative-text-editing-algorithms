@@ -9,11 +9,13 @@ The devices yielded are the search's own, still mid-flight and still to be exten
 caller that wants to deliver into them must do that against a copy.
 """
 
+import random
 from collections.abc import Generator
 from dataclasses import dataclass
 
 from algorithm_setup.algorithm_copy import copy_client_server, copy_clients
 from device.clientdevice import ClientDevice
+from device.operations import ClientOperation, ServerOperation
 from device.serverdevice import ServerDevice
 from exhaustive_operation_generator.exhaustive_operation_generator import (
     generate_all_client_client_operations,
@@ -46,13 +48,20 @@ class ClientServerQueueItem:
         return ClientServerQueueItem({client.client_id: client for client in clients_copy}, server_copy, self.depth)
 
 
-def build_exhaustive_states_clients(clients: dict[int, ClientDevice], num_of_operations: int = 4) -> Generator[Devices]:
+def build_exhaustive_states_clients(
+    clients: dict[int, ClientDevice], num_of_operations: int = 4, randomised: bool = False, depth_first: bool = False
+) -> Generator[Devices]:
     queue: list[ClientsQueueItem] = [ClientsQueueItem(clients, 0)]
 
     while queue != []:
-        queue_item = queue.pop(-1)
+        queue_item = queue.pop(-1) if depth_first else queue.pop(0)
 
-        for operation in generate_all_client_client_operations(list(queue_item.clients.values())):
+        all_client_operations = generate_all_client_client_operations(list(queue_item.clients.values()))
+
+        if randomised:
+            random.shuffle(all_client_operations)
+
+        for operation in all_client_operations:
             queue_item_copy = queue_item.copy()
 
             client = queue_item_copy.clients[operation.client_id]
@@ -70,47 +79,60 @@ def build_exhaustive_states_clients(clients: dict[int, ClientDevice], num_of_ope
 
 
 def build_exhaustive_states_client_server(
-    clients: dict[int, ClientDevice], server: ServerDevice, num_of_operations: int = 4
+    clients: dict[int, ClientDevice],
+    server: ServerDevice,
+    num_of_operations: int = 4,
+    randomised: bool = False,
+    depth_first: bool = False,
 ) -> Generator[Devices]:
     queue: list[ClientServerQueueItem] = [ClientServerQueueItem(clients, server, 0)]
 
     while queue != []:
-        queue_item = queue.pop(-1)
+        queue_item = queue.pop(-1) if depth_first else queue.pop(0)
 
         all_server_operations, all_client_operations = generate_all_client_server_operations(
             queue_item.server, list(queue_item.clients.values())
         )
 
-        for operation in all_client_operations:
-            queue_item_copy = queue_item.copy()
+        all_operations: list[ClientOperation | ServerOperation] = all_client_operations + all_server_operations
 
-            client = queue_item_copy.clients[operation.client_id]
-            client.perform_operation(operation)
+        if randomised:
+            random.shuffle(all_operations)
 
-            queue_item_copy.depth += 1
+        for operation in all_operations:
+            if isinstance(operation, ClientOperation):
+                queue_item_copy = queue_item.copy()
 
-            yield queue_item_copy.server, queue_item_copy.clients
+                client = queue_item_copy.clients[operation.client_id]
+                client.perform_operation(operation)
 
-            if queue_item_copy.depth != num_of_operations:
-                queue.append(queue_item_copy)
+                queue_item_copy.depth += 1
 
-        for operation in all_server_operations:
-            queue_item_copy = queue_item.copy()
+                yield queue_item_copy.server, queue_item_copy.clients
 
-            queue_item_copy.server.perform_operation(operation)
+                if queue_item_copy.depth != num_of_operations:
+                    queue.append(queue_item_copy)
+            else:
+                queue_item_copy = queue_item.copy()
 
-            queue_item_copy.depth += 1
+                queue_item_copy.server.perform_operation(operation)
 
-            yield queue_item_copy.server, queue_item_copy.clients
+                queue_item_copy.depth += 1
 
-            if queue_item_copy.depth != num_of_operations:
-                queue.append(queue_item_copy)
+                yield queue_item_copy.server, queue_item_copy.clients
+
+                if queue_item_copy.depth != num_of_operations:
+                    queue.append(queue_item_copy)
 
 
 def build_exhaustive_states(
-    clients: dict[int, ClientDevice], server: ServerDevice | None = None, num_of_operations: int = 4
+    clients: dict[int, ClientDevice],
+    server: ServerDevice | None = None,
+    num_of_operations: int = 4,
+    randomised: bool = False,
+    depth_first: bool = False,
 ) -> Generator[Devices]:
     if server:
-        return build_exhaustive_states_client_server(clients, server, num_of_operations)
+        return build_exhaustive_states_client_server(clients, server, num_of_operations, randomised, depth_first)
     else:
-        return build_exhaustive_states_clients(clients, num_of_operations)
+        return build_exhaustive_states_clients(clients, num_of_operations, randomised, depth_first)
