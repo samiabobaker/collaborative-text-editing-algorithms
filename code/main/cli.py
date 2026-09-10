@@ -14,6 +14,7 @@
 import argparse
 import contextlib
 import io
+import random
 import signal
 import sys
 import time
@@ -213,7 +214,14 @@ def run_seeds(
 
 
 def run_exhaustive_case(
-    check_name: str, setup: DeviceSetup, num_of_clients: int, depth: int, verbose: bool, timeout: float = 0
+    check_name: str,
+    setup: DeviceSetup,
+    num_of_clients: int,
+    depth: int,
+    verbose: bool,
+    timeout: float = 0,
+    randomised: bool = False,
+    depth_first: bool = False,
 ) -> tuple[str, int]:
     # The exhaustive counterpart of run_case. Returns the outcome and how many traces were
     # checked, so that a pass can report the size of the space it covered and a timeout can
@@ -224,10 +232,10 @@ def run_exhaustive_case(
     try:
         with case_timeout(timeout):
             if verbose:
-                outcome, checked = check(setup, num_of_clients, depth)
+                outcome, checked = check(setup, num_of_clients, depth, randomised, depth_first)
             else:
                 with contextlib.redirect_stdout(captured):
-                    outcome, checked = check(setup, num_of_clients, depth)
+                    outcome, checked = check(setup, num_of_clients, depth, randomised, depth_first)
     except Exception as exception:
         if verbose:
             traceback.print_exc()
@@ -257,21 +265,45 @@ def run_forever(check: Check, setup: DeviceSetup, first_seed: int, num_of_client
 
 
 def run_exhaustive(
-    check_name: str, names: list[str], num_of_clients: int, depth: int, verbose: bool, timeout: float
+    check_name: str,
+    names: list[str],
+    num_of_clients: int,
+    depth: int,
+    verbose: bool,
+    timeout: float,
+    randomised: bool,
+    depth_first: bool,
+    seed: int,
 ) -> int:
-    # One sweep per algorithm. Unlike the seed sweeps there is nothing to reproduce a
-    # failure with, because the search is deterministic given the depth and client count.
+    # One sweep per algorithm. A plain exhaustive search is fully determined by the depth
+    # and the client count, so there is nothing to reproduce a failure with and none is
+    # needed. A randomised one is not, so it is seeded here and the seed is reported: that
+    # is the only handle on replaying a violation it turns up.
+    #
+    # Each algorithm is reseeded with the same value rather than sharing one stream, so a
+    # failure in a --all sweep can be replayed on its own algorithm with the seed printed.
     total_failures = 0
+    if randomised:
+        print(f"randomised search order, seed {seed} (replay this run with --seed {seed})")
+
     for name in names:
+        if randomised:
+            random.seed(seed)
+
         started = time.time()
-        outcome, checked = run_exhaustive_case(check_name, ALGORITHMS[name], num_of_clients, depth, verbose, timeout)
+        outcome, checked = run_exhaustive_case(
+            check_name, ALGORITHMS[name], num_of_clients, depth, verbose, timeout, randomised, depth_first
+        )
         elapsed = time.time() - started
 
         if outcome == "passed":
             print(f"{name:24s} {'ok':>7s}  {checked} traces to depth {depth}  ({elapsed:5.1f}s)")
         elif outcome == "failed":
             total_failures += 1
-            print(f"{name:24s} {'failed':>7s}  after {checked} traces to depth {depth}  ({elapsed:5.1f}s)")
+            # The seed is repeated on the failing line so it survives being grepped out of a
+            # long --all sweep, where the header is thousands of lines away.
+            replay = f"  (--seed {seed})" if randomised else ""
+            print(f"{name:24s} {'failed':>7s}  after {checked} traces to depth {depth}  ({elapsed:5.1f}s){replay}")
         elif outcome == "timeout":
             # Not a pass and not a violation: the search was cut short, so it says nothing
             # about the property. Counted as a non-pass so a sweep does not read as clean.
@@ -298,13 +330,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--list", action="store_true", help="list the checks and algorithms")
     parser.add_argument("--seeds", type=int, default=1000, help="how many seeds to run (default 1000)")
     parser.add_argument("--from-seed", type=int, default=1, help="first seed (default 1)")
-    parser.add_argument("--seed", type=int, help="run this single seed, e.g. to reproduce a failure")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        help="run this single seed, e.g. to reproduce a failure; "
+        "with --randomised-exhaustive it seeds the search order instead",
+    )
     parser.add_argument("--clients", type=int, default=3, help="clients per case (default 3)")
     parser.add_argument("--ops", type=int, default=30, help="operations per case (default 30)")
     parser.add_argument(
         "--exhaustive",
         action="store_true",
-        help="enumerate every execution up to --depth instead of sampling random ones",
+        help="enumerate every execution up to --depth instead of sampling random ones (defaults to breadth first search)",
     )
     parser.add_argument("--depth", type=int, default=5, help="operations per execution when --exhaustive (default 5)")
     parser.add_argument("--forever", action="store_true", help="keep going until a case fails")
@@ -316,6 +353,16 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="seconds before a case is given up on, 0 for no limit "
         "(default 10 per random case, 600 for a whole exhaustive search)",
+    )
+    parser.add_argument(
+        "--depth-first",
+        action="store_true",
+        help="performs a depth-first search, instead of a breadth-first search when doing an exhaustive search",
+    )
+    parser.add_argument(
+        "--randomised-exhaustive",
+        action="store_true",
+        help="when doing an exhaustive search, randomises the search order",
     )
     args = parser.parse_args(argv)
 
@@ -347,7 +394,28 @@ def main(argv: list[str] | None = None) -> int:
             parser.error(f"--exhaustive does not support {check_name}, only {', '.join(sorted(EXHAUSTIVE_CHECKS))}")
         if args.forever:
             parser.error("--exhaustive and --forever are alternatives: an exhaustive search is already finite")
-        return run_exhaustive(check_name, names, args.clients, args.depth, args.verbose, timeout)
+        if args.seed is not None and not args.randomised_exhaustive:
+            parser.error(
+                "--seed only affects an exhaustive search when --randomised-exhaustive is used: "
+                "without it the search order is already fixed by --depth and --clients"
+            )
+
+        # A run with no seed still gets one, so that a violation found by chance can be
+        # replayed; picking it here rather than per algorithm keeps one --all sweep to a
+        # single seed.
+        seed = args.seed if args.seed is not None else random.randrange(2**31)
+
+        return run_exhaustive(
+            check_name,
+            names,
+            args.clients,
+            args.depth,
+            args.verbose,
+            timeout,
+            args.randomised_exhaustive,
+            args.depth_first,
+            seed,
+        )
 
     check = CHECKS[check_name]
     seeds = [args.seed] if args.seed is not None else range(args.from_seed, args.from_seed + args.seeds)

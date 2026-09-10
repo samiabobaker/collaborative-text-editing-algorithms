@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from algorithm_setup.algorithm_copy import copy_client_server, copy_clients
 from device.clientdevice import ClientDevice
-from device.operations import ClientDeleteOperation, ClientInsertOperation
+from device.operations import ClientDeleteOperation, ClientInsertOperation, ClientOperation, ServerOperation
 from device.serverdevice import ServerDevice
 from exhaustive_operation_generator.exhaustive_operation_generator import (
     generate_all_client_client_operations,
@@ -47,7 +47,7 @@ class ClientServerQueueItem:
 
 
 def build_exhaustive_trace_clients(
-    clients: dict[int, ClientDevice], num_of_operations: int = 4
+    clients: dict[int, ClientDevice], num_of_operations: int = 4, randomised: bool = False, depth_first: bool = False
 ) -> Generator[dict[int, ClientTrace]]:
     initial_clients_trace: dict[int, ClientTrace] = {}
 
@@ -61,11 +61,12 @@ def build_exhaustive_trace_clients(
     queue.append(initial_queue_items)
 
     while queue != []:
-        queue_item = queue.pop(-1)
+        queue_item = queue.pop(-1) if depth_first else queue.pop(0)
 
         all_operations = generate_all_client_client_operations(list(queue_item.clients.values()))
 
-        random.shuffle(all_operations)
+        if randomised:
+            random.shuffle(all_operations)
 
         for operation in all_operations:
             queue_item_copy = queue_item.copy()
@@ -88,7 +89,11 @@ def build_exhaustive_trace_clients(
 
 
 def build_exhaustive_trace_client_server(
-    clients: dict[int, ClientDevice], server: ServerDevice, num_of_operations: int = 4, randomised: bool = False
+    clients: dict[int, ClientDevice],
+    server: ServerDevice,
+    num_of_operations: int = 4,
+    randomised: bool = False,
+    depth_first: bool = False,
 ) -> Generator[dict[int, ClientTrace]]:
 
     initial_clients_trace: dict[int, ClientTrace] = {}
@@ -103,20 +108,19 @@ def build_exhaustive_trace_client_server(
     queue.append(initial_queue_items)
 
     while queue != []:
-        queue_item = queue.pop(0)
+        queue_item = queue.pop(-1) if depth_first else queue.pop(0)
 
         all_server_operations, all_client_operations = generate_all_client_server_operations(
             queue_item.server, list(queue_item.clients.values())
         )
 
+        all_operations: list[ClientOperation | ServerOperation] = all_client_operations + all_server_operations
+
         if randomised:
-            random.shuffle(all_server_operations)
-            random.shuffle(all_client_operations)
+            random.shuffle(all_operations)
 
-        while all_server_operations or all_client_operations:
-            if len(all_client_operations) != 0 and (len(all_server_operations) == 0 or random.random() < 0.5):
-                operation = all_client_operations.pop()
-
+        for operation in all_operations:
+            if isinstance(operation, ClientOperation):
                 queue_item_copy = queue_item.copy()
 
                 client = queue_item_copy.clients[operation.client_id]
@@ -134,9 +138,7 @@ def build_exhaustive_trace_client_server(
 
                 if queue_item_copy.depth != num_of_operations:
                     queue.append(queue_item_copy)
-            elif len(all_server_operations) != 0:
-                operation = all_server_operations.pop()
-
+            else:
                 queue_item_copy = queue_item.copy()
 
                 queue_item_copy.server.perform_operation(operation)
@@ -154,8 +156,9 @@ def build_exhaustive_trace(
     server: ServerDevice | None = None,
     num_of_operations: int = 4,
     randomised: bool = False,
+    depth_first: bool = False,
 ) -> Generator[dict[int, ClientTrace]]:
     if server:
-        return build_exhaustive_trace_client_server(clients, server, num_of_operations, randomised)
+        return build_exhaustive_trace_client_server(clients, server, num_of_operations, randomised, depth_first)
     else:
-        return build_exhaustive_trace_clients(clients, num_of_operations)
+        return build_exhaustive_trace_clients(clients, num_of_operations, randomised, depth_first)

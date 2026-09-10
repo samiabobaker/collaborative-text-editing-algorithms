@@ -44,35 +44,64 @@ def _run(traces: Iterator[bool]) -> ExhaustiveResult:
 
 
 def exhaustive_list_spec(
-    checker: ListSpecChecker, device_setup: DeviceSetup, num_of_clients: int, depth: int
-) -> ExhaustiveResult:
-    server, clients = _client_dict(device_setup, num_of_clients)
-    return _run(checker(trace) for trace in build_exhaustive_list_spec_trace(clients, server, depth))
-
-
-def exhaustive_interleaving(
-    checker: InterleavingChecker, device_setup: DeviceSetup, num_of_clients: int, depth: int
+    checker: ListSpecChecker,
+    device_setup: DeviceSetup,
+    num_of_clients: int,
+    depth: int,
+    randomised: bool,
+    depth_first: bool,
 ) -> ExhaustiveResult:
     server, clients = _client_dict(device_setup, num_of_clients)
     return _run(
-        checker(trace, characters) for trace, characters in build_exhaustive_interleaving_trace(clients, server, depth)
+        checker(trace) for trace in build_exhaustive_list_spec_trace(clients, server, depth, randomised, depth_first)
     )
 
 
-def strong_list_spec_exhaustive(device_setup: DeviceSetup, num_of_clients: int, depth: int) -> ExhaustiveResult:
-    return exhaustive_list_spec(strong_list_specification_checker_for_client_log, device_setup, num_of_clients, depth)
+def exhaustive_interleaving(
+    checker: InterleavingChecker,
+    device_setup: DeviceSetup,
+    num_of_clients: int,
+    depth: int,
+    randomised: bool,
+    depth_first: bool,
+) -> ExhaustiveResult:
+    server, clients = _client_dict(device_setup, num_of_clients)
+    return _run(
+        checker(trace, characters)
+        for trace, characters in build_exhaustive_interleaving_trace(clients, server, depth, randomised, depth_first)
+    )
 
 
-def weak_list_spec_exhaustive(device_setup: DeviceSetup, num_of_clients: int, depth: int) -> ExhaustiveResult:
-    return exhaustive_list_spec(weak_list_specification_checker_for_client_log, device_setup, num_of_clients, depth)
+def strong_list_spec_exhaustive(
+    device_setup: DeviceSetup, num_of_clients: int, depth: int, randomised: bool, depth_first: bool
+) -> ExhaustiveResult:
+    return exhaustive_list_spec(
+        strong_list_specification_checker_for_client_log, device_setup, num_of_clients, depth, randomised, depth_first
+    )
 
 
-def forward_interleaving_exhaustive(device_setup: DeviceSetup, num_of_clients: int, depth: int) -> ExhaustiveResult:
-    return exhaustive_interleaving(forward_non_interleaving_for_client_log, device_setup, num_of_clients, depth)
+def weak_list_spec_exhaustive(
+    device_setup: DeviceSetup, num_of_clients: int, depth: int, randomised: bool, depth_first: bool
+) -> ExhaustiveResult:
+    return exhaustive_list_spec(
+        weak_list_specification_checker_for_client_log, device_setup, num_of_clients, depth, randomised, depth_first
+    )
 
 
-def interleaving_exhaustive(device_setup: DeviceSetup, num_of_clients: int, depth: int) -> ExhaustiveResult:
-    return exhaustive_interleaving(maximally_non_interleaving_for_client_log, device_setup, num_of_clients, depth)
+def forward_interleaving_exhaustive(
+    device_setup: DeviceSetup, num_of_clients: int, depth: int, randomised: bool, depth_first: bool
+) -> ExhaustiveResult:
+    return exhaustive_interleaving(
+        forward_non_interleaving_for_client_log, device_setup, num_of_clients, depth, randomised, depth_first
+    )
+
+
+def interleaving_exhaustive(
+    device_setup: DeviceSetup, num_of_clients: int, depth: int, randomised: bool, depth_first: bool
+) -> ExhaustiveResult:
+    return exhaustive_interleaving(
+        maximally_non_interleaving_for_client_log, device_setup, num_of_clients, depth, randomised, depth_first
+    )
 
 
 def _converges_from(server: ServerDevice | None, clients: dict[int, ClientDevice]) -> bool:
@@ -85,15 +114,17 @@ def _converges_from(server: ServerDevice | None, clients: dict[int, ClientDevice
     return states_agree(clients_copy)
 
 
-def convergence_exhaustive(device_setup: DeviceSetup, num_of_clients: int, depth: int) -> ExhaustiveResult:
+def convergence_exhaustive(
+    device_setup: DeviceSetup, num_of_clients: int, depth: int, randomised: bool, depth_first: bool
+) -> ExhaustiveResult:
     server, clients = _client_dict(device_setup, num_of_clients)
     return _run(
         _converges_from(node_server, node_clients)
-        for node_server, node_clients in build_exhaustive_states(clients, server, depth)
+        for node_server, node_clients in build_exhaustive_states(clients, server, depth, randomised, depth_first)
     )
 
 
-EXHAUSTIVE_CHECKS: dict[str, Callable[[DeviceSetup, int, int], ExhaustiveResult]] = {
+EXHAUSTIVE_CHECKS: dict[str, Callable[[DeviceSetup, int, int, bool, bool], ExhaustiveResult]] = {
     "convergence": convergence_exhaustive,
     "strong-list-spec": strong_list_spec_exhaustive,
     "weak-list-spec": weak_list_spec_exhaustive,
