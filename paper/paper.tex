@@ -197,50 +197,49 @@ We quote the relevant properties below, but refer to the Fugue paper \cite{Weidn
   \end{enumerate}
 \end{property}
 
-\section{OT background} \label{sec:otbackground}
+\section{Operational Transformation Background} \label{sec:otbackground}
 
 This section gives an overview of the common terminology and properties used by OT algorithms.
 
-The idea of OT is to transform incoming remote operations with respect to local operations that have already been performed. For example, if a client receives a
-$del(3)$ operation, but it has performed $ins(2,x)$, then the original character has shifted one to the right so the deletion is now transformed to $del(4)$. The functions
-which describe these transformations are called transformation functions. Transformation functions are paired with a control algorithm, which describes when and how to call these 
+The idea of OT is to transform incoming remote operations with respect to concurrent operations that have already been applied locally. For example, if a client receives a
+$del(3)$ operation, but it has already applied a concurrent $ins(2,x)$, then the original character has shifted one to the right so the deletion is now transformed to $del(4)$. The functions
+that describe these transformations are called transformation functions. Transformation functions are paired with a control algorithm, which determines when and how to call these 
 transformation functions. The intent is that the control algorithm makes certain assumptions about the properties of the transformation functions, and any functions that satisfy these properties
 can be used with that algorithm.
 
 \subsection{Inclusion Transformations}
 
 
-The first kind of transformation functions are inclusion transformations, which are used by all control algorithms. 
+The first kind of transformation functions are \emph{inclusion transformations}, which are used by all control algorithms. 
 
 \begin{definition}[Inclusion Transformation]
   For two operations $O_1$ and $O_2$ generated from the same state, we write $O_1' = IT(O_1, O_2)$. $O_1'$ is the transformed operation
   of $O_1$, now taking into account the effects of $O_2$. For example, $del(4) = IT(del(3), ins(2, x))$.
 \end{definition}
 
-There are two properties that have appeared in the literature for inclusion transformation functions, which are often required for the control algorithms to converge. These are TP1 and TP2.
+There are two properties that have appeared in the literature for inclusion transformation functions, which are often required for the control algorithms to converge. These are TP1 and TP2~\cite{Ressel1996} (sometimes also called CP1 and CP2 respectively in the literature).
 
 \begin{property}[TP1]
-  If $O_1$ and $O_2$ are operations, and $O_1' = IT(O_1, O_2)$ and $O_2' = IT(O_2, O_1)$, then $IT$ satisfies TP1 if 
-  $O_2' \circ O_1 = O_1' \circ O_2$. That is, for all document states, executing $O_1$ then $O_2'$ will always result in the same
-  document state as executing $O_2$ then $O_1'$.
+  If $O_1$ and $O_2$ are operations based on the same document state, $O_1' = IT(O_1, O_2)$, and $O_2' = IT(O_2, O_1)$, then $IT$ satisfies TP1 if 
+  $O_2' \circ O_1 = O_1' \circ O_2$. That is, for all document states, executing $O_1$ followed by $O_2'$ results in the same
+  document state as executing $O_2$ followed by $O_1'$.
 \end{property}
 
-TP1 is the basic property that ensures that using $IT$ will lead the clients to converge. However, when there are more than two clients, it turns out this is not
-enough. This leads to a second property TP2.
+TP1 is the basic property that ensures that using $IT$ will lead the clients to converge. However, when there are more than two clients and no server is assumed, some algorithms additionally require the TP2 property:
 
 \begin{property}[TP2]
-  If $O_1$ and $O_2$ are operations, and $O_1' = IT(O_1, O_2)$ and $O_2' = IT(O_2, O_1)$, then $IT$ satisfies TP2 if 
-  for all operations $O$, $IT(IT(O, O_1), O_2') = IT(IT(O, O_2), O_1')$.
+  If for all operations $O$, $O_1$, and $O_2$ based on the same document state we have $O_1' = IT(O_1, O_2)$, $O_2' = IT(O_2, O_1)$, and
+  $IT(IT(O, O_1), O_2') = IT(IT(O, O_2), O_1')$, then $IT$ satisfies TP2.
 \end{property}
 
-Finding transformation functions that satisfy TP2 has been a challenge. Previous work has shown that TP2 cannot be satisfied without introducing additional parameters into the operations \cite{Randolph2015}. Many functions claim to satisfy TP2, but were later shown not to \cite{Oster2005Proving}, or have not been independently checked
-\cite{Randolph2015, Sun2017}. It is important to note that, for many control algorithms, satisfying TP2 is not a requirement. TP2-avoiding algorithms are algorithms that 
-are designed to avoid the issues that require TP2. With these algorithms, it is fine to use functions that do not satisfy TP2.
+Finding transformation functions that satisfy TP2 has been a challenge. Previous work has shown that TP2 cannot be satisfied without introducing additional parameters into the operations \cite{Randolph2015}. Several published functions claim to satisfy TP2, but were later shown not to \cite{Oster2005Proving}, or have not been independently checked
+\cite{Randolph2015, Sun2017}. It is important to note that satisfying TP2 is only required for some control algorithms. An algorithm is \emph{TP2-avoiding}
+if it does not assume TP2.
 
 \subsection{Exclusion Transformations}
 
 
-A few algorithms additionally use exclusion transformations, which are the inverse of $IT$.
+A few algorithms additionally use \emph{exclusion transformations}, which are the inverse of $IT$.
 
 \begin{definition}[Exclusion Transformations]
   For two operations $O_1$ and $O_2$ where $O_2$ is generated from the resulting state of $O_1$, we write $O_2' = ET(O_2, O_1)$. $O_2'$ is the transformed operation of $O_2$,
@@ -251,7 +250,7 @@ A few algorithms additionally use exclusion transformations, which are the inver
 Exclusion transformations must satisfy the reversibility requirement, which enforces that $ET$ and $IT$ are inverses.
 
 \begin{property}[Reversibility Requirement]
-  If $O_1$ and $O_2$ are operations, then:
+  $IT$ and $ET$ meet the reversibility requirement if, for all operations $O_1$ and $O_2$,
   \begin{enumerate}
     \item $ET(IT(O_1, O_2), O_2) = O_1$
     \item $IT(ET(O_1, O_2), O_2) = O_1$
@@ -260,7 +259,7 @@ Exclusion transformations must satisfy the reversibility requirement, which enfo
 
 
 $ET$ is only relevant to a few algorithms. Nonetheless, there are transformation functions which claim to satisfy the reversibility requirements, but actually do not (see \autoref{sec:gotimplementation}).
-Note that some papers use the terms forward and backward transposition. These roughly correspond to inclusion and exclusion transformations.
+Note that some papers use the terms \emph{forward} and \emph{backward transposition}, which roughly correspond to inclusion and exclusion transformations.
 
 \section{Model checker implementation} \label{sec:modelcheckerimplementation}
 
