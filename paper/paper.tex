@@ -360,6 +360,7 @@ We depart from that tradition in this paper, and always test a control algorithm
 For example, the TP1 and TP2 properties are only relevant for ensuring convergence, but say nothing about whether an algorithm will satisfy the strong or weak list specification.
 In \autoref{sec:tm11andrandolphfunctions}, we find two transformation functions that both satisfy TP1 and TP2 but give different properties when tested with the same control algorithm.
 In our experiments we therefore treat an OT algorithm as a pair of a control algorithm and transformation functions, sometimes testing the same control algorithm with several transformation functions, and vice versa.
+We only test combinations where there is a match between the claimed properties of the transformation functions and the claimed assumptions of the control algorithm.
 
 \section{Evaluating the model checker}
 
