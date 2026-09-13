@@ -374,14 +374,22 @@ We only test combinations where there is a match between the claimed properties 
 
 \section{Results of the model checker} \label{sec:modelcheckerresults}
 
+To demonstrate the generality of our model checker and its ability to find bugs, we implemented a corpus of collaborative text editing algorithms covering most research publications in this field, as well as a selection of popular open-source implementations.
+We are making this corpus available as open source along with the model checker to facilitate the further study of these algorithms.
+Our implementations are not optimised for performance, but rather aim to be close to the published pseudocode, making it easy to check that our implementation correctly reflects the original publication.
+For any violations of a property found by the model checker we additionally check by hand that the violation does indeed occur in the algorithm as originally published.
 
-
+In cases where an open source implementation already exists (often as part of a larger library that also provides many other features) we develop our own implementation against the model checker's API that focuses only on the collaborative text editing algorithm.
+If the model checker finds a violation of a property, we replay the same scenario against the original implementation to ensure the behaviour is consistent.
 
 \subsection{Properties of each algorithm}
 
-\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. We aimed to build a collection of all major published algorithms, as well as popular open-source implementations. When there is a choice of transformation functions,
-we choose transformation functions that would substantiate or disprove any known claims about the functions. For rows with no transformation functions, we used the transformation functions from the paper describing the algorithm. We do not claim that all of these properties are of equal importance. We feel convergence, the weak list specification and forward non-interleaving are requirements for a useful
-collaborative text-editing algorithm. The strong list specification is less important. Maximal non-interleaving may only be of theoretical interest, as the scenario of backward interleaving may not be as relevant in many cases.
+\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. When there is a choice of transformation functions,
+we choose transformation functions that would substantiate or disprove prior claims about the functions. For rows with no transformation functions, we used the transformation functions from the same paper as the control algorithm.
+
+In our opinion, convergence and the weak list specification are minimal requirements for a collaborative text editing algorithm to be useful in practice.
+Forward non-interleaving is also important, although algorithms differ on how frequently interleaving occurs in realistic editing scenarios (something we do not aim to quantify in this paper); an algorithm in which forward interleaving is rare but not impossible may still be acceptable in practice.
+Whether an algorithm satisfies the strong list specification and/or maximal non-interleaving is less important in practice, but we include them in our analysis as they are well-defined properties of theoretical interest, and they could be important for some applications.
 
 %Include a description of how I determine this graph. I will give various sets of configurations, and I will run every set of configurations for every client for every algorithm for a minimum number of seeds.
 
@@ -532,17 +540,21 @@ In addition to the table, we believe that the only functions that explicitly sat
 
 \subsection{Assumptions made by each algorithm}  \label{sec:assumptions}
 
-Some algorithms make stronger assumptions about the network, which are important to consider when comparing their properties to those of other algorithms. 
+Some algorithms assume the existence of a server that imposes a total order on all operations, requiring a client to communicate with the server before the operation can be processed by any other client.
+For fault tolerance, the server can be replaced with a consensus protocol providing a replicated log, such as Raft \cite{Ongaro2014}.
+Algorithms that make this assumption are listed under the heading \emph{Centralised OT} in \autoref{tab:algorithmproperties}.
+Some work \cite{Sun2020arxiv} differentiates between a transformation-based server and a non-transformation-based server, based on whether or not the server actually performs any transformations. In our opinion this is not a meaningful distinction, because any algorithm with a transformation-based server can be implemented with a non-transformation-based server, by having the server simply serialise the operations and the clients simulate what the server would do.  
 
-The first is the existence of a server. Some work \cite{Sun2020arxiv} has differentiated between a transformation-based server, and a non-transformation-based server, based on whether or not the server actually performs any transformations. We feel this is not a useful distinction, because any algorithm with a transformation-based server can be implemented with a non-transformation-based server, by having the server simply serialise the operations and the clients simulate what the server would do.  
+Sometimes this assumption is made implicitly.
+SOCT3 and SOCT4 use a sequencer, which is a non-transformation-based server.
+Some TP2-avoiding algorithms do so by assuming totally ordered delivery, which has been proven to be equivalent to consensus \cite{Chandra1996}; we therefore place these algorithms in the same category as server-based algorithms.
 
-The second assumption is that all clients are online. This is strictly worse than assuming the existence of a server; a server is a single point of failure, but this assumption makes every point a point of failure. This is usually introduced by having the algorithm wait until it has received some message from every other client before continuing.
-
-Sometimes these assumptions are made implicitly. SOCT3 and SOCT4 use a sequencer, which can only be implemented by introducing one of these assumptions. Some TP2-avoiding algorithms do so by enforcing totally ordered delivery, which again can only be implemented by making one of these assumptions. 
-
-When an algorithm makes these assumptions, it is possible to instead use a fault-tolerant consensus algorithm, but these often have a high communication overhead.
+Three algorithms we considered (SOCT4 \cite{Vidot2000}, TIBOT \cite{Li2004ICPADS}, and TIBOT 2.0 \cite{Xu2014}) even assume that all clients are online, and stop making progress if one or more clients become unavailable.
+While a server-based algorithm can be made fault-tolerant using a consensus protocol, that is not the case for these algorithms, making them fundamentally unable to tolerate faults.
 
 \autoref{tab:algorithmassumptions} provides a list of the algorithms we found that make either of these two assumptions.
+We call algorithms that do not assume a server or consensus protocol \emph{decentralised}, since they can operate in a peer-to-peer network under network partitions.
+All CRDT algorithms studied in this paper are decentralised.
 
 \begin{table}
   \centering
