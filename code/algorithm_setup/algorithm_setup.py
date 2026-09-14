@@ -23,6 +23,7 @@ from got.gotclient import GOTClient
 from gottombstone.gottombstoneclient import GOTTombstoneClient
 from jupiter.jupiterclient import JupiterClient
 from jupiter.jupiterserver import JupiterServer
+from lbt.lbtclient import LBTClient
 from logoot.logootclient import LogootClient
 from logootsplit.logootsplitclient import LogootSplitClient
 from loro.loroclient import LoroClient
@@ -31,8 +32,11 @@ from markandretrace.markandretraceclient import MarkAndRetraceClient
 from pot.potclient import POTClient
 from pot.potserver import POTServer
 from pps.ppsclient import PPSClient
+from prosemirror.prosemirrorclient import ProseMirrorClient
+from prosemirror.prosemirrorserver import ProseMirrorServer
 from rga.rgaclient import RGAClient
 from rgas4.rgas4client import RGAS4Client
+from sdt.sdtclient import SDTClient
 from sharedb.sharedbclient import ShareDBClient
 from sharedb.sharedbserver import ShareDBServer
 from soct2.soct2client import SOCT2Client
@@ -44,6 +48,7 @@ from sync7.sync7client import Sync7Client
 from sync9.sync9client import Sync9Client
 from tibot.tibotclient import TIBOTClient
 from tibot2.tibot2client import TIBOT2Client
+from treedoc.treedocclient import TreedocClient
 from twc.twcclient import TWCClient
 from twc.twcserver import TWCServer
 from woot.wootclient import WOOTClient
@@ -112,6 +117,7 @@ fugue_setup = make_setup(FugueClient)
 fuguemax_setup = make_setup(FugueMaxClient)
 got_setup = make_setup(GOTClient)
 got_tombstone_setup = make_setup(GOTTombstoneClient)
+lbt_setup = make_setup(LBTClient)
 logoot_setup = make_setup(LogootClient)
 logoot_split_setup = make_setup(LogootSplitClient)
 loro_setup = make_setup(LoroClient)
@@ -120,10 +126,12 @@ markandretrace_setup = make_setup(MarkAndRetraceClient)
 pps_setup = make_setup(PPSClient)
 rga_setup = make_setup(RGAClient)
 rgas4_setup = make_setup(RGAS4Client)
+sdt_setup = make_setup(SDTClient)
 sync7_setup = make_setup(Sync7Client)
 sync9_setup = make_setup(Sync9Client)
 tibot_setup = make_setup(TIBOTClient)
 tibot2_setup = make_setup(TIBOT2Client)
+treedoc_setup = make_setup(TreedocClient)
 woot_setup = make_setup(WOOTClient)
 wooto_setup = make_setup(WOOTOClient)
 yjs_setup = make_setup(YjsClient)
@@ -134,6 +142,7 @@ cot_setup = make_setup(COTClient, COTServer)
 easysync_setup = make_setup(EasySyncClient, EasySyncServer, peer_to_peer=False)
 jupiter_setup = make_setup(JupiterClient, JupiterServer, peer_to_peer=False)
 pot_setup = make_setup(POTClient, POTServer)
+prosemirror_setup = make_setup(ProseMirrorClient, ProseMirrorServer, peer_to_peer=False)
 sharedb_setup = make_setup(ShareDBClient, ShareDBServer, peer_to_peer=False)
 soct3_setup = make_setup(SOCT3Client, SOCT3Server)
 soct4_setup = make_setup(SOCT4Client, SOCT4Server)

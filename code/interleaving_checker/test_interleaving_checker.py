@@ -2,7 +2,7 @@ import random
 from itertools import permutations
 
 from adopted.adoptedtransform import IMORTransform, SuleimanTransform
-from algorithm_setup.algorithm_setup import DeviceSetup, adopted_setup, fugue_setup, yjs_setup, yjsmod_setup
+from algorithm_setup.algorithm_setup import DeviceSetup, adopted_setup, fugue_setup, woot_setup, yjs_setup, yjsmod_setup
 from device.clientdevice import ClientDevice
 from device.operations import (
     ClientDeleteOperation,
@@ -15,15 +15,25 @@ from interleaving_checker.interleaving_checker import (
     build_observed_list_order,
     check_condition_1,
     check_condition_1_with_deletes,
+    forward_non_interleaving_for_client_log,
     forward_non_interleaving_with_deletes_from_client_logs,
     has_common_forward_order,
     maximally_non_interleaving,
     transitive_closure,
 )
+from interleaving_checker.random_trace import build_random_trace
 from list_spec_checker.client_trace import ClientTrace as ListClientTrace
 from list_spec_checker.client_trace import Event as ListEvent
 from list_spec_checker.list_spec_checker import strong_list_specification_checker_for_client_log
 from unique_char.uniquechar import UniqueChar
+
+
+def assert_strong_list_precondition(logs: dict[int, ClientTrace]) -> None:
+    list_logs = {i: ListClientTrace() for i in logs}
+    for client_id, log in logs.items():
+        for event, state in zip(log.events_seen, log.states_after_events, strict=True):
+            list_logs[client_id].add_event(ListEvent(event.operation, event.performed_locally), state)
+    assert strong_list_specification_checker_for_client_log(list_logs)
 
 
 # IMOR and Suleiman turn one of two concurrent inserts of the same character into a
@@ -61,6 +71,25 @@ def test_fugue_still_passes():
         client_dict[client.client_id] = client
 
     assert maximally_non_interleaving(client_dict, server, 30) is True
+
+
+def test_delete_checker_preserves_insert_only_verdicts():
+    saw_failure = False
+    for setup in (yjs_setup, woot_setup):
+        for seed in range(30):
+            random.seed(seed)
+            server, clients = setup(3)
+            logs, characters = build_random_trace({client.client_id: client for client in clients}, server, 30)
+            assert all(
+                not isinstance(operation, ClientDeleteOperation)
+                for log in logs.values()
+                for event in log.events_seen
+                for operation in event.operation
+            )
+            expected = forward_non_interleaving_for_client_log(logs, characters)
+            assert forward_non_interleaving_with_deletes_from_client_logs(logs, characters) == expected
+            saw_failure |= not expected
+    assert saw_failure
 
 
 def test_deleted_earlier_sibling_still_exempts_a_later_sibling():
@@ -260,11 +289,7 @@ def test_deleted_sibling_exemptions_need_one_common_order():
         add(3, [delete_b], False, [a, x])
         add(4, [delete_c], False, [a, x])
 
-        list_logs = {i: ListClientTrace() for i in logs}
-        for client_id, log in logs.items():
-            for event, state in zip(log.events_seen, log.states_after_events, strict=True):
-                list_logs[client_id].add_event(ListEvent(event.operation, event.performed_locally), state)
-        assert strong_list_specification_checker_for_client_log(list_logs)
+        assert_strong_list_precondition(logs)
 
         # axb requires c<b; axc requires b<c. The old per-pair checks accept both.
         order = transitive_closure(build_observed_list_order(logs))
@@ -381,6 +406,7 @@ def test_yjs_family_delete_trace_really_interleaves_consecutive_insertions():
 
         assert state_when_v_arrives == [s, r, v]
         assert all(client.read_state() == [s, r, v] for client in clients)
+        assert_strong_list_precondition(traces)
         assert forward_non_interleaving_with_deletes_from_client_logs(traces, characters) is False
 
 
@@ -392,6 +418,7 @@ def test_same_yjs_family_trace_without_delete_does_not_interleave():
 
         assert state_when_v_arrives == [r, s, v, l]
         assert all(client.read_state() == [r, s, v, l] for client in clients)
+        assert_strong_list_precondition(traces)
         assert forward_non_interleaving_with_deletes_from_client_logs(traces, characters) is True
 
 
@@ -399,6 +426,7 @@ if __name__ == "__main__":
     test_lost_origin_is_reported_for_imor()
     test_lost_origin_is_reported_for_suleiman()
     test_fugue_still_passes()
+    test_delete_checker_preserves_insert_only_verdicts()
     test_deleted_earlier_sibling_still_exempts_a_later_sibling()
     test_unresolved_sibling_order_is_conservatively_accepted()
     test_transitive_order_can_make_a_violation_certain()

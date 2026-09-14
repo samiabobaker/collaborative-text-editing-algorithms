@@ -30,6 +30,18 @@ year = {1995},
 doi = {10.1145/215585.215706}
 }
 
+@article{Chandra1996,
+author = {Chandra, Tushar Deepak and Toueg, Sam},
+title = {Unreliable failure detectors for reliable distributed systems},
+journal = {Journal of the ACM},
+volume = {43},
+number = {2},
+pages = {225--267},
+year = {1996},
+month = mar, 
+doi = {10.1145/226643.226647}
+}
+
 %% adOPTed algorithm for OT, which supports undo
 @inproceedings{Ressel1996,
 author = {Ressel, Matthias and Nitsche-Ruhland, Doris and Gunzenhäuser, Rul},
@@ -137,6 +149,23 @@ series = {CSCWD},
 pages = {80--84},
 year = {2002},
 doi = {10.1109/CSCWD.2002.1047653}
+}
+
+@inproceedings{Shen2002,
+author = {Shen, Haifeng and Sun, Chengzheng},
+title = {Flexible notification for collaborative systems},
+year = {2002},
+isbn = {1581135602},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/587078.587090},
+doi = {10.1145/587078.587090},
+booktitle = {Proceedings of the 2002 ACM Conference on Computer Supported Cooperative Work},
+pages = {77–86},
+numpages = {10},
+keywords = {collaborative system, concurrency control, group editor, notification, operational transformation},
+location = {New Orleans, Louisiana, USA},
+series = {CSCW '02}
 }
 
 @article{Sun2002,
@@ -292,6 +321,18 @@ year = {2006},
 doi = {10.1145/1180875.1180916}
 }
 
+@INPROCEEDINGS{Cart2007,
+  author={Cart, Michelle and Ferrie, Jean},
+  booktitle={2007 International Conference on Collaborative Computing: Networking, Applications and Worksharing (CollaborateCom 2007)}, 
+  title={Asynchronous reconciliation based on operational transformation for P2P collaborative environments}, 
+  year={2007},
+  volume={},
+  number={},
+  pages={127-138},
+  keywords={Collaboration;Collaborative work;History;Mobile computing;Convergence;Merging;Collaborative software;Control systems;Distributed computing;XML;replication;copy consistency;reconciliation;history merge;operational transformation},
+  doi={10.1109/COLCOM.2007.4553821}
+}
+
 @article{Li2007,
 author = {Li, Rui and Li, Du},
 title = {A New Operational Transformation Framework for Real-Time Group Editors},
@@ -426,6 +467,26 @@ publisher = {ACM},
 doi = {10.1145/1832772.1832777}
 }
 
+@article{Li2010,
+author = {Li, Du and Li, Rui},
+title = {An Admissibility-Based Operational Transformation Framework for Collaborative Editing Systems},
+year = {2010},
+issue_date = {February  2010},
+publisher = {Kluwer Academic Publishers},
+address = {USA},
+volume = {19},
+number = {1},
+issn = {0925-9724},
+url = {https://doi.org/10.1007/s10606-009-9103-1},
+doi = {10.1007/s10606-009-9103-1},
+abstract = {Operational transformation (OT) as a consistency control method has been well accepted in group editors. With OT, the users can edit any part of a shared document at any time and local responsiveness is not sensitive to communication latencies. However, established theoretical frameworks for developing OT algorithms either require transformation functions to work in all possible cases, which complicates the design of transformation functions, or include an under-formalized condition of intention preservation, which results in algorithms that cannot be formally proved and must be fixed over time to address newly discovered counterexamples. To address those limitations, this paper proposes an alternative framework, called admissibility-based transformation (ABT), that is theoretically based on formalized, provable correctness criteria and practically no longer requires transformation functions to work under all conditions. Compared to previous approaches, ABT simplifies the design and proofs of OT algorithms.},
+journal = {Comput. Supported Coop. Work},
+month = feb,
+pages = {1–43},
+numpages = {43},
+keywords = {operational transformation, group editor, consistency control, collaboration, CSCW}
+}
+
 @techreport{Martin2010report,
 author = {Martin, Stéphane and Urso, Pascal and Weiss, Stéphane},
 title = {Scalable {XML} Collaborative Editing with Undo},
@@ -465,6 +526,19 @@ pages = {1162--1174},
 year = {2010},
 doi = {10.1109/tpds.2009.173}
 }
+
+@INPROCEEDINGS{Wu2010,
+  author={Wu, Qinyi and Pu, Calton and Ferreira, João Eduardo},
+  booktitle={2010 IEEE 26th International Conference on Data Engineering (ICDE 2010)}, 
+  title={A partial persistent data structure to support consistency in real-time collaborative editing}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={776-779},
+  keywords={Data structures;Collaboration;History;Collaborative work;Collaborative tools;Algorithm design and analysis;Information retrieval;Buildings;Data models;Educational institutions},
+  doi={10.1109/ICDE.2010.5447883}
+}
+
 
 %% https://hal.inria.fr/docs/00/62/95/03/PDF/doce63-ahmednacer.pdf
 @inproceedings{AhmedNacer2011,
@@ -625,6 +699,16 @@ publisher = {Springer},
 doi = {10.1007/978-3-319-06410-9_30}
 }
 
+@inproceedings{Ongaro2014,
+author = {Ongaro, Diego and Ousterhout, John K},
+title = {In Search of an Understandable Consensus Algorithm},
+booktitle = {USENIX Annual Technical Conference},
+series = {ATC},
+publisher = {USENIX},
+year = {2014},
+url = {https://www.usenix.org/conference/atc14/technical-sessions/presentation/ongaro}
+}
+
 @inproceedings{Xu2014,
 author = {Xu, Yi and Sun, Chengzheng and Li, Mo},
 title = {Achieving Convergence in Operational Transformation: Conditions, Mechanisms and Systems},
@@ -680,6 +764,13 @@ institution = {The Apache Wave Foundation},
 year = {2015},
 month = aug,
 url = {https://web.archive.org/web/20221218021957/https://people.apache.org/~al/wave_docs/ApacheWaveProtocol-0.4.pdf}
+}
+
+@inproceedings{Wu2009,
+  title={Consistency in Real-time Collaborative Editing Systems Based on Partial Persistent Sequences},
+  author={Qinyi Wu and Calton Pu},
+  year={2009},
+  url={https://api.semanticscholar.org/CorpusID:16582489}
 }
 
 %% https://members.loria.fr/CIgnat/files/pdf/YuDAIS15.pdf
@@ -809,6 +900,18 @@ number = {8},
 year = {2017},
 month = mar,
 doi = {10.1002/cpe.4110}
+}
+
+@article{Kleppmann2017,
+author = {Kleppmann, Martin and Beresford, Alastair R},
+title = {A Conflict-Free Replicated JSON Datatype},
+journal = {IEEE Transactions on Parallel and Distributed Systems},
+volume = {28},
+number = {10},
+pages = {2733--2746},
+year = {2017},
+month = apr,
+doi = {10.1109/tpds.2017.2697382},
 }
 
 %% Claims to satisfy TP1+TP2
@@ -1035,12 +1138,30 @@ publisher = {ACM},
 doi = {10.1145/3578358.3591330}
 }
 
+@misc{Kleppmann2023,
+  author       = "Kleppmann, Martin and Toth, Balazs",
+  title        = {ot-verification},
+  howpublished = {Available at \url{https://github.com/ept/ot-verification} },
+  year         = {2023}
+}
+
+
 @misc{Ou2023,
 author = {Ou, Yuran and Zhou, Jian},
 title = {{RDSL}: an Efficient Retrieval Algorithm for Group Editing {CRDT}},
 year = {2023},
 month = sep,
 url = {https://www.researchsquare.com/article/rs-3316287/v1}
+}
+
+@misc{Weidner2023,
+      title={Collabs: A Flexible and Performant CRDT Collaboration Framework}, 
+      author={Matthew Weidner and Huairui Qi and Maxime Kjaer and Ria Pradeep and Benito Geordie and Yicheng Zhang and Gregory Schare and Xuan Tang and Sicheng Xing and Heather Miller},
+      year={2023},
+      eprint={2212.02618},
+      archivePrefix={arXiv},
+      primaryClass={cs.DC},
+      url={https://arxiv.org/abs/2212.02618}, 
 }
 
 @misc{Weidner2024,
@@ -1089,4 +1210,27 @@ number = {11},
 pages = {2425--2437},
 year = {2025},
 doi = {10.1109/TPDS.2025.3611880}
+}
+
+@misc{Automerge,
+  title = {{Automerge} {CRDT}},
+  url = {https://automerge.org/}
+}
+
+@misc{Diffsync,
+author = {Little, Greg and Toomim, Michael},
+title = {{Diffsync}},
+url = {https://github.com/invisible-college/diffsync}
+}
+
+@misc{ShareDB,
+  author = {Smith, Nate and Gentle, Joseph},
+  title = {{ShareDB}},
+  url = {https://github.com/share/sharedb}
+}
+
+
+@misc{Loro,
+  title = {{Loro} {CRDT}},
+  url = {https://loro.dev/}
 }
