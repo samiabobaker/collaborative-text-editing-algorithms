@@ -53,9 +53,10 @@ def forward_non_interleaving_with_deletes(
 
     Deleted elements are absent from visible states, but any ordering that was observed
     while they were visible remains part of the strong-list-specification witness order.
-    A violation is reported only when that partial order proves that the condition applies;
-    unresolved pairs are therefore conservative rather than false positives. As with the
-    insert-only checker, this assumes that the algorithm satisfies the strong list spec.
+    All separated visible origin/child pairs must admit one common order in which an
+    already-delivered sibling comes before the child. This remains conservative about
+    adjacency involving deleted endpoints. As with the insert-only checker, this assumes
+    that the algorithm satisfies the strong list spec.
     """
     client_logs, characters = build_random_trace(clients, server, num_of_ops, print_ops, with_deletes=True)
     return forward_non_interleaving_with_deletes_from_client_logs(client_logs, characters, print_ops)
@@ -64,9 +65,8 @@ def forward_non_interleaving_with_deletes(
 def forward_non_interleaving_with_deletes_from_client_logs(
     client_logs: dict[int, ClientTrace], characters: dict[int, Character], print_ops: bool = False
 ) -> bool:
-    # Assume algorithm satisfies the strong list spec, so the observed order has at least
-    # one totalization. The predicate below reports only violations present in all of them.
-    list_order = transitive_closure(build_observed_list_order(client_logs))
+    list_order = build_observed_list_order(client_logs)
+    earlier_siblings: dict[UniqueChar, set[frozenset[UniqueChar]]] = {}
 
     for client_log in client_logs.values():
         observed_characters: set[UniqueChar] = set()
@@ -81,14 +81,57 @@ def forward_non_interleaving_with_deletes_from_client_logs(
                     if isinstance(operation, ClientInsertOperation)
                 )
             observed_characters.update(state)
-            for A in state:
-                for B in state:
-                    if check_condition_1_with_deletes(state, characters, list_order, observed_characters, A, B):
-                        continue
-                    if print_ops:
-                        print(f"Failed forward interleaving with deletes at {A} {B}.")
-                        print_client_logs(client_logs)
-                    return False
+            for index, B in enumerate(state):
+                A = characters[B.id].left_origin
+                if A == "start" or A not in state or (index > 0 and state[index - 1] == A):
+                    continue
+                # Since A and B are separated, B must not be A's earliest delivered
+                # child. Keep the alternatives together instead of choosing a sibling.
+                siblings = frozenset(
+                    sibling
+                    for sibling in characters[A.id].left_origin_of
+                    if sibling != B and sibling in observed_characters
+                )
+                earlier_siblings.setdefault(B, set()).add(siblings)
+
+    if not has_common_forward_order(list_order, earlier_siblings):
+        if print_ops:
+            print("Failed forward interleaving with deletes: no common order for separated visible pairs.")
+            print_client_logs(client_logs)
+        return False
+    return True
+
+
+def has_common_forward_order(
+    list_order: set[tuple[UniqueChar, UniqueChar]],
+    earlier_siblings: dict[UniqueChar, set[frozenset[UniqueChar]]],
+) -> bool:
+    """Topologically order elements, satisfying every earlier-sibling requirement.
+
+    Each requirement for B is a set of alternatives, at least one of which must precede
+    B. An eligible element can always be moved to the front of any valid remaining
+    order: it has no unplaced predecessors and moving it earlier can only help other
+    requirements. Thus no backtracking is needed; getting stuck proves impossibility.
+    """
+    predecessors: dict[UniqueChar, set[UniqueChar]] = {}
+    for left, right in list_order:
+        predecessors.setdefault(left, set())
+        predecessors.setdefault(right, set()).add(left)
+    for element, requirements in earlier_siblings.items():
+        predecessors.setdefault(element, set())
+        for alternatives in requirements:
+            for sibling in alternatives:
+                predecessors.setdefault(sibling, set())
+
+    placed: set[UniqueChar] = set()
+    while predecessors:
+        for element, required in predecessors.items():
+            if required <= placed and all(alternatives & placed for alternatives in earlier_siblings.get(element, ())):
+                break
+        else:
+            return False
+        placed.add(element)
+        del predecessors[element]
     return True
 
 

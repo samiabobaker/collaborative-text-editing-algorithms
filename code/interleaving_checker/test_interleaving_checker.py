@@ -1,4 +1,5 @@
 import random
+from itertools import permutations
 
 from adopted.adoptedtransform import IMORTransform, SuleimanTransform
 from algorithm_setup.algorithm_setup import DeviceSetup, adopted_setup, fugue_setup, yjs_setup, yjsmod_setup
@@ -15,9 +16,13 @@ from interleaving_checker.interleaving_checker import (
     check_condition_1,
     check_condition_1_with_deletes,
     forward_non_interleaving_with_deletes_from_client_logs,
+    has_common_forward_order,
     maximally_non_interleaving,
     transitive_closure,
 )
+from list_spec_checker.client_trace import ClientTrace as ListClientTrace
+from list_spec_checker.client_trace import Event as ListEvent
+from list_spec_checker.list_spec_checker import strong_list_specification_checker_for_client_log
 from unique_char.uniquechar import UniqueChar
 
 
@@ -204,6 +209,106 @@ def test_inserted_and_deleted_in_one_event_still_counts_as_observed():
     )
 
 
+def test_deleted_sibling_exemptions_need_one_common_order():
+    a, b, c, x = [UniqueChar(char, index) for index, char in enumerate("abcx")]
+    characters = {
+        a.id: Character(a, "start", "end"),
+        b.id: Character(b, a, "end"),
+        c.id: Character(c, a, "end"),
+        x.id: Character(x, "start", "end"),
+    }
+    characters[a.id].left_origin_of = [b, c]
+    insert_a = ClientInsertOperation(0, 0, a)
+    insert_b = ClientInsertOperation(0, 1, b)
+    insert_c = ClientInsertOperation(1, 1, c)
+    insert_x = ClientInsertOperation(2, 0, x)
+    delete_b = ClientDeleteOperation(0, 1, b)
+    delete_c = ClientDeleteOperation(1, 1, c)
+
+    # Sources create and delete b/c. Two observers retain opposite siblings and
+    # receive the other sibling's insert/delete in one event, so b/c never co-occur.
+    for conflicting in (False, True):
+        logs = {i: ClientTrace() for i in range(5)}
+
+        def add(
+            client_id: int,
+            operations: list[ClientInsertOperation | ClientDeleteOperation],
+            local: bool,
+            state: list[UniqueChar],
+            client_logs: dict[int, ClientTrace] = logs,
+        ) -> None:
+            client_logs[client_id].add_event(Event(operations, local), state)
+
+        add(0, [insert_a], True, [a])
+        add(0, [insert_b], True, [a, b])
+        add(0, [delete_b], True, [a])
+        add(1, [insert_a], False, [a])
+        add(1, [insert_c], True, [a, c])
+        add(1, [delete_c], True, [a])
+        add(2, [insert_x], True, [x])
+        add(3, [insert_a], False, [a])
+        add(3, [insert_b], False, [a, b])
+        add(3, [insert_c, delete_c], False, [a, b])
+        add(3, [insert_x], False, [a, x, b])
+        add(4, [insert_a], False, [a])
+        add(4, [insert_c], False, [a, c])
+        add(4, [insert_b, delete_b], False, [a, c])
+        add(4, [insert_x], False, [a, x, c] if conflicting else [a, c, x])
+        add(0, [insert_c, delete_c, insert_x], False, [a, x])
+        add(1, [insert_b, delete_b, insert_x], False, [a, x])
+        add(2, [insert_a, insert_b, delete_b, insert_c, delete_c], False, [a, x])
+        add(3, [delete_b], False, [a, x])
+        add(4, [delete_c], False, [a, x])
+
+        list_logs = {i: ListClientTrace() for i in logs}
+        for client_id, log in logs.items():
+            for event, state in zip(log.events_seen, log.states_after_events, strict=True):
+                list_logs[client_id].add_event(ListEvent(event.operation, event.performed_locally), state)
+        assert strong_list_specification_checker_for_client_log(list_logs)
+
+        # axb requires c<b; axc requires b<c. The old per-pair checks accept both.
+        order = transitive_closure(build_observed_list_order(logs))
+        assert check_condition_1_with_deletes([a, x, b], characters, order, {a, b, c, x}, a, b)
+        if conflicting:
+            assert check_condition_1_with_deletes([a, x, c], characters, order, {a, b, c, x}, a, c)
+        assert forward_non_interleaving_with_deletes_from_client_logs(logs, characters) is not conflicting
+
+
+def test_common_order_keeps_sibling_alternatives_and_combines_requirements():
+    a, b, c = [UniqueChar(char, index) for index, char in enumerate("abc")]
+    # Choosing b<a would create a cycle, but c<a<b satisfies both requirements.
+    assert has_common_forward_order(set(), {a: {frozenset({b, c})}, b: {frozenset({a})}})
+    # Requirements from separate states are conjunctive: both b<a and c<a.
+    assert not has_common_forward_order(set(), {a: {frozenset({b}), frozenset({c})}, b: {frozenset({a})}})
+    assert not has_common_forward_order(set(), {a: {frozenset()}})
+
+
+def test_common_order_matches_exhaustive_total_orders():
+    rng = random.Random(36)
+    for size in range(1, 6):
+        elements = [UniqueChar(str(index), index) for index in range(size)]
+        for _ in range(100):
+            order = {(a, b) for a in elements for b in elements if a != b and rng.random() < 0.15}
+            requirements = {
+                element: {
+                    frozenset(other for other in elements if other != element and rng.random() < 0.5)
+                    for _ in range(rng.randrange(3))
+                }
+                for element in elements
+            }
+            expected = False
+            for candidate in permutations(elements):
+                rank = {element: index for index, element in enumerate(candidate)}
+                if all(rank[a] < rank[b] for a, b in order) and all(
+                    any(rank[sibling] < rank[element] for sibling in alternatives)
+                    for element, clauses in requirements.items()
+                    for alternatives in clauses
+                ):
+                    expected = True
+                    break
+            assert has_common_forward_order(order, requirements) == expected
+
+
 def replay_yjs_family_counterexample(setup: DeviceSetup, with_delete: bool):
     _, clients = setup(2)
     traces = {client.client_id: ClientTrace() for client in clients}
@@ -300,6 +405,9 @@ if __name__ == "__main__":
     test_future_sibling_does_not_hide_an_earlier_violation()
     test_sibling_observed_by_another_client_does_not_rewrite_a_state()
     test_inserted_and_deleted_in_one_event_still_counts_as_observed()
+    test_deleted_sibling_exemptions_need_one_common_order()
+    test_common_order_keeps_sibling_alternatives_and_combines_requirements()
+    test_common_order_matches_exhaustive_total_orders()
     test_yjs_family_delete_trace_really_interleaves_consecutive_insertions()
     test_same_yjs_family_trace_without_delete_does_not_interleave()
     print("OK")
