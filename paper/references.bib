@@ -365,6 +365,37 @@ year = {2008},
 doi = {10.1007/s10606-007-9071-2}
 }
 
+@InProceedings{Boucheneb2009,
+author="Boucheneb, Hanifa
+and Imine, Abdessamad",
+editor="Lee, David
+and Lopes, Ant{\'o}nia
+and Poetzsch-Heffter, Arnd",
+title="On Model-Checking Optimistic Replication Algorithms",
+booktitle="Formal Techniques for Distributed Systems",
+year="2009",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="73--89",
+isbn="978-3-642-02138-1"
+}
+
+
+@InProceedings{Imine2009,
+author="Imine, Abdessamad",
+editor="Field, John
+and Vasconcelos, Vasco T.",
+title="Coordination Model for Real-Time Collaborative Editors",
+booktitle="Coordination Models and Languages",
+year="2009",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="225--246",
+abstract="Real-time Collaborative Editors (RCE) are a class of distributed systems based on the interaction of several users trying to edit simultaneously shared documents, such as articles, wiki pages and programming source code. Operational Transformation (OT) is considered as the efficient and safe method for consistency maintenance in the literature of collaborative editors. Indeed, it is aimed at ensuring copies convergence even though the users's updates are executed in any order on different copies. Unfortunately, existing OT algorithms often fail to achieve this objective. Moreover, these algorithms have limited scalability with the number of users as they use vector timestamps to enforce causality dependency. In this paper, we present a novel coordination model for managing collaborative editing work in a scalable and decentralized fashion. It may be deployed easily on P2P networks as it supports dynamic groups where users can leave and join at any time.",
+isbn="978-3-642-02053-7"
+}
+
+
 %% Proves TP2 by hand. However, Oster et al (2005) claim that SDT does not
 %% satisfy TP2. Does the version of SDT in this paper fix the problem? Algorithm 4
 %% on page 571 looks very much like figure 18 in Oster et al.
@@ -867,6 +898,13 @@ year = {2016},
 doi = {10.1007/978-3-319-43144-4_22}
 }
 
+@misc{Urso2016,
+  author       = {Urso, Pascal and Oster, Gérald and Ignat, Claudia-Lavinia and Ahmed-Nacer, Mehdi and Martin, Stéphane and Roh, Hyun-Gul},
+  title        = {{ReplicationBenchmarker}},
+  howpublished = {Available at \url{https://github.com/coast-team/replication-benchmarker}},
+  year         = {2016}
+}
+
 %% POT algorithm claims TP2 avoidance
 @article{Xu2016,
 author = {Xu, Yi and Sun, Chengzheng},
@@ -877,6 +915,14 @@ number = {3},
 pages = {695--709},
 year = {2016},
 doi = {10.1109/tpds.2015.2412938}
+}
+
+@misc{Chen2017,
+author = {Chen, Rudi},
+title = {{Alchemy Book}: Collaborative Text Editor Written in {Elixir}/{Phoenix}},
+year = {2017},
+month = oct,
+url = {https://github.com/rudi-c/alchemy-book}
 }
 
 %% https://arxiv.org/abs/1707.01747
@@ -1172,6 +1218,22 @@ month = apr,
 url = {https://mattweidner.com/2024/04/29/list-positions.html}
 }
 
+@article{Zhang2024,
+author = {Zhang, Yuqi and Huang, Yu and Wei, Hengfeng and Ma, Xiaoxing},
+title = {Model-checking-driven explorative testing of CRDT designs and implementations},
+journal = {Journal of Software: Evolution and Process},
+volume = {36},
+number = {4},
+pages = {e2555},
+keywords = {CRDT, explorative testing, model checking, TLA+},
+doi = {https://doi.org/10.1002/smr.2555},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/smr.2555},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/smr.2555},
+year = {2024}
+}
+
+
+
 @inproceedings{Gentle2025,
 author = {Gentle, Joseph and Kleppmann, Martin},
 title = {Collaborative Text Editing with {Eg-walker}: Better, Faster, Smaller},
@@ -1234,3 +1296,4 @@ url = {https://github.com/invisible-college/diffsync}
   title = {{Loro} {CRDT}},
   url = {https://loro.dev/}
 }
+
