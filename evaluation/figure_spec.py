@@ -82,7 +82,7 @@ PANELS: dict[str, list[str]] = {
     # "weak-list-spec": ["adopted-tm11", "diffsync", "lbt", "adopted-ressel", "prosemirror"],
     "strong-list-spec": ["cot", "jupiter", "easysync", "sharedb", "tibot", "soct4"],
     "forward-interleaving": ["treedoc", "logoot", "lseq", "woot", "soct3", "soct4"],
-    "interleaving": ["rga", "yjs", "loro", "collabs", "loro", "fugue"],
+    "interleaving": ["rga", "yjs", "loro", "collabs", "fugue"],
 }
 
 

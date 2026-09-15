@@ -2,8 +2,14 @@
 \def\sectionautorefname{Section}
 \def\subsectionautorefname{Section}
 \usepackage{makecell}
+\usepackage{multirow}
+\usepackage[nointegrals]{wasysym}
 \usepackage{amsthm}
 \usepackage[htt]{hyphenat}
+\newcommand{\rot}[1]{\rotatebox[origin=l]{90}{#1}}
+
+
+\graphicspath{{figures/}}
 
 % acmart creates the shared `theorem` counter (numbered within section) in an
 % \AtEndPreamble hook, so defer this to make Property share it with Definition.
@@ -23,16 +29,20 @@
 
 \author{Sami Abobaker}
 
-\author{Martin Kleppmann}
-
 \author{Aryan Shah}
 
 \author{Musaab Khan}
 
+\author{Martin Kleppmann}
+
 %% Abstract
 
 \begin{abstract}
-    ...
+    The field of collaborative text-editing algorithms, which are used in popular software such as Google Docs and Overleaf, has a reputation of being largely incorrect, and not worth trying to understand. 
+    This is due to a plethora of issues: algorithms are published in peer-reviewed venues, but later found not to work; algorithms often come without a publicly available implementation; implementation details of these algorithms are sometimes left incomplete or vague; and there is typically no proof or an incorrect proof. 
+    Recently, formal specifications have been proposed that define what it means for a collaborative text-editing algorithm to be correct, but few algorithms have actually been checked against these specifications, and there are no executable checkers for these specifications, so their correctness properties are simply unknown. 
+    We provide the first model-checker specialised for finding violations of these properties, supporting both randomised and exhaustive search, and we also provide a collection of implementations of 50 algorithms, covering most of the research literature and open source libraries.
+    We test these implementations using our model checker to provide the most comprehensive survey of the field, reporting about 15 severe issues in the algorithms, and 6 of those were not reported previously. 
 \end{abstract}
 
 %% CCS Codes
@@ -365,13 +375,85 @@ We only test combinations where there is a match between the claimed properties 
 
 \section{Evaluating the model checker}
 
-...
+Because we are only checking cases, rather than writing a proof, we can never be absolutely certain that a $\checkmark$ in \autoref{tab:algorithmproperties} means that the property is satisfied. The purpose of this evaluation is to give confidence that, if the model checker is unable to find property violations in the algorithm, then it is unlikely that one exists. 
 
-%Being able to reproduce known bugs.
+We use our large collection of algorithm implementations to collect data on the presence of violations, the time to find violations and to compare different search strategies. We present this data in this section. When running our model checker, we have many choices over the configurations we use to search for violations. This includes: the number of operations generated, the number of clients, the number of seeds checked, whether to use random or exhaustive search and what search order to use for an exhaustive search. We investigate how changing each of these affects the likelihood of finding a violation, and we justify our use of random checking over exhaustive checking. 
 
-%Best configurations. Number of operations? Number of clients?
 
-%Random vs exhaustive? Justify use of random checking.
+\subsection{Reproducing known properties}
+
+Our model checker was able to reproduce all published results about the algorithms. This is a list of known results about these algorithms our model checker was able to reproduce by finding violations (within seconds) using randomised testing:
+
+\begin{itemize}
+  \item
+    Five transformations functions: Ellis \cite{Ellis1989}, Ressel \cite{Ressel1996}, Imine \cite{Imine2003}, Suleiman \cite{Suleiman1997} and SDT \cite{Li2008} were all shown to fail to satisfy TP2 \cite{Oster2005Proving} (and some do not satisfy TP1). We combined each of these functions with the adOPTed algorithm, and all produced convergence violations for three or more clients (which is when TP2 violations occur).
+  \item
+    The dOPT algorithm is known not to converge \cite{Sun1996}.
+  \item
+    Fugue is known to not satisfy maximal non-interleaving \cite{Weidner2025Fugue}.
+  \item
+    Jupiter is known to not satisfy the strong list specification \cite{Attiya2016}.
+  \item
+    The Fugue paper \cite{Weidner2025Fugue} gives a list of algorithms for which they could find forward interleaving (e.g. Logoot, LSEQ, Treedoc, WOOT) and could not find forward interleaving (e.g RGA, Yjs, Sync9). Our results are consistent with those (apart from when we were able to avoid forward interleaving by reversing the priority schemes, see \autoref{sec:doptjupiteradoptedimplementation}). 
+  \item
+    The Logoot algorithm is known to have flaws which lead it to get stuck in an infinite loop \cite{Sun2018}.
+\end{itemize}
+
+
+Similarly, when an algorithm is known to satisfy a particular property, our model checker did not falsely report violations of that property. This includes Fugue \cite{Weidner2025Fugue} satisfying the strong list specification and forward non-interleaving, and FugueMax additionally satisfying maximal non-interleaving. Similarly, we found Jupiter satisfied the weak list specification, and RGA satisfied the strong list specification, which are both proven properties \cite{Wei2018, Attiya2016}.  
+
+
+\subsection{How commonly violations appear}
+
+\autoref{fig:violationrate} show how the percentage of violations in a set of 10000 traces changes when the number of operations generated by the checker changes. This is useful because it suggests what depth an exhaustive search would need to be run at; if we know a violation does not appear until a certain depth, then doing an exhaustive search below that depth is not useful. Similarly, it suggests what number of operations to generate when doing a randomised search. We pick a set of algorithms for each property. There is no guarantee that the patterns here will apply to every single one of these algorithms, but these figures do illustrate some of the behaviours that are possible, that we should consider when choosing a search strategy.
+
+\begin{figure*}
+  \caption[width=\textwidth]{The percentage of traces which contained violations out of a randomised test of 10000 traces as operations changed, for a selection of algorithms and properties.}
+  \includegraphics{violation_rate}
+  \label{fig:violationrate}
+\end{figure*}
+
+We observe that some of the violations (such as convergence violations in dOPT, or forward non-interleaving violations in TreeDoc) appear very commonly. The violations appear at less than 10 operations, and once the number of operations are large enough, the violations can appear nearly always.
+
+Other violations (such as the strong list specification violations) do not appear as commonly. They do not appear at all when there are less than 10 operations, and may still be unlikely above that. These are violations which require a more specific set of operations to be exhibited, so our model checker does not find them as often. For example, a maximal non-interleaving violation (that is not also a forward non-interleaving violations) may require the operations to include both include forward interleaving and backward interleaving.  These tell us also that running an exhaustive search below 10 operations is likely to miss many of these violations.
+
+We also experimented with how the number of clients changes how often violations appear, but we found no clear effect. Mainly, we find that some violations only appear when there are more than two clients (such as TP2 violations), but beyond that there is no clear effect. Becuase there is no limit to how an algorithm can behave however, there may be violations where this is not the case. One exceptional case we found was in PPS where violations could only appear with greater than 10 clients (see \autoref{sec:ppsimplementation}).
+
+\subsection{What depth to do an exhaustive search}
+
+The previous section suggests that the minimum depth to check the strong list specification at should be above 10 because violations sometimes do not appear below that. Running an exhaustive search at those depths is infeasible, as shown by \autoref{fig:exhaustivesearchcost}. Running an exhaustive search at 10 operations would take multiple years. Parallelisation and more efficient checking algorithms can reduce this, but it will not change the asymptotic behaviour. 
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{depth_cost}
+  \caption{The time taken to run an exhaustive search of convergence violations for the RGA algorithm at different depths.}
+  \label{fig:exhaustivesearchcost}
+\end{figure}
+
+\subsection{Comparing random and exhaustive search}
+
+Because of the time cost of doing an exhaustive search, we instead do a randomised search. \autoref{fig:successrate} aims to show that randomised search is a suitable alternative for exhaustive search. For all algorithm, property pairs for which we found a violation, we run a search for each of these violations and measure how long it took to find it. We find that while randomised testing is able to find all the violations, all of the exhuastive search strategies are only able to find a fraction of the violations, and taking exponentially longer to do so. 
+
+We considered multiple search strategies for exhaustive search; the first is breadth-first search vs depth-first search, and the second is a deterministic search order vs a randomised (but still exhaustive) search order. The motive behind using a randomised exhaustive search is that a deterministic search order tends to search through many `uninteresting' cases first, such as all operations being on one client. This means that the search can spend a long time looking through cases which are unlikely to contain bug. Randomised exhaustive search randomises the order of siblings in the search tree. The advantage of a depth-first search is that it is guaranteed to check large number of operations, whereas a breadth-first will spend a long time before reaching the maximum number of operations. The issue with a depth-first is that it can spend a long time searching through subtrees that are not likely to contain any violations. We observe that none of these alterations produced a clear improvement in the success rate of the search.
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{time_to_violation}
+  \caption{The percentage of violations found by each search strategy after different execution times. Both random and exhaustive searches use a trace length of 15 operations.}
+  \label{fig:successrate}
+\end{figure}
+
+The Jupiter strong list specification violations is an example of a violation that random search found, but exhaustive search could not within a reasonable amount of time. There were no examples of violations we could find through exhaustive search, but not through randomised. It may be worth considering in future work whether there are heuristics, which would help a randomised or exhaustive search to find certain properties faster.
+
+\subsection{How many seeds to do a random search for}
+
+There is a question of how many traces to run a random search for. \autoref{fig:numberofseeds} shows the proportion of times a violation was found within a certain number of traces for various violations. We see that, even when running the randomised search for a short amount of time, it is still likely to find a violation. This acts as evidence that for most violations, running a randomised search should be likely to find it, even without running the search for very long.
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{detection}
+  \caption{The percentage of traces which contained violations out of a randomised test of 10000 traces as operations changed.}
+  \label{fig:numberofseeds}
+\end{figure}
+
+
 
 \section{Results of the model checker} \label{sec:modelcheckerresults}
 
@@ -385,7 +467,7 @@ If the model checker finds a violation of a property, we replay the same scenari
 
 \subsection{Properties of each algorithm}
 
-\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. When there is a choice of transformation functions,
+\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. The properties are: convergence (Conv), Attiya et al.'s weak and strong list specifications (WLS and SLS) and the forward and maximal non-interleaving properties (FNI and MNI). It also includes which algorithms assume all clients are online (ACO) --- see \autoref{sec:assumptions}. When there is a choice of transformation functions,
 we choose transformation functions that would substantiate or disprove prior claims about the functions. For rows with no transformation functions, we used the transformation functions from the same paper as the control algorithm.
 
 In our opinion, convergence and the weak list specification are minimal requirements for a collaborative text editing algorithm to be useful in practice.
@@ -394,125 +476,81 @@ Whether an algorithm satisfies the strong list specification and/or maximal non-
 
 A common pattern we found across OT algorithms is that they exhibited interleaving in one direction, but not the other. Flipping the priority scheme flipped which direction of interleaving was exhibited. In these cases, we choose the direction that leads to forward non-interleaving being satisfied.
 
-%Include a description of how I determine this graph. I will give various sets of configurations, and I will run every set of configurations for every client for every algorithm for a minimum number of seeds.
-
-
 \begin{table*}
   \centering
-  \caption{Various collaborative text-editing algorithms and their properties. Key: $\checkmark$=The checker could not find violations for this property. $\square$=The checker
-    found violations for this property.}
+  \setlength{\aboverulesep}{0pt}\setlength{\belowrulesep}{0pt}\setlength{\abovetopsep}{0pt}\setlength{\belowbottomsep}{0pt}\setlength{\abovecaptionskip}{0pt}\setlength{\belowcaptionskip}{2pt}
+  \caption{Properties and assumptions. $\checkmark${}~= no violations found, $\square${}~= violations found; \CIRCLE{}~= assumption required.}
   \label{tab:algorithmproperties}
-    \begin{tabular}{lccccc}
+    \begin{tabular}{@{}c l *{5}{c} | c@{}}
         \toprule
-        Algorithm & Convergence & \makecell{Weak List \\ Specification \cite{}} & \makecell{Strong List \\ Specification \cite{}} & \makecell{Forward \\ non-interleaving \cite{Weidner2025Fugue} }& \makecell{Maximal \\ non-interleaving \cite{Weidner2025Fugue}} \\
+        & & \multicolumn{5}{c}{Properties} & \multicolumn{1}{c}{Assumptions} \\
+        \cmidrule(lr){3-7} \cmidrule(l){8-8}
+        & Algorithm
+        & Conv
+        & WLS~\cite{Attiya2016}
+        & SLS~\cite{Attiya2016}
+        & FNI~\cite{Weidner2025Fugue}
+        & MNI~\cite{Weidner2025Fugue}
+        & ACO \\
         \midrule
-        ABT \cite{Li2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-
-        AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + IMOR  \cite{Imine2003} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Randolph \cite{Randolph2015} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-        AdOPTed + Ressel \cite{Ressel1996} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Suleiman \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + TM1.1 \cite{Sun2017} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Tombstone \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-
-        Automerge \cite{Automerge} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$  \\
-
-        Collabs \cite{Weidner2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$  \\
-
-        COT \cite{Sun2009} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-
-        Diamond Types (Eg-Walker) \cite{Gentle2025} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
-
-        Diffsync \cite{Diffsync} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-
-        dOPT + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-
-        Etherpad (EasySync) \cite{...} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-
-        
-        Fugue \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ \\
-        FugueMax \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
-
-        GOT \cite{Sun1998TOCHI} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        GOTO + TTF \cite{Sun1998CSCW} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-
-        Jupiter \cite{Nichols1995} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
-
-        LBT \cite{Li2005} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\ 
-
-        Logoot \cite{Weiss2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-
-        LogootSplit \cite{Andre2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
-
-        Loro \cite{Loro} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ \\
-
-        LSEQ \cite{Nedelec2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-
-        Mark \& Retrace \cite{Gu2005} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-
-        POT \cite{Xu2016} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-
-        Partial Persistent Sequences \cite{Wu2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-
-        ProseMirror \cite{...} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-
-        RGA (with S4 Vectors) \cite{Roh2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$  \\
-
-        RGA (Timestamped-insertion trees) \cite{Attiya2016} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$  \\
-
-        RGA (Non-interleaving fix) \cite{Kleppmann2019} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-
-        SDT \cite{Li2008} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-
-        ShareDB \cite{ShareDB} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
-
-        SOCT2 \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        SOCT2 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
-
-        SOCT3 \cite{Vidot2000} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        SOCT3 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
-        
-        SOCT4 \cite{Vidot2000} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\ 
-
-        Sync7 \cite{...} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-
-        Sync9 \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ \\
-        
-
-        TIBOT \cite{Li2004ICPADS} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
-        TIBOT 2.0 \cite{Xu2014} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
-
-        Weidner's Text without CRDTs \cite{Weidner2025without} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$ \\
-        
-        TreeDoc \cite{Preguica2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-
-        WOOT \cite{Oster2006WOOT} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-        WOOTO \cite{Weiss2007} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-      
-        Yjs \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$  & $\square$ \\
-        YjsMod \cite{...} & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$ \\
-
-
-        \textbf{TODO}: \\
-
-        
-
-        
-        WOOTH \cite{} \\
-
-
-        Differential Synchronisation \cite{} \\
-        Chronofold \cite{} \\
-        Causal Trees / Weave \cite{} \\
-        Citrea / Swarm \cite{} \\
-        Causal Graph CRDT \cite{} \\
-        SECRO \cite{} \\
-
+        \multirow{10}{*}{\rotatebox[origin=c]{90}{\textit{Centralised OT}}}
+          & COT \cite{Sun2009} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Diffsync \cite{Little2017} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Etherpad (EasySync) \cite{AppJet2011} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Jupiter \cite{Nichols1995} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \Circle \\
+          & POT \cite{Xu2016} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & ProseMirror \cite{Haverbeke2015} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & ShareDB \cite{Smith2013} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \Circle \\
+          & SOCT3 \cite{Vidot2000} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & SOCT3 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & SOCT4 \cite{Vidot2000} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \CIRCLE \\
+        \midrule
+        \multirow{18}{*}{\rotatebox[origin=c]{90}{\textit{Decentralised OT}}}
+          & ABT \cite{Li2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + IMOR \cite{Imine2003} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + Randolph \cite{Randolph2015} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + Ressel \cite{Ressel1996} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + Suleiman \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + TM1.1 \cite{Sun2017} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + Tombstone \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & dOPT + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & GOT \cite{Sun1998TOCHI} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & GOTO + TTF \cite{Sun1998CSCW} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & LBT \cite{Li2005} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Mark \& Retrace \cite{Gu2005} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & SDT \cite{Li2008} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & SOCT2 \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & SOCT2 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & TIBOT \cite{Li2004ICPADS} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \CIRCLE \\
+          & TIBOT 2.0 \cite{Xu2014} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \CIRCLE \\
+        \midrule
+        \multirow{21}{*}{\rotatebox[origin=c]{90}{\textit{CRDT}}}
+          & Automerge \cite{Automerge2026} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & Collabs \cite{Weidner2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & Diamond Types (Eg-Walker) \cite{Gentle2025} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & \Circle \\
+          & Fugue \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & FugueMax \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & \Circle \\
+          & Logoot \cite{Weiss2009} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Logoot (with fix) \cite{Weiss2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & LogootSplit \cite{Andre2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & Loro \cite{Loro2026} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & LSEQ \cite{Nedelec2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & Partial Persistent Sequences \cite{Wu2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & RGA (with S4 Vectors) \cite{Roh2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & RGA (Timestamped-insertion trees) \cite{Attiya2016} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & Causal Trees \cite{Grishchenko2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & RGA (Non-interleaving fix) \cite{Kleppmann2019} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Sync7 \cite{Little2024} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Sync9 \cite{Toomim2019} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & TreeDoc \cite{Preguica2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & Weidner's Text without CRDTs \cite{Weidner2025without} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & WOOT \cite{Oster2006WOOT}, WOOTO \cite{Weiss2007}, WOOTH \cite{AhmedNacer2011} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & Yjs \cite{Nicolaescu2015} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & YjsMod \cite{Gentle2021} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & \Circle \\
         \bottomrule
-    \end{tabular}   
+    \end{tabular}
 \end{table*}
-
 \subsection{Properties of transformation functions}
 
 
@@ -520,7 +558,7 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
 
 In addition to the table, we believe that the only functions that explicitly satisfy the reversibility requirements are the tombstone transformation functions \cite{Oster2006TTF}. The functions provided alongside GOT claim to satisfy the reversibility requirements, but we show that this is false.
 
-\begin{table*}
+\begin{table}
   \caption{Various transformation functions and their properties. Key: $\checkmark$=The checker could not find violations for this property. $\square$=The checker
     found violations for this property.}
   \label{tab:tfproperties}
@@ -537,7 +575,7 @@ In addition to the table, we believe that the only functions that explicitly sat
         Randolph \cite{Randolph2015} & $\checkmark$ & $\checkmark$ \\
         \bottomrule
     \end{tabular}   
-\end{table*}
+\end{table}
 
 
 
@@ -555,35 +593,88 @@ Some TP2-avoiding algorithms do so by assuming totally ordered delivery, which h
 Three algorithms we considered (SOCT4 \cite{Vidot2000}, TIBOT \cite{Li2004ICPADS}, and TIBOT 2.0 \cite{Xu2014}) even assume that all clients are online, and stop making progress if one or more clients become unavailable.
 While a server-based algorithm can be made fault-tolerant using a consensus protocol, that is not the case for these algorithms, making them fundamentally unable to tolerate faults.
 
-\autoref{tab:algorithmassumptions} provides a list of the algorithms we found that make either of these two assumptions.
+\autoref{tab:algorithmproperties} includes information about the assumptions made by the algorithms.
 We call algorithms that do not assume a server or consensus protocol \emph{decentralised}, since they can operate in a peer-to-peer network under network partitions.
 All CRDT algorithms studied in this paper are decentralised.
 
-\begin{table}
-  \centering
-  \caption{Algorithms that require a central server, and algorithms that assume all clients are online. Algorithms with neither requirement are omitted.}
-  \label{tab:algorithmassumptions}
-  \begin{tabular}{ll}
-    \toprule
-    Assumptions & Algorithms \\
-    \midrule
-    Requires a central server & \makecell[l]{
-      COT \\ Jupiter \\ POT \\ SOCT3 \\ SOCT4 \\ EasySync (Etherpad) \\ ProseMirror
-    } \\
-    \midrule
-    Assumes all clients are online & \makecell[l]{
-      SOCT4 \\ TIBOT
-    } \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+...
 
+\section{Related work}
+
+
+This section reviews the existing efforts to verify collaborative text-editing algorithms. None of these check as many algorithms as we do, and none check for either the strong list specification or the non-interleaving properties.
+
+
+Imine et al. used the automated theorem prover SPIKE to verify TP1 and TP2 properties of various transformation functions \cite{Imine2003, Oster2005Proving, Imine2006}. SPIKE found counter examples in many published transformation functions at the time. The work only considers transformation functions in isolation, without any control algorithm. 
+It therefore only establishes convergence, and not any of the other properties we check. 
+It also does not actually execute the functions, but makes deductions based on the provided specification. 
+This led to them falsely proving functions satisfied TP2; the same authors found the proof was incorrect because of an error in their specification. 
+They also produced similar counter examples using the UPPAAL model-checker \cite{Boucheneb2009}, which was also only used to check for convergence.
+
+
+Previous work has also used the TLC model checker and TLA+ specification language to verify various correctness properties. 
+Oster et al. used this to verify convergence in the WOOT algorithm \cite{Oster2005WOOT}, exhaustively up to four sites and five characters. 
+Wei et al. used this to specify Jupiter, and to show that Jupiter satisfied strong eventual consistency and the weak list specification \cite{Wei2020}.
+Zhang et al. introduced a MET framework \cite{Zhang2024} which uses TLC to model check strong eventual consistency in CRDTs specified in TLA+, and then reuses the traces that the checker explored as test cases in a real implementation.
+
+
+Wei et al. also showed that Jupiter satisfied the weak list specification, by proposing a new algorithm CJupiter. They showed CJupiter satisfied the weak list specification, and that the algorithm was equivalent to Jupiter \cite{Wei2018}.
+
+
+Gomes et al. use the Isabelle/HOL proof assistant to prove strong eventual consistency for three CRDTS including RGA, but only for the convergence property \cite{Gomes2017}.
+
+
+There are many algorithms that solve related problems to collaborative text-editing, but were too different to include in our implementations. Collaborative XML editing \cite{Davis2002, Martin2010report}, graphics editing \cite{Sun2002}, tree editing \cite{Molli2003, Jungnickel2015}, JSON editing \cite{Jungnickel2016} and rich-text editing \cite{Litt2022} all apply these ideas to different kinds of documents, often using the same algorithms. Our model checker can only model plain text, and the properties are only well-defined on plain text, so we leave these out. 
+
+\section{Conclusion}
+
+We presented a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against the majority of collaborative text-editing algorithms. 
+We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text-editing, and use these to produce a set of results with our model checker documenting which algorithms satisfy which properties. Earlier collection of algorithm implementations exist \cite{Urso2016}, but ours covers many more. 
+Our implementations resolve multiple ambiguities in previous research, and for many algorithms, are the first publicly available implementations of these algorithms. We find 6 previously unreported property violations.
+Our model checker supports both randomised and exhaustive checking and we evaluate the behaviour of these two strategies, and justify our use of random over exhaustive checking. We hope our model checker helps to quickly rule out broken algorithms, so future research in this area avoids many of the correctness issues that have plagued work in the past.
+
+Future work may apply more rigorous formal verification techniques on the algorithms our model checker is unable to find a violation for. 
+Our work can never guarantee a property is satisfied in all cases, which a formal proof, written in a proof assistant for example, could. 
+Also, our work does not check for deletions with non-interleaving. Further consideration of how the non-interleaving properties apply to algorithms that do not use tombstones should be done in future work. The performance properties of algorithms are also something that should be investigated in future work. 
+An algorithm may be correct but impractical due to performance concerns.
+Comparing performance fairly has been difficult, as it depends on what level of performance optimisations are applied by the implementation \cite{Gentle2025}. Documenting these performance optimisations and developing fair approaches of comparing them should be considered in future work.
+
+
+
+%% Bibliography
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+
+\appendix
+
+\section{Counter-Examples}
+
+\subsection{Suleiman TP1 and TP2 Counter Examples}
+
+...
+
+\subsection{GOT Counter Examples}
+
+...
+
+\subsection{LBT Counter Examples}
+
+...
+
+\subsection{TM1.1 Counter Examples}
+
+...
+
+\subsection{ProseMirror Counter Examples}
+
+...
 
 \section{Algorithm implementations} \label{sec:algorithmimplementations}
 
 This section supplements \autoref{tab:algorithmproperties} with additional findings about specific algorithms.
 
-\subsection{dOPT, Jupiter and adOPTed}
+\subsection{dOPT, Jupiter and adOPTed} \label{sec:doptjupiteradoptedimplementation}
 
 dOPT \cite{Ellis1989} is the original OT algorithm, which is well known not to work. The transformation functions proposed in the same paper satisfy neither TP1 nor TP2. Furthermore, the algorithm has an issue which manifests because it calls its inclusion transformations with two operations that were not generated from the same state when two clients are out of sync by more than one operation. Similar issues are referred to in the literature as the dOPT puzzle \cite{Sun1998CSCW}. The original paper does mention the correctness issues and claims that the problem lies in the priority scheme, which decides which character should appear first when there are two concurrent insertions at the same location. They propose an alternative priority scheme, but this is also known not to work \cite{Sun1998CSCW}, so we do not implement it.
 
@@ -593,7 +684,7 @@ The adOPTed algorithm \cite{Ressel1996} is another algorithm based on dOPT. It d
 
 \subsection{SOCT2, SOCT3 and SOCT4}
 
-SOCT2 \cite{Suleiman1997} is an OT algorithm requiring TP2-satisfying functions. The paper gives transformation functions, but our model checker finds these do not satisfy TP2 (or even TP1), as they lead to divergence with adOPTed with both two and three clients. That aligns with known results \cite{Oster2005Proving}. Previous open source implementations \cite{...} have made the algorithm work using the tombstone transformation functions (TTF) \cite{Oster2006TTF}. We also find that this works. SOCT2 also requires functions satisfying the reversibility requirements (though they use the terms forwards/backwards transposition rather than inclusion/exclusion), which TTF claims to satisfy.
+SOCT2 \cite{Suleiman1997} is an OT algorithm requiring TP2-satisfying functions. The paper gives transformation functions, but our model checker finds these do not satisfy TP2 (or even TP1), as they lead to divergence with adOPTed with both two and three clients. That aligns with known results \cite{Oster2005Proving}. Previous open source implementations \cite{Urso2016} have made the algorithm work using the tombstone transformation functions (TTF) \cite{Oster2006TTF}. We also find that this works. SOCT2 also requires functions satisfying the reversibility requirements (though they use the terms forwards/backwards transposition rather than inclusion/exclusion), which TTF claims to satisfy.
 
 
 SOCT3 \cite{Vidot2000} is based on SOCT2, with the main change being that the delivery of operations is now serialised by introducing a sequencer (essentially a server). This means that SOCT3 is now TP2-avoiding, and claims to work with transformation functions that satisfy TP1 and the reversibility requirements, but not TP2. We could not find any functions that satisfy this specific set of conditions to test the algorithm with, so we tested it with the original SOCT2 transformation functions (which do not work), and the tombstone
@@ -629,7 +720,7 @@ SDT \cite{Li2004CSCW}, LBT \cite{Li2005} and ABT \cite{Li2010} are three algorit
 
 We found that the WOOT \cite{Oster2006WOOT} algorithm satisfies convergence and the weak and strong list specifications. Its successors, WOOTO \cite{Weiss2007} and WOOTH \cite{AhmedNacer2011}, both satisfy the same properties, the changes being performance improvements. WOOTH is not formally described in a paper, but given as open source code.
 
-\subsection{TM1.1 and Randolph functions}
+\subsection{TM1.1 and Randolph functions} \label{sec:tm11andrandolphfunctions}
 
 The TM1.1 transformation functions \cite{Sun2017} and Randolph et al.'s functions \cite{Randolph2015} both claim to satisfy TP2, but neither has been checked outside of its original paper. We implement both with the adOPTed algorithm, and find that both lead to convergence (including with more than two clients), indicating that they do indeed satisfy TP2. However, we find that with the TM1.1 functions, the algorithm does not satisfy the weak list specification, because it sometimes deletes a character that the user did not intend to delete.
 
@@ -641,15 +732,14 @@ The Logoot \cite{Weiss2009} algorithm is known to have bugs \cite{Sun2018}, whic
 by lowering the base to $2^4$, violations start to appear. This is because the bugs require two random numbers to be equal, and with BASE=$2^{64}$ this happens with very low probability. Reducing the collision probability to an acceptable level would require setting BASE to a value that is too great to be practical.
 
 
-The first bug leads to divergence; this bug was fixed in a later description of the algorithm \cite{Weiss2010}. The other causes the algorithm to get stuck in an infinite loop. We implemented the fix for this bug that we found in an open source implementation. % TODO: need reference to that open source implementation
-
-...
+The first bug leads to divergence; this bug was fixed in a later description of the algorithm \cite{Weiss2010}. The other causes the algorithm to get stuck in an infinite loop. Previous work has found that many of the fixes to this bug in open source implementations \cite{Urso2016, Chen2017} introduce divergence bugs
+elsewhere. We implemented both of those fixes and found they do not work. We were able to slightly modify one of these fixes \cite{Chen2017}, and with that, we were unable to reproduce the issue.
 
 \subsection{LogootSplit and LSEQ}
 
 LogootSplit \cite{Andre2013} and LSEQ \cite{Nedelec2013} are two variants of Logoot. LSEQ is simply a change to the allocation strategy, so all the issues with Logoot apply to LSEQ as well. LogootSplit is a bigger change, and we found it does not have the same bugs as Logoot. LogootSplit has three variants -- LogootSplitNaive, LogootSplitString and LogootSplitAVL. We only implement LogootSplitNaive; the differences between the three are only in the data structures used to improve performance.
 
-\subsection{Partial persistent sequences (PPS)}
+\subsection{Partial persistent sequences (PPS)} \label{sec:ppsimplementation}
 
 A PPS \cite{Wu2010} represents positions using rational numbers. This idea was mentioned previously \cite{Preguica2009}, but dismissed because it requires infinite-precision floating point numbers. Even without considering that issue, we find that the algorithm fails to converge because it does not give unique identifiers when two users concurrently insert at the same position. The two papers proposing this algorithm \cite{Wu2009, Wu2010} identify this issue and each provide a separate fix. We find that neither fix works entirely, and provide counter-examples. 
 
@@ -663,44 +753,15 @@ children and many left children. Depending on the interpretation, this can lead 
 describes two kinds of ID scheme, each of which has a different way of correctly handling deletions.
 % TODO: what did you actually implement in the end?
 
+\subsection{RGA}
+
+In the original RGA paper \cite{Roh2009}, positions were described using S4Vectors. Later descriptions of RGA do not use S4Vectors \cite{Attiya2016}. We implemented both, and found they satisfied the same properties. Timestamped insertion trees and causal trees \cite{Grishchenko2010} are both different names for the same algorithm, both equivalent to RGA. 
+
+Kleppmann et al. \cite{Kleppmann2019} proposed a fix to RGA to avoid interleaving behaviour. That fix was later shown to be totally wrong \cite{Weidner2025Fugue} as the algorithm no longer converged.
+
 \subsection{ProseMirror}
 
-We ported the collaborative editing algorithm from ProseMirror \cite{...} into our checker. We found that the algorithm exhibits weak list specification violations due to reordering characters in certain scenarios. We provide a reproduction of this violation, calling the original ProseMirror library, in our repository.
-
-\section{Related algorithms}
-
-This section describes algorithms that solve related problems to collaborative text-editing, but were too different to include in our implementations. Collaborative XML editing \cite{Davis2002, Martin2010}, graphics editing \cite{Sun2002}, tree editing \cite{Molli2003, Jungnickel2015}, JSON editing \cite{Jungnickel2016,Kleppmann2017} and rich-text editing \cite{Litt2022} all apply these ideas to different kinds of documents, often using the same algorithms. Our model checker can only model plain text, and the properties are only well-defined on plain text, so we leave these out. 
-
-...
-
-\appendix
-
-\section{Counter-Examples}
-
-\subsection{Suleiman TP1 and TP2 Counter Examples}
-
-...
-
-\subsection{GOT Counter Examples}
-
-...
-
-\subsection{LBT Counter Examples}
-
-...
-
-\subsection{TM1.1 Counter Examples}
-
-...
-
-\subsection{ProseMirror Counter Examples}
-
-...
-
-%% Bibliography
-\bibliographystyle{ACM-Reference-Format}
-\bibliography{references}
-
+We ported the collaborative editing algorithm from ProseMirror \cite{Haverbeke2015} into our checker. We found that the algorithm exhibits weak list specification violations due to reordering characters in certain scenarios. We provide a reproduction of this violation, calling the original ProseMirror library, in our repository.
 \end{document}
 
 
