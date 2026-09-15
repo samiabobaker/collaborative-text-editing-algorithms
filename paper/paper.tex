@@ -2,9 +2,12 @@
 \def\sectionautorefname{Section}
 \def\subsectionautorefname{Section}
 \usepackage{makecell}
+\usepackage{multirow}
+\usepackage[nointegrals]{wasysym}
 \usepackage{amsthm}
 \usepackage[htt]{hyphenat}
 \newcommand{\rot}[1]{\rotatebox[origin=l]{90}{#1}}
+
 
 \graphicspath{{figures/}}
 
@@ -464,7 +467,7 @@ If the model checker finds a violation of a property, we replay the same scenari
 
 \subsection{Properties of each algorithm}
 
-\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. When there is a choice of transformation functions,
+\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. The properties are: convergence (Conv), Attiya et al.'s weak and strong list specifications (WLS and SLS) and the forward and maximal non-interleaving properties (FNI and MNI). It also includes which algorithms assume all clients are online (ACO) --- see \autoref{sec:assumptions}. When there is a choice of transformation functions,
 we choose transformation functions that would substantiate or disprove prior claims about the functions. For rows with no transformation functions, we used the transformation functions from the same paper as the control algorithm.
 
 In our opinion, convergence and the weak list specification are minimal requirements for a collaborative text editing algorithm to be useful in practice.
@@ -475,79 +478,76 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
 
 \begin{table*}
   \centering
-  \caption{Collaborative text-editing algorithms, their properties, and the assumptions they make.
-    In the five property columns, $\checkmark${} = the checker could not find violations of the property and
-    $\square${} = the checker found violations. In the two assumption columns the reading is reversed:
-    $\checkmark${} = the algorithm requires the assumption.}
+  \setlength{\aboverulesep}{0pt}\setlength{\belowrulesep}{0pt}\setlength{\abovetopsep}{0pt}\setlength{\belowbottomsep}{0pt}\setlength{\abovecaptionskip}{0pt}\setlength{\belowcaptionskip}{2pt}
+  \caption{Properties and assumptions. $\checkmark${}~= no violations found, $\square${}~= violations found; \CIRCLE{}~= assumption required.}
   \label{tab:algorithmproperties}
-    \begin{tabular}{l *{5}{c} | *{2}{c}}
+    \begin{tabular}{@{}c l *{5}{c} | c@{}}
         \toprule
-        & \multicolumn{5}{c}{Properties} & \multicolumn{2}{c}{Assumptions} \\
-        \cmidrule(lr){2-6} \cmidrule(l){7-8}
-        Algorithm
-          & \rot{Conv}
-          & \rot{WLS}
-          & \rot{SLS}
-          & \rot{FNI~\cite{Weidner2025Fugue}}
-          & \rot{MNI~\cite{Weidner2025Fugue}}
-          & \rot{CS}
-          & \rot{ACO} \\
+        & & \multicolumn{5}{c}{Properties} & \multicolumn{1}{c}{Assumptions} \\
+        \cmidrule(lr){3-7} \cmidrule(l){8-8}
+        & Algorithm
+        & Conv
+        & WLS~\cite{Attiya2016}
+        & SLS~\cite{Attiya2016}
+        & FNI~\cite{Weidner2025Fugue}
+        & MNI~\cite{Weidner2025Fugue}
+        & ACO \\
         \midrule
-        \multicolumn{8}{l}{\textit{Centralised OT}} \\
-        COT \cite{Sun2009} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\checkmark$ & $\square$ \\
-        Diffsync \cite{Diffsync} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & $\checkmark$ & $\square$ \\
-        Etherpad (EasySync) \cite{AppJet2011} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\checkmark$ & $\square$ \\
-        Jupiter \cite{Nichols1995} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
-        POT \cite{Xu2016} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\checkmark$ & $\square$ \\
-        ProseMirror \cite{Haverbeke2015} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & $\checkmark$ & $\square$ \\
-        ShareDB \cite{ShareDB} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ \\
-        SOCT3 \cite{Vidot2000} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\checkmark$ & $\square$ \\
-        SOCT3 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\checkmark$ & $\square$ \\
-        SOCT4 \cite{Vidot2000} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\checkmark$ & $\checkmark$ \\
+        \multirow{10}{*}{\rotatebox[origin=c]{90}{\textit{Centralised OT}}}
+          & COT \cite{Sun2009} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Diffsync \cite{Diffsync} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Etherpad (EasySync) \cite{AppJet2011} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Jupiter \cite{Nichols1995} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \Circle \\
+          & POT \cite{Xu2016} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & ProseMirror \cite{Haverbeke2015} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & ShareDB \cite{ShareDB} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \Circle \\
+          & SOCT3 \cite{Vidot2000} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & SOCT3 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & SOCT4 \cite{Vidot2000} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \CIRCLE \\
         \midrule
-        \multicolumn{8}{l}{\textit{Decentralised OT}} \\
-        ABT \cite{Li2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + IMOR \cite{Imine2003} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Randolph \cite{Randolph2015} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Ressel \cite{Ressel1996} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Suleiman \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + TM1.1 \cite{Sun2017} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        AdOPTed + Tombstone \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        dOPT + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        GOT \cite{Sun1998TOCHI} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        GOTO + TTF \cite{Sun1998CSCW} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        LBT \cite{Li2005} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        Mark \& Retrace \cite{Gu2005} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        SDT \cite{Li2008} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        SOCT2 \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        SOCT2 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        TIBOT \cite{Li2004ICPADS} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & $\square$ & $\checkmark$ \\
-        TIBOT 2.0 \cite{Xu2014} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-        \midrule.
-        \multicolumn{8}{l}{\textit{CRDT}} \\
-        Automerge \cite{Automerge} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-        Collabs \cite{Weidner2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-        Diamond Types (Eg-Walker) \cite{Gentle2025} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-        Fugue \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-        FugueMax \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
-        Logoot \cite{Weiss2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        LogootSplit \cite{Andre2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        Loro \cite{Loro} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-        LSEQ \cite{Nedelec2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        Partial Persistent Sequences \cite{Wu2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        RGA (with S4 Vectors) \cite{Roh2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-        RGA (Timestamped-insertion trees) \cite{Attiya2016} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-        RGA (Non-interleaving fix) \cite{Kleppmann2019} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        Sync7 \cite{...} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        Sync9 \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-        TreeDoc \cite{Preguica2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        Weidner's Text without CRDTs \cite{Weidner2025without} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-        WOOT \cite{Oster2006WOOT} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        WOOTO \cite{Weiss2007} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        WOOTH \cite{AhmedNacer2011} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ \\
-        Yjs \cite{Nicolaescu2015} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ \\
-        YjsMod \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ \\
+        \multirow{18}{*}{\rotatebox[origin=c]{90}{\textit{Decentralised OT}}}
+          & ABT \cite{Li2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + IMOR \cite{Imine2003} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + Randolph \cite{Randolph2015} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + Ressel \cite{Ressel1996} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + Suleiman \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + TM1.1 \cite{Sun2017} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & AdOPTed + Tombstone \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & dOPT + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & GOT \cite{Sun1998TOCHI} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & GOTO + TTF \cite{Sun1998CSCW} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & LBT \cite{Li2005} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Mark \& Retrace \cite{Gu2005} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & SDT \cite{Li2008} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & SOCT2 \cite{Suleiman1997} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & SOCT2 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & TIBOT \cite{Li2004ICPADS} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \CIRCLE \\
+          & TIBOT 2.0 \cite{Xu2014} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \CIRCLE \\
+        \midrule
+        \multirow{21}{*}{\rotatebox[origin=c]{90}{\textit{CRDT}}}
+          & Automerge \cite{Automerge} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & Collabs \cite{Weidner2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & Diamond Types (Eg-Walker) \cite{Gentle2025} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & \Circle \\
+          & Fugue \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & FugueMax \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & \Circle \\
+          & Logoot \cite{Weiss2009} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Logoot (with fix) \cite{Weiss2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & LogootSplit \cite{Andre2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & Loro \cite{Loro} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & LSEQ \cite{Nedelec2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & Partial Persistent Sequences \cite{Wu2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & RGA (with S4 Vectors) \cite{Roh2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & RGA (Timestamped-insertion trees) \cite{Attiya2016} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & Causal Trees \cite{Grischenko2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & RGA (Non-interleaving fix) \cite{Kleppmann2019} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Sync7 \cite{...} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Sync9 \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & TreeDoc \cite{Preguica2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & Weidner's Text without CRDTs \cite{Weidner2025without} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & WOOT \cite{Oster2006WOOT}, WOOTO \cite{Weiss2007}, WOOTH \cite{AhmedNacer2011} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & Yjs \cite{Nicolaescu2015} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & YjsMod \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & \Circle \\
         \bottomrule
     \end{tabular}
 \end{table*}
@@ -593,28 +593,9 @@ Some TP2-avoiding algorithms do so by assuming totally ordered delivery, which h
 Three algorithms we considered (SOCT4 \cite{Vidot2000}, TIBOT \cite{Li2004ICPADS}, and TIBOT 2.0 \cite{Xu2014}) even assume that all clients are online, and stop making progress if one or more clients become unavailable.
 While a server-based algorithm can be made fault-tolerant using a consensus protocol, that is not the case for these algorithms, making them fundamentally unable to tolerate faults.
 
-\autoref{tab:algorithmassumptions} provides a list of the algorithms we found that make either of these two assumptions.
+\autoref{tab:algorithmproperties} includes information about the assumptions made by the algorithms.
 We call algorithms that do not assume a server or consensus protocol \emph{decentralised}, since they can operate in a peer-to-peer network under network partitions.
 All CRDT algorithms studied in this paper are decentralised.
-
-\begin{table}
-  \centering
-  \caption{Algorithms that require a central server, and algorithms that assume all clients are online. Algorithms with neither requirement are omitted.}
-  \label{tab:algorithmassumptions}
-  \begin{tabular}{ll}
-    \toprule
-    Assumptions & Algorithms \\
-    \midrule
-    Requires a central server & \makecell[l]{
-      COT \\ Jupiter \\ POT \\ SOCT3 \\ SOCT4 \\ EasySync (Etherpad) \\ ProseMirror
-    } \\
-    \midrule
-    Assumes all clients are online & \makecell[l]{
-      SOCT4 \\ TIBOT
-    } \\
-    \bottomrule
-  \end{tabular}
-\end{table}
 
 ...
 
@@ -762,6 +743,12 @@ represents a document as a binary tree with major nodes and mini nodes. Other pa
 children and many left children. Depending on the interpretation, this can lead to something closer to the Fugue algorithm \cite{Weidner2025Fugue}. The original paper also 
 describes two kinds of ID scheme, each of which has a different way of correctly handling deletions.
 % TODO: what did you actually implement in the end?
+
+\subsection{RGA}
+
+In the original RGA paper \cite{Roh2009}, positions were described using S4Vectors. Later descriptions of RGA do not use S4Vectors \cite{Attiya2016}. We implemented both, and found they satisfied the same properties. Timestamped insertion trees and causal trees \cite{Grischenko2010} are both different names for the same algorithm, both equivalent to RGA. 
+
+Kleppmann et al. \cite{Kleppmann2019} proposed a fix to RGA to avoid interleaving behaviour. That fix was later shown to be totally wrong \cite{Weidner2025Fugue} as the algorithm no longer converged.
 
 \subsection{ProseMirror}
 
