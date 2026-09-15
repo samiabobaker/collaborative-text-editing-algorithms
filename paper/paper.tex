@@ -628,7 +628,16 @@ There are many algorithms that solve related problems to collaborative text-edit
 
 \section{Conclusion}
 
-...
+We presented a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against the majority of collaborative text-editing algorithms. 
+We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text-editing, and use these to produce a set of results with our model checker documenting which algorithms satisfy which properties. Earlier collection of algorithm implementations exist \cite{Urso2016}, but ours covers many more. 
+Our implementations resolve multiple ambiguities in previous research, and for many algorithms, are the first publicly available implementations of these algorithms. We find 6 previously unreported property violations.
+Our model checker supports both randomised and exhaustive checking and we evaluate the behaviour of these two strategies, and justify our use of random over exhaustive checking. We hope our model checker helps to quickly rule out broken algorithms, so future research in this area avoids many of the correctness issues that have plagued work in the past.
+
+Future work may apply more rigorous formal verification techniques on the algorithms our model checker is unable to find a violation for. 
+Our work can never guarantee a property is satisfied in all cases, which a formal proof, written in a proof assistant for example, could. 
+Also, our work does not check for deletions with non-interleaving. Further consideration of how the non-interleaving properties apply to algorithms that do not use tombstones should be done in future work. The performance properties of algorithms are also something that should be investigated in future work. 
+An algorithm may be correct but impractical due to performance concerns.
+Comparing performance fairly has been difficult, as it depends on what level of performance optimisations are applied by the implementation \cite{Gentle2025}. Documenting these performance optimisations and developing fair approaches of comparing them should be considered in future work.
 
 
 
