@@ -333,16 +333,16 @@ state, and only on the characters in that state. As before, there is a single ch
 
 \subsection{Issues with checking for non-interleaving}
 
-Maximal non-interleaving uses a right origin that may be a tombstone. We find this causes difficulties when the algorithm does not use tombstones, as the property is not explicit in that case. It is not straightforward to add tombstones to an algorithm that does not use them, as the position of the tombstones is not well-defined. Further consideration may be needed as to what extent this property can be tested
-on those algorithms. The non-interleaving results in our main evaluation use only insertions. The strong and weak list checks include deletions, and we also provide a separate forward non-interleaving check with deletions, described below.
+The non-interleaving properties assume that the algorithms use tombstones, because the right origin may be a tombstone. We find this causes difficulties when the algorithm does not use tombstones, as the properties are not explicit in that case. It is not straightforward to add tombstones to an algorithm that does not use them, as the position of the tombstones is not well-defined. Further consideration may be needed as to what extent these properties can be tested
+on those algorithms. We avoid these issues by generating only insertions when checking for interleaving, and omitting deletions. The behaviour of deletions is still checked in the strong and weak list specifications, so we consider this an acceptable omission.
 
 Another reason for omitting deletions from the interleaving tests is that the non-interleaving properties are defined in terms of the total list order from the strong list specification.
-For executions that violate the strong list specification, such a total order need not exist, so these definitions of non-interleaving do not apply.
+For algorithms that satisfy the weak but not the strong list specification, this total order is not uniquely defined, and thus the question of whether interleaving is present is difficult to answer unambiguously.
 In executions containing only insertions, there is no difference between the strong and weak list specifications, and thus the presence of interleaving can easily be determined from the final document state after all clients converge.
 
 \subsection{Checking for non-interleaving}
 
-The trace used in the insert-only non-interleaving checkers is the same as that for the strong and weak list specifications, but now includes the left and right origins of each character. These are straightforward to determine by simply checking the elements immediately before and after the character at the time of insertion. Since there are no deletions, it is not possible for the right origin to be a tombstone.
+The trace used in the non-interleaving checkers is the same as that for the strong and weak list specifications, but now includes the left and right origins of each character. These are straightforward to determine by simply checking the elements immediately before and after the character at the time of insertion. Since there are no deletions, it is not possible for the right origin to be a tombstone.
 
 Knowing these, the condition for forward non-interleaving is easy to check. The checker loops over all pairs of characters $A$ and $B$. If $A$ is the left origin of $B$, and $B$ appears earlier in the list than all other characters for which $A$ is left origin, but $A$ and $B$ are not consecutive, then a forward non-interleaving
 violation is reported.
@@ -350,8 +350,6 @@ violation is reported.
 For maximal non-interleaving, the condition for backward non-interleaving can be checked analogously. Maximal non-interleaving's third condition defines the ordering 
 of characters with the same left and right origin. Mathematically, this was included to ensure a unique ordering. It mentions an ID but does not enforce what that ID is. We leave the choice of this ID to the algorithm, as the one piece of freedom it has over the ordering of characters. For that reason, we do not check condition 3
 of maximal non-interleaving.  
-
-The separate forward check with deletions uses the visible left origin recorded at insertion and the ordering of all character pairs ever observed together, as in strong-list condition 1b. For each state, we consider pairs $A,B$ that are both visible and where $A$ is the left origin of $B$. If they are separated, some other character with left origin $A$ must precede $B$. Such a sibling may have been deleted, but its insertion must already have been delivered to that replica. A modified topological sort tests whether one total order satisfies these requirements for all recorded states together. An element can be placed when all its observed predecessors and at least one alternative from each of its sibling requirements have been placed. If no element can be placed, the checker reports a violation. These verdicts assume the execution satisfies the strong list specification. This check requires neither right origins nor access to the algorithm's tombstones; it checks the constraints on visible pairs rather than the full order including tombstones.
 
 \subsection{Checking properties of transformation functions}
 
@@ -402,7 +400,7 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
 \begin{table*}
   \centering
   \caption{Various collaborative text-editing algorithms and their properties. Key: $\checkmark$=The checker could not find violations for this property. $\square$=The checker
-    found violations for this property. The non-interleaving columns use insert-only traces.}
+    found violations for this property.}
   \label{tab:algorithmproperties}
     \begin{tabular}{lccccc}
         \toprule
