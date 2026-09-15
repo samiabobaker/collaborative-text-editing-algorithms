@@ -363,7 +363,7 @@ of maximal non-interleaving.
 
 The separate forward check with deletions records each character's visible left origin at insertion and the order of every pair of characters observed together, as in condition 1b of the strong list specification. For each state, we consider visible characters $A$ and $B$ where $A$ is the left origin of $B$. If they are not consecutive, another character with left origin $A$ must precede $B$. This sibling may have been deleted, but its insertion must already have been delivered to that replica.
 
-A modified topological sort checks whether one total order extends the observed ordering and satisfies these requirements across all recorded states. A character can be placed once all its observed predecessors and at least one sibling from each of its requirements have been placed. Placing an eligible character can only help satisfy the remaining requirements, so no backtracking is needed. If characters remain but none can be placed, the checker reports a violation. These verdicts assume the execution satisfies the strong list specification. The check requires neither right origins nor access to tombstones. It checks adjacency only in states where both characters are visible, so passing does not establish the full property over an order including tombstones.
+A modified topological sort seeks one order consistent with the observed pairs and all sibling requirements. It places a character only after its observed predecessors and at least one sibling from each requirement. If characters remain but none is eligible, no such order exists and the checker reports a violation. These verdicts assume the execution satisfies the strong list specification. The check needs neither right origins nor access to tombstones. It only checks adjacency in states where both characters are visible, so passing does not establish the full property including tombstones.
 
 \subsection{Checking properties of transformation functions}
 
@@ -639,7 +639,7 @@ Our model checker supports both randomised and exhaustive checking and we evalua
 
 Future work may apply more rigorous formal verification techniques on the algorithms our model checker is unable to find a violation for. 
 Our work can never guarantee a property is satisfied in all cases, which a formal proof, written in a proof assistant for example, could. 
-Our non-interleaving evaluation uses insert-only traces; the separate forward check with deletions covers only constraints on visible pairs. Extending this check to the full non-interleaving properties, including for algorithms without tombstones, remains future work. The performance properties of algorithms are also something that should be investigated in future work.
+Our non-interleaving evaluation uses insert-only traces. The separate forward check with deletions covers visible pairs; checking the full properties, including for algorithms without tombstones, remains future work. The performance properties of algorithms are also something that should be investigated in future work.
 An algorithm may be correct but impractical due to performance concerns.
 Comparing performance fairly has been difficult, as it depends on what level of performance optimisations are applied by the implementation \cite{Gentle2025}. Documenting these performance optimisations and developing fair approaches of comparing them should be considered in future work.
 
