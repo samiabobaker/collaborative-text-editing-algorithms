@@ -495,12 +495,12 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
         \midrule
         \multirow{10}{*}{\rotatebox[origin=c]{90}{\textit{Centralised OT}}}
           & COT \cite{Sun2009} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
-          & Diffsync \cite{Diffsync} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Diffsync \cite{Little2017} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
           & Etherpad (EasySync) \cite{AppJet2011} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
           & Jupiter \cite{Nichols1995} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \Circle \\
           & POT \cite{Xu2016} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
           & ProseMirror \cite{Haverbeke2015} & $\checkmark$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
-          & ShareDB \cite{ShareDB} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \Circle \\
+          & ShareDB \cite{Smith2013} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \Circle \\
           & SOCT3 \cite{Vidot2000} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
           & SOCT3 + TTF \cite{Oster2006TTF} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & SOCT4 \cite{Vidot2000} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \CIRCLE \\
@@ -526,7 +526,7 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
           & TIBOT 2.0 \cite{Xu2014} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \CIRCLE \\
         \midrule
         \multirow{21}{*}{\rotatebox[origin=c]{90}{\textit{CRDT}}}
-          & Automerge \cite{Automerge} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & Automerge \cite{Automerge2026} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & Collabs \cite{Weidner2023} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & Diamond Types (Eg-Walker) \cite{Gentle2025} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & \Circle \\
           & Fugue \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
@@ -534,20 +534,20 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
           & Logoot \cite{Weiss2009} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
           & Logoot (with fix) \cite{Weiss2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & LogootSplit \cite{Andre2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
-          & Loro \cite{Loro} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & Loro \cite{Loro2026} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & LSEQ \cite{Nedelec2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & Partial Persistent Sequences \cite{Wu2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & RGA (with S4 Vectors) \cite{Roh2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & RGA (Timestamped-insertion trees) \cite{Attiya2016} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
-          & Causal Trees \cite{Grischenko2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & Causal Trees \cite{Grishchenko2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & RGA (Non-interleaving fix) \cite{Kleppmann2019} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
-          & Sync7 \cite{...} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
-          & Sync9 \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & Sync7 \cite{Little2024} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & Sync9 \cite{Toomim2019} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & TreeDoc \cite{Preguica2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & Weidner's Text without CRDTs \cite{Weidner2025without} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & WOOT \cite{Oster2006WOOT}, WOOTO \cite{Weiss2007}, WOOTH \cite{AhmedNacer2011} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & Yjs \cite{Nicolaescu2015} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
-          & YjsMod \cite{...} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & \Circle \\
+          & YjsMod \cite{Gentle2021} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & \Circle \\
         \bottomrule
     \end{tabular}
 \end{table*}
@@ -624,7 +624,7 @@ Wei et al. also showed that Jupiter satisfied the weak list specification, by pr
 Gomes et al. use the Isabelle/HOL proof assistant to prove strong eventual consistency for three CRDTS including RGA, but only for the convergence property \cite{Gomes2017}.
 
 
-There are many algorithms that solve related problems to collaborative text-editing, but were too different to include in our implementations. Collaborative XML editing \cite{Davis2002, Martin2010}, graphics editing \cite{Sun2002}, tree editing \cite{Molli2003, Jungnickel2015}, JSON editing \cite{Jungnickel2016} and rich-text editing \cite{Litt2022} all apply these ideas to different kinds of documents, often using the same algorithms. Our model checker can only model plain text, and the properties are only well-defined on plain text, so we leave these out. 
+There are many algorithms that solve related problems to collaborative text-editing, but were too different to include in our implementations. Collaborative XML editing \cite{Davis2002, Martin2010report}, graphics editing \cite{Sun2002}, tree editing \cite{Molli2003, Jungnickel2015}, JSON editing \cite{Jungnickel2016} and rich-text editing \cite{Litt2022} all apply these ideas to different kinds of documents, often using the same algorithms. Our model checker can only model plain text, and the properties are only well-defined on plain text, so we leave these out. 
 
 \section{Conclusion}
 
@@ -684,7 +684,7 @@ The adOPTed algorithm \cite{Ressel1996} is another algorithm based on dOPT. It d
 
 \subsection{SOCT2, SOCT3 and SOCT4}
 
-SOCT2 \cite{Suleiman1997} is an OT algorithm requiring TP2-satisfying functions. The paper gives transformation functions, but our model checker finds these do not satisfy TP2 (or even TP1), as they lead to divergence with adOPTed with both two and three clients. That aligns with known results \cite{Oster2005Proving}. Previous open source implementations \cite{...} have made the algorithm work using the tombstone transformation functions (TTF) \cite{Oster2006TTF}. We also find that this works. SOCT2 also requires functions satisfying the reversibility requirements (though they use the terms forwards/backwards transposition rather than inclusion/exclusion), which TTF claims to satisfy.
+SOCT2 \cite{Suleiman1997} is an OT algorithm requiring TP2-satisfying functions. The paper gives transformation functions, but our model checker finds these do not satisfy TP2 (or even TP1), as they lead to divergence with adOPTed with both two and three clients. That aligns with known results \cite{Oster2005Proving}. Previous open source implementations \cite{Urso2016} have made the algorithm work using the tombstone transformation functions (TTF) \cite{Oster2006TTF}. We also find that this works. SOCT2 also requires functions satisfying the reversibility requirements (though they use the terms forwards/backwards transposition rather than inclusion/exclusion), which TTF claims to satisfy.
 
 
 SOCT3 \cite{Vidot2000} is based on SOCT2, with the main change being that the delivery of operations is now serialised by introducing a sequencer (essentially a server). This means that SOCT3 is now TP2-avoiding, and claims to work with transformation functions that satisfy TP1 and the reversibility requirements, but not TP2. We could not find any functions that satisfy this specific set of conditions to test the algorithm with, so we tested it with the original SOCT2 transformation functions (which do not work), and the tombstone
@@ -720,7 +720,7 @@ SDT \cite{Li2004CSCW}, LBT \cite{Li2005} and ABT \cite{Li2010} are three algorit
 
 We found that the WOOT \cite{Oster2006WOOT} algorithm satisfies convergence and the weak and strong list specifications. Its successors, WOOTO \cite{Weiss2007} and WOOTH \cite{AhmedNacer2011}, both satisfy the same properties, the changes being performance improvements. WOOTH is not formally described in a paper, but given as open source code.
 
-\subsection{TM1.1 and Randolph functions}
+\subsection{TM1.1 and Randolph functions} \label{sec:tm11andrandolphfunctions}
 
 The TM1.1 transformation functions \cite{Sun2017} and Randolph et al.'s functions \cite{Randolph2015} both claim to satisfy TP2, but neither has been checked outside of its original paper. We implement both with the adOPTed algorithm, and find that both lead to convergence (including with more than two clients), indicating that they do indeed satisfy TP2. However, we find that with the TM1.1 functions, the algorithm does not satisfy the weak list specification, because it sometimes deletes a character that the user did not intend to delete.
 
@@ -755,13 +755,13 @@ describes two kinds of ID scheme, each of which has a different way of correctly
 
 \subsection{RGA}
 
-In the original RGA paper \cite{Roh2009}, positions were described using S4Vectors. Later descriptions of RGA do not use S4Vectors \cite{Attiya2016}. We implemented both, and found they satisfied the same properties. Timestamped insertion trees and causal trees \cite{Grischenko2010} are both different names for the same algorithm, both equivalent to RGA. 
+In the original RGA paper \cite{Roh2009}, positions were described using S4Vectors. Later descriptions of RGA do not use S4Vectors \cite{Attiya2016}. We implemented both, and found they satisfied the same properties. Timestamped insertion trees and causal trees \cite{Grishchenko2010} are both different names for the same algorithm, both equivalent to RGA. 
 
 Kleppmann et al. \cite{Kleppmann2019} proposed a fix to RGA to avoid interleaving behaviour. That fix was later shown to be totally wrong \cite{Weidner2025Fugue} as the algorithm no longer converged.
 
 \subsection{ProseMirror}
 
-We ported the collaborative editing algorithm from ProseMirror \cite{...} into our checker. We found that the algorithm exhibits weak list specification violations due to reordering characters in certain scenarios. We provide a reproduction of this violation, calling the original ProseMirror library, in our repository.
+We ported the collaborative editing algorithm from ProseMirror \cite{Haverbeke2015} into our checker. We found that the algorithm exhibits weak list specification violations due to reordering characters in certain scenarios. We provide a reproduction of this violation, calling the original ProseMirror library, in our repository.
 \end{document}
 
 
