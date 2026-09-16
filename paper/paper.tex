@@ -72,7 +72,7 @@ As a result, some work in this field has gained a reputation of being full of er
 To address this situation, this paper makes the following contributions:
 \begin{itemize}
     \item We implement Darner --- a specialised model checker for testing collaborative text editing algorithms --- which includes checks for five properties: convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}. It is named after a family of dragonflies that hunts bugs in flight, and also after a darning needle for mending holes in textiles.
-    \item We implement a corpus of collaborative text editing algorithms covering most of the research literature and open source libraries, and use Darner to test these algorithms against the aforementioned properties. % TODO: say how many algorithms are in the corpus
+    \item We implement a corpus of 50 collaborative text editing algorithms covering most of the research literature and open source libraries, and use Darner to test these algorithms against the aforementioned properties.
         For many of these algorithms, this is the first publicly available implementation, and the first time their properties have been independently checked.
         Our results provide, for the first time, a comprehensive survey of the collaborative text editing literature from a correctness point of view, and for several published algorithms we find novel bugs that have not been reported previously.
     \item We evaluate Darner based on its ability to reproduce known results, and we compare its performance in an exhaustive checking mode with a randomised mode that probabilistically searches for violations of consistency properties.
@@ -131,10 +131,10 @@ for the full properties.
   There exists a binary relation $lo$ on the characters of the state, called the list order, such that:
   \begin{enumerate}
     \item
-      Each locally executed operation $op$, which results in a sequence of elements $w = a_0 \dots a_{n-1}$, satisfies the properties:
+      For all events $e = do(op, w)$, where $op$ is a locally executed operation that results in a sequence of elements $w = a_0 \dots a_{n-1}$, the following properties are satisfied:
       \begin{enumerate}
         \item
-          $w$ contains exactly the elements visible to $e$ that have been inserted, but not deleted. % TODO: this refers to a variable $e$ that is not defined in the strong list spec context, only on the definition of the weak list
+          $w$ contains exactly the elements visible to $e$ that have been inserted, but not deleted.
         \item
           The order of these elements is consistent with the list order:
           $\forall i,j. (i < j) \implies (a_i, a_j) \in lo$.
@@ -173,6 +173,8 @@ Maximal non-interleaving is a strengthening of forward non-interleaving that als
 In this paper we check for forward non-interleaving as well as maximal non-interleaving, and to our knowledge Darner is the first implementation of these properties.
 We expect that an algorithm that satisfies forward non-interleaving but not maximal non-interleaving is good enough for most practical applications, but we report the results for maximal non-interleaving as well because backward insertion may be more frequent in some applications.
 
+The properties assume the algorithm uses \emph{tombstones}. This is when, rather than actually deleting an element from the document state, the algorithm simply marks the element as deleted. Marked elements are called tombstones, and are not displayed to the user when outputting the document state.
+
 We quote the relevant properties below, but refer to the Fugue paper \cite{Weidner2025Fugue} for the full details.
 
 \begin{definition}[Left Origin]
@@ -182,7 +184,6 @@ We quote the relevant properties below, but refer to the Fugue paper \cite{Weidn
 \end{definition}
 
 \begin{definition}[Right Origin]
-  % TODO: should we leave out the mention of tombstones in this definition, since we haven't explained the term yet, and our checker's implementation does not use deletions in the interleaving tests?
   The right origin of an element is the element directly following its insertion position at the time of insertion, in the list including tombstones. If the element was inserted by 
   an $ins(i, x)$ call, then its right origin was at index $i+1$ at the time of this call. If $i$ is the end of the list, then its right origin is a special symbol
   $\mathit{end}$.
@@ -274,9 +275,7 @@ Note that some papers use the terms \emph{forward} and \emph{backward transposit
 
 \section{Darner implementation} \label{sec:modelcheckerimplementation}
 
-In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the strong and weak list specifications and for the non-interleaving properties.
-% TODO: state that both the model checker and the tested algorithms are implemented in Python, without the use of any existing model-checking tool.
-% state the approximate number of lines of code in the implementation of the checker (including implementations of the properties) and in the algorithm implementations.
+In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the strong and weak list specifications and for the non-interleaving properties. Both Darner and the algorithm implementations are written in Python, without the use of any existing model checking tool. Darner is about 2300 lines of codes, and the algorithm corpus is about 17000 lines of code in total (averaging about 400 lines of code per algorithm).
 
 \subsection{Interface between algorithms and Darner}
 
@@ -291,8 +290,7 @@ which device at which time, allowing it to model a wide range of network scenari
 
 The editing operations generated by the checker insert or delete a single character at a time. Support for multi-character operations (e.g. pasting a chunk of text) could be added in future work.
 
-% TODO: "actually received when a client receives a message" is strange phrasing; can you make this clearer?
-\texttt{perform\_operation} returns a list of operations seen by the client. This allows Darner to know what operations were actually received when a client receives a message from another device.
+\texttt{perform\_operation} returns a list of operations seen by the client. This allows Darner to know what operations were contained in the message that the client received.
 
 A second mechanism is provided by the methods \texttt{can\_receive\_from} and \texttt{can\_receive\_from\_server}. Algorithms tend to restrict the delivery order of operations. The most common way is to use a causal order, enforced by vector clocks. We leave the choice of restriction to the algorithm, and it is exposed to Darner through these methods, which return the devices from which a client can receive.
 
@@ -304,10 +302,11 @@ of the algorithms and specifications assume every character is unique.
 
 Darner generally follows the following steps. It first generates an operation to be executed on one of the clients or the server. It executes that operation, and records which operations were performed on which device, what the states of the clients were after each operation, and other useful information (for example, the left and right origins of each character). It repeats this with more operations to produce a trace of the execution. After the trace is fully generated, it is passed to one of the checkers which decides whether a particular property is satisfied.
 
-% TODO: explain how sending messages is handled. is that implicit in generating an operation?
 The possible choices for an operation to be generated are an insertion or deletion at every position in the state, or receiving a message
 from one of the other clients or server. We can then choose these operations at random, or check each one exhaustively up to a certain depth.
 We implement both, but focus mainly on random generation.
+
+The model checker does not generate operations for sending messages. When to send a message is left as a choice to the algorithm implementation. Most algorithms send a message after every local operation, but some (such as TIBOT) delay this.
 
 \subsection{Checking for convergence}
 
@@ -722,7 +721,7 @@ We found that the WOOT \cite{Oster2006WOOT} algorithm satisfies convergence and 
 
 The TM1.1 transformation functions \cite{Sun2017} and Randolph et al.'s functions \cite{Randolph2015} both claim to satisfy TP2, but neither has been checked outside of its original paper. We implement both with the adOPTed algorithm, and find that both lead to convergence (including with more than two clients), indicating that they do indeed satisfy TP2. However, we find that with the TM1.1 functions, the algorithm does not satisfy the weak list specification, because it sometimes deletes a character that the user did not intend to delete.
 
-In contrast, Darner could not find strong or weak list specification violations for Randolph et al.'s functions. When implementing these functions, we found that they implicitly assume a total ordering on the characters, and we achieved this by attaching the client ID and a per-client counter to each character. % TODO: Other algorithms (e.g. RGA) also assume such a total ordering, and it's unproblematic. I'd say we don't need to mention this, or is there something important I'm missing here?
+In contrast, Darner could not find strong or weak list specification violations for Randolph et al.'s functions. The functions require comparing characters. Simply checking by character code is not enough. It leads to convergence violations because it is not a total ordering (which the algorithm assumes it is). Instead, we attach a client ID and a per-client counter to each character, which provides a total order; this is fairly common in CRDTs, but not as common in OT algorithms.
 
 \subsection{Logoot}
 
@@ -748,8 +747,7 @@ A PPS \cite{Wu2010} represents positions using rational numbers. This idea was m
 We found that the TreeDoc \cite{Preguica2009} algorithm satisfies the strong list specification. There is some ambiguity over what is meant by TreeDoc in the literature. The original paper
 represents a document as a binary tree with major nodes and mini nodes. Other papers \cite{Zawirski2011} represent TreeDoc as a tree that is not binary. A node can have many right
 children and many left children. Depending on the interpretation, this can lead to something closer to the Fugue algorithm \cite{Weidner2025Fugue}. The original paper also 
-describes two kinds of ID scheme, each of which has a different way of correctly handling deletions.
-% TODO: what did you actually implement in the end?
+describes two kinds of ID scheme (UDIS and SDIS), each of which has a different way of correctly handling deletions. Our implementation uses major nodes and mini nodes faithful to the original description, and we used SDIS.
 
 \subsection{RGA}
 
