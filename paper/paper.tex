@@ -38,11 +38,12 @@
 %% Abstract
 
 \begin{abstract}
-    The field of collaborative text-editing algorithms, which are used in popular software such as Google Docs and Overleaf, has a reputation of being largely incorrect, and not worth trying to understand. 
-    This is due to a plethora of issues: algorithms are published in peer-reviewed venues, but later found not to work; algorithms often come without a publicly available implementation; implementation details of these algorithms are sometimes left incomplete or vague; and there is typically no proof or an incorrect proof. 
-    Recently, formal specifications have been proposed that define what it means for a collaborative text-editing algorithm to be correct, but few algorithms have actually been checked against these specifications, and there are no executable checkers for these specifications, so their correctness properties are simply unknown. 
-    We provide Darner --- the first model checker specialised for finding violations of these properties, supporting both randomised and exhaustive search. We also provide a collection of implementations of 50 algorithms, covering most of the research literature and open source libraries.
-    We test these implementations using Darner to provide the most comprehensive survey of the field, reporting about 15 severe issues in the algorithms, and 6 of those were not reported previously. 
+    Collaborative text-editing algorithms, which are used in popular software such as Google Docs and Overleaf, have a troubled history: many published algorithms violate their purported consistency guarantees, and many algorithms' claimed properties have not been independently validated, making it unclear which algorithms are safe to use.
+    Formal specifications that define what it means for a collaborative text-editing algorithm to be correct have been proposed recently, but few algorithms have been checked against these specifications, and to date there is no executable checker for these specifications. 
+    In this paper we introduce Darner, the first model checker specialised for finding violations of these specifications, supporting both randomised and exhaustive search.
+    We also implement a corpus of over 50 such algorithms, covering most of the research literature and popular open source libraries.
+    Applying Darner to this corpus reveals that 17 of these algorithms do not meet the requirements that we consider essential for a collaborative text-editing algorithm to be practically useful; of these, 11 reproduce known results and 6 are new flaws not reported previously.
+    By providing the most comprehensive survey and empirical validation to date, we hope that this paper will place the field of collaborative text-editing on a more stable footing going forward.
 \end{abstract}
 
 %% CCS Codes
