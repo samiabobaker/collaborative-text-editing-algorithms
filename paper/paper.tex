@@ -23,7 +23,7 @@
 \begin{document}
 
 
-\title{A comprehensive set of correctness properties of collaborative text editing algorithms}
+\title{Darner: A model checker for collaborative text editing algorithms}
 
 %% Authors
 
@@ -41,8 +41,8 @@
     The field of collaborative text-editing algorithms, which are used in popular software such as Google Docs and Overleaf, has a reputation of being largely incorrect, and not worth trying to understand. 
     This is due to a plethora of issues: algorithms are published in peer-reviewed venues, but later found not to work; algorithms often come without a publicly available implementation; implementation details of these algorithms are sometimes left incomplete or vague; and there is typically no proof or an incorrect proof. 
     Recently, formal specifications have been proposed that define what it means for a collaborative text-editing algorithm to be correct, but few algorithms have actually been checked against these specifications, and there are no executable checkers for these specifications, so their correctness properties are simply unknown. 
-    We provide the first model-checker specialised for finding violations of these properties, supporting both randomised and exhaustive search, and we also provide a collection of implementations of 50 algorithms, covering most of the research literature and open source libraries.
-    We test these implementations using our model checker to provide the most comprehensive survey of the field, reporting about 15 severe issues in the algorithms, and 6 of those were not reported previously. 
+    We provide Darner --- the first model checker specialised for finding violations of these properties, supporting both randomised and exhaustive search. We also provide a collection of implementations of 50 algorithms, covering most of the research literature and open source libraries.
+    We test these implementations using Darner to provide the most comprehensive survey of the field, reporting about 15 severe issues in the algorithms, and 6 of those were not reported previously. 
 \end{abstract}
 
 %% CCS Codes
@@ -71,17 +71,17 @@ As a result, some work in this field has gained a reputation of being full of er
 
 To address this situation, this paper makes the following contributions:
 \begin{itemize}
-    \item We implement a specialised model checker for testing collaborative text editing algorithms, which includes checks for five properties: convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}.
-    \item We implement a corpus of collaborative text editing algorithms covering most of the research literature and open source libraries, and use our model checker to test these algorithms against the aforementioned properties. % TODO: say how many algorithms are in the corpus
+    \item We implement Darner --- a specialised model checker for testing collaborative text editing algorithms --- which includes checks for five properties: convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}. It is named after a family of dragonflies that hunts bugs in flight, and also after a darning needle for mending holes in textiles.
+    \item We implement a corpus of collaborative text editing algorithms covering most of the research literature and open source libraries, and use Darner to test these algorithms against the aforementioned properties. % TODO: say how many algorithms are in the corpus
         For many of these algorithms, this is the first publicly available implementation, and the first time their properties have been independently checked.
         Our results provide, for the first time, a comprehensive survey of the collaborative text editing literature from a correctness point of view, and for several published algorithms we find novel bugs that have not been reported previously.
-    \item We evaluate our model checker based on its ability to reproduce known results, and we compare its performance in an exhaustive checking mode with a randomised mode that probabilistically searches for violations of consistency properties.
+    \item We evaluate Darner based on its ability to reproduce known results, and we compare its performance in an exhaustive checking mode with a randomised mode that probabilistically searches for violations of consistency properties.
 \end{itemize}
 
-As with any model checker, our tool can only explore a finite state space to establish that either an algorithm does not satisfy some property, or that it satisfies the property within bounded executions.
+As with any model checker, Darner can only explore a finite state space to establish that either an algorithm does not satisfy some property, or that it satisfies the property within bounded executions.
 Making any guarantees about unbounded executions would require a formal proof.
-However, the advantage of our model checker is that adding new algorithms and checking them against our properties is quick and easy, making it possible to quickly rule out algorithms that are obviously broken.
-We hope that our tool and our algorithm corpus will therefore become a standard part of future research on collaborative editing algorithms, allowing formal verification efforts to focus on those algorithms that have been shown by the model checker to be plausible.
+However, the advantage of Darner is that adding new algorithms and checking them against our properties is quick and easy, making it possible to quickly rule out algorithms that are obviously broken.
+We hope that Darner and our algorithm corpus will therefore become a standard part of future research on collaborative editing algorithms, allowing formal verification efforts to focus on those algorithms that have been shown by Darner to be plausible.
 
 The scope of this paper is focussed on the correctness of collaborative text editing with single-character insertions and deletions, and it includes both the OT and the CRDT family of algorithms.
 We leave an evaluation of algorithm performance, and additional features (such as multi-character operations \cite{Lv2016}, undo \cite{Ressel1999}, move \cite{Kleppmann2020}, and rich text \cite{Litt2022}) for future work.
@@ -114,7 +114,7 @@ While the first two properties are well-defined, the meaning of ``intention'' in
 \subsubsection{Weak and Strong List Specification}
 
 The weak and strong list specifications of Attiya et al.~\cite{Attiya2016} are precise correctness properties for collaborative text editing (or, more generally, a list object supporting insertion and deletion at arbitrary positions) that go beyond convergence and causality preservation.
-We use these properties in our model checker.
+We use these properties in Darner.
 
 The weak and strong list specifications describe what characters must appear in the document, and in what order, at every point in the execution.
 Firstly, a character must appear in the document if and only if an insertion operation
@@ -170,7 +170,7 @@ Since backward insertions happen rarely in typical text editing behaviour, backw
 It has recently been shown that it is impossible for an algorithm to guarantee both forward and backward non-interleaving \cite{Weidner2025Fugue}.
 Maximal non-interleaving is a strengthening of forward non-interleaving that also disallows backward interleaving when possible, but which prioritises forward non-interleaving in cases when it is not possible to prevent both interleaving directions.
 
-In this paper we check for forward non-interleaving as well as maximal non-interleaving, and to our knowledge our model checker is the first implementation of these properties.
+In this paper we check for forward non-interleaving as well as maximal non-interleaving, and to our knowledge Darner is the first implementation of these properties.
 We expect that an algorithm that satisfies forward non-interleaving but not maximal non-interleaving is good enough for most practical applications, but we report the results for maximal non-interleaving as well because backward insertion may be more frequent in some applications.
 
 We quote the relevant properties below, but refer to the Fugue paper \cite{Weidner2025Fugue} for the full details.
@@ -272,37 +272,37 @@ Exclusion transformations must satisfy the reversibility requirement, which enfo
 $ET$ is only relevant to a few algorithms. Nonetheless, there are transformation functions which claim to satisfy the reversibility requirements, but actually do not (see \autoref{sec:gotimplementation}).
 Note that some papers use the terms \emph{forward} and \emph{backward transposition}, which roughly correspond to inclusion and exclusion transformations.
 
-\section{Model checker implementation} \label{sec:modelcheckerimplementation}
+\section{Darner implementation} \label{sec:modelcheckerimplementation}
 
-In this section, we describe our implementation of the model checker. To our knowledge, this is the first automated checker for the strong and weak list specifications and for the non-interleaving properties.
+In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the strong and weak list specifications and for the non-interleaving properties.
 % TODO: state that both the model checker and the tested algorithms are implemented in Python, without the use of any existing model-checking tool.
 % state the approximate number of lines of code in the implementation of the checker (including implementations of the properties) and in the algorithm implementations.
 
-\subsection{Interface between algorithms and model checker}
+\subsection{Interface between algorithms and Darner}
 
-We start by describing the interface between our algorithms and the model checker, which determines the assumptions the model checker makes of the algorithms.
+We start by describing the interface between our algorithms and Darner, which determines the assumptions Darner makes of the algorithms.
 Our implementation represents algorithms using the \texttt{ClientDevice} and \texttt{ServerDevice} (if the algorithm uses a server) interfaces. The interfaces provide
-some mechanisms for the model checker to interact with the devices.
+some mechanisms for Darner to interact with the devices.
 
-The first is the method \texttt{perform\_operation}, which allows the model checker to execute a \texttt{ClientOperation} or \texttt{ServerOperation}. These operations
+The first is the method \texttt{perform\_operation}, which allows Darner to execute a \texttt{ClientOperation} or \texttt{ServerOperation}. These operations
 include local edits to the document (such as \texttt{ClientInsertOperation} and \texttt{ClientDeleteOperation}), and also receiving operations from other devices
-(such as \texttt{ClientReceiveFromClientOperation}). By including receiving operations, the model checker has control over the order in which messages are delivered to 
+(such as \texttt{ClientReceiveFromClientOperation}). By including receiving operations, Darner has control over the order in which messages are delivered to 
 which device at which time, allowing it to model a wide range of network scenarios. Not all operations have to be relevant to all algorithms; for example, we include a \texttt{ClientTimestepOperation} that is only relevant to the TIBOT and TIBOT 2.0 algorithms.
 
 The editing operations generated by the checker insert or delete a single character at a time. Support for multi-character operations (e.g. pasting a chunk of text) could be added in future work.
 
 % TODO: "actually received when a client receives a message" is strange phrasing; can you make this clearer?
-\texttt{perform\_operation} returns a list of operations seen by the client. This allows the model checker to know what operations were actually received when a client receives a message from another device.
+\texttt{perform\_operation} returns a list of operations seen by the client. This allows Darner to know what operations were actually received when a client receives a message from another device.
 
-A second mechanism is provided by the methods \texttt{can\_receive\_from} and \texttt{can\_receive\_from\_server}. Algorithms tend to restrict the delivery order of operations. The most common way is to use a causal order, enforced by vector clocks. We leave the choice of restriction to the algorithm, and it is exposed to the model checker through these methods, which return the devices from which a client can receive.
+A second mechanism is provided by the methods \texttt{can\_receive\_from} and \texttt{can\_receive\_from\_server}. Algorithms tend to restrict the delivery order of operations. The most common way is to use a causal order, enforced by vector clocks. We leave the choice of restriction to the algorithm, and it is exposed to Darner through these methods, which return the devices from which a client can receive.
 
-Finally, there is the method \texttt{read\_state}, which the model checker can use to see the document state of the client. The state is represented by the type 
+Finally, there is the method \texttt{read\_state}, which Darner can use to see the document state of the client. The state is represented by the type 
 \texttt{list[UniqueChar]}. It is simply a list of unique characters. \texttt{UniqueChar} is just a character with a unique id attached to it, which we use because many 
 of the algorithms and specifications assume every character is unique.
 
 \subsection{Generating operations}
 
-The model checker generally follows the following steps. It first generates an operation to be executed on one of the clients or the server. It executes that operation, and records which operations were performed on which device, what the states of the clients were after each operation, and other useful information (for example, the left and right origins of each character). It repeats this with more operations to produce a trace of the execution. After the trace is fully generated, it is passed to one of the checkers which decides whether a particular property is satisfied.
+Darner generally follows the following steps. It first generates an operation to be executed on one of the clients or the server. It executes that operation, and records which operations were performed on which device, what the states of the clients were after each operation, and other useful information (for example, the left and right origins of each character). It repeats this with more operations to produce a trace of the execution. After the trace is fully generated, it is passed to one of the checkers which decides whether a particular property is satisfied.
 
 % TODO: explain how sending messages is handled. is that implicit in generating an operation?
 The possible choices for an operation to be generated are an insertion or deletion at every position in the state, or receiving a message
@@ -319,7 +319,7 @@ until there is nothing left to receive. The checker then checks that all the doc
 The strong list specification checker takes in a trace containing the state of each client after each operation. It also contains what operations were visible
 to each client at each point (which is determined by what is returned from \texttt{perform\_operation}). It can use this trace to check each condition given in Property \ref{prop:stronglist}.
 
-Condition 1a is checked by maintaining an initially empty set of characters. For each client, the model checker
+Condition 1a is checked by maintaining an initially empty set of characters. For each client, Darner
 iterates through each local operation generated by the checker. If it was an insertion operation, the inserted character is added to the set.
 If it was a deletion operation, the deleted character is removed from the set. At each point, the checker tests whether this set is equal to the set of characters in the client state. If not, it reports a strong list specification violation.
 
@@ -331,7 +331,7 @@ We do this by working backwards from the conditions imposed on the list order. E
 
 The list order is represented as a set of pairs of characters. It is initially empty. Working backwards from condition 1b, the checker adds to this set every pair of characters $(a,b)$ such that $a$ appears before $b$ in some document state. Working backwards from the requirement that $\mathit{lo}$ is transitive, the checker applies the transitive closure to the list order. For the requirement that $\mathit{lo}$ is irreflexive, this can be done by iterating through the set of pairs and checking that there are no pairs of the form $(a,a)$. If there are, we have a contradiction showing that no list order satisfying these properties exists.
 
-The only remaining part is that $\mathit{lo}$ must be a total relation. An irreflexive, transitive, and total relation can always be constructed from an irreflexive and transitive one by arbitrarily adding pairs to make the relation total without breaking irreflexivity. Therefore, if the model checker has found an irreflexive and transitive relation, then it can say an irreflexive, transitive and total list order must also exist, and the specification is satisfied.
+The only remaining part is that $\mathit{lo}$ must be a total relation. An irreflexive, transitive, and total relation can always be constructed from an irreflexive and transitive one by arbitrarily adding pairs to make the relation total without breaking irreflexivity. Therefore, if Darner has found an irreflexive and transitive relation, then it can say an irreflexive, transitive and total list order must also exist, and the specification is satisfied.
 
 This approach is equivalent to constructing a graph where the nodes are characters in the state and an edge from $a$ to $b$ means that $a$ appears before $b$ in some state. If this graph is acyclic, then the strong list specification is satisfied. If it contains a cycle, it is not satisfied.
 
@@ -373,16 +373,16 @@ In \autoref{sec:tm11andrandolphfunctions}, we find two transformation functions 
 In our experiments we therefore treat an OT algorithm as a pair of a control algorithm and transformation functions, sometimes testing the same control algorithm with several transformation functions, and vice versa.
 We only test combinations where there is a match between the claimed properties of the transformation functions and the claimed assumptions of the control algorithm.
 
-\section{Evaluating the model checker}
+\section{Evaluating Darner}
 
-Because we are only checking cases, rather than writing a proof, we can never be absolutely certain that a $\checkmark$ in \autoref{tab:algorithmproperties} means that the property is satisfied. The purpose of this evaluation is to give confidence that, if the model checker is unable to find property violations in the algorithm, then it is unlikely that one exists. 
+Because we are only checking cases, rather than writing a proof, we can never be absolutely certain that a $\checkmark$ in \autoref{tab:algorithmproperties} means that the property is satisfied. The purpose of this evaluation is to give confidence that, if Darner is unable to find property violations in the algorithm, then it is unlikely that one exists. 
 
-We use our large collection of algorithm implementations to collect data on the presence of violations, the time to find violations and to compare different search strategies. We present this data in this section. When running our model checker, we have many choices over the configurations we use to search for violations. This includes: the number of operations generated, the number of clients, the number of seeds checked, whether to use random or exhaustive search and what search order to use for an exhaustive search. We investigate how changing each of these affects the likelihood of finding a violation, and we justify our use of random checking over exhaustive checking. 
+We use our large collection of algorithm implementations to collect data on the presence of violations, the time to find violations and to compare different search strategies. We present this data in this section. When running Darner, we have many choices over the configurations we use to search for violations. This includes: the number of operations generated, the number of clients, the number of seeds checked, whether to use random or exhaustive search and what search order to use for an exhaustive search. We investigate how changing each of these affects the likelihood of finding a violation, and we justify our use of random checking over exhaustive checking. 
 
 
 \subsection{Reproducing known properties}
 
-Our model checker was able to reproduce all published results about the algorithms. This is a list of known results about these algorithms our model checker was able to reproduce by finding violations (within seconds) using randomised testing:
+Darner was able to reproduce all published results about the algorithms. This is a list of known results about these algorithms Darner was able to reproduce by finding violations (within seconds) using randomised testing:
 
 \begin{itemize}
   \item
@@ -400,7 +400,7 @@ Our model checker was able to reproduce all published results about the algorith
 \end{itemize}
 
 
-Similarly, when an algorithm is known to satisfy a particular property, our model checker did not falsely report violations of that property. This includes Fugue \cite{Weidner2025Fugue} satisfying the strong list specification and forward non-interleaving, and FugueMax additionally satisfying maximal non-interleaving. Similarly, we found Jupiter satisfied the weak list specification, and RGA satisfied the strong list specification, which are both proven properties \cite{Wei2018, Attiya2016}.  
+Similarly, when an algorithm is known to satisfy a particular property, Darner did not falsely report violations of that property. This includes Fugue \cite{Weidner2025Fugue} satisfying the strong list specification and forward non-interleaving, and FugueMax additionally satisfying maximal non-interleaving. Similarly, we found Jupiter satisfied the weak list specification, and RGA satisfied the strong list specification, which are both proven properties \cite{Wei2018, Attiya2016}.  
 
 
 \subsection{How commonly violations appear}
@@ -415,9 +415,9 @@ Similarly, when an algorithm is known to satisfy a particular property, our mode
 
 We observe that some of the violations (such as convergence violations in dOPT, or forward non-interleaving violations in TreeDoc) appear very commonly. The violations appear at less than 10 operations, and once the number of operations are large enough, the violations can appear nearly always.
 
-Other violations (such as the strong list specification violations) do not appear as commonly. They do not appear at all when there are less than 10 operations, and may still be unlikely above that. These are violations which require a more specific set of operations to be exhibited, so our model checker does not find them as often. For example, a maximal non-interleaving violation (that is not also a forward non-interleaving violations) may require the operations to include both include forward interleaving and backward interleaving.  These tell us also that running an exhaustive search below 10 operations is likely to miss many of these violations.
+Other violations (such as the strong list specification violations) do not appear as commonly. They do not appear at all when there are less than 10 operations, and may still be unlikely above that. These are violations which require a more specific set of operations to be exhibited, so Darner does not find them as often. For example, a maximal non-interleaving violation (that is not also a forward non-interleaving violations) may require the operations to include both include forward interleaving and backward interleaving.  These tell us also that running an exhaustive search below 10 operations is likely to miss many of these violations.
 
-We also experimented with how the number of clients changes how often violations appear, but we found no clear effect. Mainly, we find that some violations only appear when there are more than two clients (such as TP2 violations), but beyond that there is no clear effect. Becuase there is no limit to how an algorithm can behave however, there may be violations where this is not the case. One exceptional case we found was in PPS where violations could only appear with greater than 10 clients (see \autoref{sec:ppsimplementation}).
+We also experimented with how the number of clients changes how often violations appear, but we found no clear effect. Mainly, we find that some violations only appear when there are more than two clients (such as TP2 violations), but beyond that there is no clear effect. Because there is no limit to how an algorithm can behave however, there may be violations where this is not the case. One exceptional case we found was in PPS where violations could only appear with greater than 10 clients (see \autoref{sec:ppsimplementation}).
 
 \subsection{What depth to do an exhaustive search}
 
@@ -455,15 +455,15 @@ There is a question of how many traces to run a random search for. \autoref{fig:
 
 
 
-\section{Results of the model checker} \label{sec:modelcheckerresults}
+\section{Results of model checking} \label{sec:modelcheckerresults}
 
-To demonstrate the generality of our model checker and its ability to find bugs, we implemented a corpus of collaborative text editing algorithms covering most research publications in this field, as well as a selection of popular open-source implementations.
-We are making this corpus available as open source along with the model checker to facilitate the further study of these algorithms.
+To demonstrate the generality of Darner and its ability to find bugs, we implemented a corpus of collaborative text editing algorithms covering most research publications in this field, as well as a selection of popular open-source implementations.
+We are making this corpus available as open source along with Darner to facilitate the further study of these algorithms.
 Our implementations are not optimised for performance, but rather aim to be close to the published pseudocode, making it easy to check that our implementation correctly reflects the original publication.
-For any violations of a property found by the model checker we additionally check by hand that the violation does indeed occur in the algorithm as originally published.
+For any violations of a property found by Darner we additionally check by hand that the violation does indeed occur in the algorithm as originally published.
 
-In cases where an open source implementation already exists (often as part of a larger library that also provides many other features) we develop our own implementation against the model checker's API that focuses only on the collaborative text editing algorithm.
-If the model checker finds a violation of a property, we replay the same scenario against the original implementation to ensure the behaviour is consistent.
+In cases where an open source implementation already exists (often as part of a larger library that also provides many other features) we develop our own implementation against the Darner's API that focuses only on the collaborative text editing algorithm.
+If Darner finds a violation of a property, we replay the same scenario against the original implementation to ensure the behaviour is consistent.
 
 \subsection{Properties of each algorithm}
 
@@ -554,7 +554,7 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
 \subsection{Properties of transformation functions}
 
 
-\autoref{tab:tfproperties} shows the properties of published transformation functions. It is important to note that these properties are only relevant to convergence, and make no guarantees about anything else. To determine these properties, we run the model checker with the adOPTed algorithm, which is a TP2-requiring control algorithm. If no convergence violations are found on two clients, then we say the functions satisfy TP1. If no convergence violations are found on three or more clients, then we say they satisfy TP2. 
+\autoref{tab:tfproperties} shows the properties of published transformation functions. It is important to note that these properties are only relevant to convergence, and make no guarantees about anything else. To determine these properties, we run Darner with the adOPTed algorithm, which is a TP2-requiring control algorithm. If no convergence violations are found on two clients, then we say the functions satisfy TP1. If no convergence violations are found on three or more clients, then we say they satisfy TP2. 
 
 In addition to the table, we believe that the only functions that explicitly satisfy the reversibility requirements are the tombstone transformation functions \cite{Oster2006TTF}. The functions provided alongside GOT claim to satisfy the reversibility requirements, but we show that this is false.
 
@@ -597,8 +597,6 @@ While a server-based algorithm can be made fault-tolerant using a consensus prot
 We call algorithms that do not assume a server or consensus protocol \emph{decentralised}, since they can operate in a peer-to-peer network under network partitions.
 All CRDT algorithms studied in this paper are decentralised.
 
-...
-
 \section{Related work}
 
 
@@ -609,7 +607,7 @@ Imine et al. used the automated theorem prover SPIKE to verify TP1 and TP2 prope
 It therefore only establishes convergence, and not any of the other properties we check. 
 It also does not actually execute the functions, but makes deductions based on the provided specification. 
 This led to them falsely proving functions satisfied TP2; the same authors found the proof was incorrect because of an error in their specification. 
-They also produced similar counter examples using the UPPAAL model-checker \cite{Boucheneb2009}, which was also only used to check for convergence.
+They also produced similar counter examples using the UPPAAL model checker \cite{Boucheneb2009}, which was also only used to check for convergence.
 
 
 Previous work has also used the TLC model checker and TLA+ specification language to verify various correctness properties. 
@@ -624,16 +622,16 @@ Wei et al. also showed that Jupiter satisfied the weak list specification, by pr
 Gomes et al. use the Isabelle/HOL proof assistant to prove strong eventual consistency for three CRDTS including RGA, but only for the convergence property \cite{Gomes2017}.
 
 
-There are many algorithms that solve related problems to collaborative text-editing, but were too different to include in our implementations. Collaborative XML editing \cite{Davis2002, Martin2010report}, graphics editing \cite{Sun2002}, tree editing \cite{Molli2003, Jungnickel2015}, JSON editing \cite{Jungnickel2016} and rich-text editing \cite{Litt2022} all apply these ideas to different kinds of documents, often using the same algorithms. Our model checker can only model plain text, and the properties are only well-defined on plain text, so we leave these out. 
+There are many algorithms that solve related problems to collaborative text-editing, but were too different to include in our implementations. Collaborative XML editing \cite{Davis2002, Martin2010report}, graphics editing \cite{Sun2002}, tree editing \cite{Molli2003, Jungnickel2015}, JSON editing \cite{Jungnickel2016} and rich-text editing \cite{Litt2022} all apply these ideas to different kinds of documents, often using the same algorithms. Darner can only model plain text, and the properties are only well-defined on plain text, so we leave these out. 
 
 \section{Conclusion}
 
-We presented a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against the majority of collaborative text-editing algorithms. 
-We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text-editing, and use these to produce a set of results with our model checker documenting which algorithms satisfy which properties. Earlier collection of algorithm implementations exist \cite{Urso2016}, but ours covers many more. 
+We presented Darner --- a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against the majority of collaborative text-editing algorithms. 
+We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text-editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties. Earlier collection of algorithm implementations exist \cite{Urso2016}, but ours covers many more. 
 Our implementations resolve multiple ambiguities in previous research, and for many algorithms, are the first publicly available implementations of these algorithms. We find 6 previously unreported property violations.
-Our model checker supports both randomised and exhaustive checking and we evaluate the behaviour of these two strategies, and justify our use of random over exhaustive checking. We hope our model checker helps to quickly rule out broken algorithms, so future research in this area avoids many of the correctness issues that have plagued work in the past.
+Darner supports both randomised and exhaustive checking and we evaluate the behaviour of these two strategies, and justify our use of random over exhaustive checking. We hope Darner helps to quickly rule out broken algorithms, so future research in this area avoids many of the correctness issues that have plagued work in the past.
 
-Future work may apply more rigorous formal verification techniques on the algorithms our model checker is unable to find a violation for. 
+Future work may apply more rigorous formal verification techniques on the algorithms Darner is unable to find a violation for. 
 Our work can never guarantee a property is satisfied in all cases, which a formal proof, written in a proof assistant for example, could. 
 Also, our work does not check for deletions with non-interleaving. Further consideration of how the non-interleaving properties apply to algorithms that do not use tombstones should be done in future work. The performance properties of algorithms are also something that should be investigated in future work. 
 An algorithm may be correct but impractical due to performance concerns.
@@ -678,13 +676,13 @@ This section supplements \autoref{tab:algorithmproperties} with additional findi
 
 dOPT \cite{Ellis1989} is the original OT algorithm, which is well known not to work. The transformation functions proposed in the same paper satisfy neither TP1 nor TP2. Furthermore, the algorithm has an issue which manifests because it calls its inclusion transformations with two operations that were not generated from the same state when two clients are out of sync by more than one operation. Similar issues are referred to in the literature as the dOPT puzzle \cite{Sun1998CSCW}. The original paper does mention the correctness issues and claims that the problem lies in the priority scheme, which decides which character should appear first when there are two concurrent insertions at the same location. They propose an alternative priority scheme, but this is also known not to work \cite{Sun1998CSCW}, so we do not implement it.
 
-The Jupiter algorithm \cite{Nichols1995} is based on dOPT and uses a server, and claims to fix its issues. Our model checker finds that this algorithm converges and satisfies the weak list specification (which matches proofs of these properties \cite{Wei2018}). The paper does not fully specify transformation functions, so we use a set of transformation functions that were formally proven to satisfy TP1 \cite{Kleppmann2023}. The paper also does not fully specify the behaviour of the server, but this is clarified in later papers \cite{Xu2014}. We were able to satisfy forward non-interleaving with this algorithm by swapping the server and client roles in the transformation functions.
+The Jupiter algorithm \cite{Nichols1995} is based on dOPT and uses a server, and claims to fix its issues. Darner finds that this algorithm converges and satisfies the weak list specification (which matches proofs of these properties \cite{Wei2018}). The paper does not fully specify transformation functions, so we use a set of transformation functions that were formally proven to satisfy TP1 \cite{Kleppmann2023}. The paper also does not fully specify the behaviour of the server, but this is clarified in later papers \cite{Xu2014}. We were able to satisfy forward non-interleaving with this algorithm by swapping the server and client roles in the transformation functions.
 
 The adOPTed algorithm \cite{Ressel1996} is another algorithm based on dOPT. It does not use a server. It is a natural extension of the Jupiter algorithm to multiple clients, and requires TP2-satisfying functions. We use adOPTed as our algorithm for checking whether a function satisfies TP2, since it is proven to converge when the functions satisfy TP2 (and that result aligns with our checker). However, the transformation functions given in the same paper as adOPTed do not satisfy TP2, resulting in non-convergence.
 
 \subsection{SOCT2, SOCT3 and SOCT4}
 
-SOCT2 \cite{Suleiman1997} is an OT algorithm requiring TP2-satisfying functions. The paper gives transformation functions, but our model checker finds these do not satisfy TP2 (or even TP1), as they lead to divergence with adOPTed with both two and three clients. That aligns with known results \cite{Oster2005Proving}. Previous open source implementations \cite{Urso2016} have made the algorithm work using the tombstone transformation functions (TTF) \cite{Oster2006TTF}. We also find that this works. SOCT2 also requires functions satisfying the reversibility requirements (though they use the terms forwards/backwards transposition rather than inclusion/exclusion), which TTF claims to satisfy.
+SOCT2 \cite{Suleiman1997} is an OT algorithm requiring TP2-satisfying functions. The paper gives transformation functions, but Darner finds these do not satisfy TP2 (or even TP1), as they lead to divergence with adOPTed with both two and three clients. That aligns with known results \cite{Oster2005Proving}. Previous open source implementations \cite{Urso2016} have made the algorithm work using the tombstone transformation functions (TTF) \cite{Oster2006TTF}. We also find that this works. SOCT2 also requires functions satisfying the reversibility requirements (though they use the terms forwards/backwards transposition rather than inclusion/exclusion), which TTF claims to satisfy.
 
 
 SOCT3 \cite{Vidot2000} is based on SOCT2, with the main change being that the delivery of operations is now serialised by introducing a sequencer (essentially a server). This means that SOCT3 is now TP2-avoiding, and claims to work with transformation functions that satisfy TP1 and the reversibility requirements, but not TP2. We could not find any functions that satisfy this specific set of conditions to test the algorithm with, so we tested it with the original SOCT2 transformation functions (which do not work), and the tombstone
@@ -710,7 +708,7 @@ We find that both algorithms work with the TP1 functions we used for Jupiter. Bo
 
 POT \cite{Xu2016} and COT \cite{Sun2009} are another pair of TP2-avoiding algorithms. They claim to not use a server, but they require operations to be delivered in the same total order on all clients, so we categorise them as centralised as per \autoref{sec:assumptions}.
 
-Both algorithms work as expected. Although comparing performance is not a goal of this paper, we observe that the COT algorithm uses a very slow recursive algorithm -- too slow to model-check even a few hundred cases. Memoisation (as suggested in the paper) was therefore necessary for model checking (and in any practical implementation).
+Both algorithms work as expected. Although comparing performance is not a goal of this paper, we observe that the COT algorithm uses a very slow recursive algorithm -- too slow to model check even a few hundred cases. Memoisation (as suggested in the paper) was therefore necessary for model checking (and in any practical implementation).
 
 \subsection{SDT, ABT and LBT}
 
@@ -724,7 +722,7 @@ We found that the WOOT \cite{Oster2006WOOT} algorithm satisfies convergence and 
 
 The TM1.1 transformation functions \cite{Sun2017} and Randolph et al.'s functions \cite{Randolph2015} both claim to satisfy TP2, but neither has been checked outside of its original paper. We implement both with the adOPTed algorithm, and find that both lead to convergence (including with more than two clients), indicating that they do indeed satisfy TP2. However, we find that with the TM1.1 functions, the algorithm does not satisfy the weak list specification, because it sometimes deletes a character that the user did not intend to delete.
 
-In contrast, our model checker could not find strong or weak list specification violations for Randolph et al.'s functions. When implementing these functions, we found that they implicitly assume a total ordering on the characters, and we achieved this by attaching the client ID and a per-client counter to each character. % TODO: Other algorithms (e.g. RGA) also assume such a total ordering, and it's unproblematic. I'd say we don't need to mention this, or is there something important I'm missing here?
+In contrast, Darner could not find strong or weak list specification violations for Randolph et al.'s functions. When implementing these functions, we found that they implicitly assume a total ordering on the characters, and we achieved this by attaching the client ID and a per-client counter to each character. % TODO: Other algorithms (e.g. RGA) also assume such a total ordering, and it's unproblematic. I'd say we don't need to mention this, or is there something important I'm missing here?
 
 \subsection{Logoot}
 
