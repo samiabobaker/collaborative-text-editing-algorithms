@@ -398,16 +398,16 @@ def replay_yjs_family_counterexample(setup: DeviceSetup, with_delete: bool):
     return clients, traces, characters, (l, r, s, v), client_0_state_when_v_arrives
 
 
-def test_yjs_family_delete_trace_really_interleaves_consecutive_insertions():
+def test_yjs_family_delete_trace_does_not_interleave_under_the_fugue_anchoring():
     for setup in (yjs_setup, yjsmod_setup):
         clients, traces, characters, (_, r, s, v), state_when_v_arrives = replay_yjs_family_counterexample(
             setup, with_delete=True
         )
 
-        assert state_when_v_arrives == [s, r, v]
-        assert all(client.read_state() == [s, r, v] for client in clients)
+        assert state_when_v_arrives == [r, s, v]
+        assert all(client.read_state() == [r, s, v] for client in clients)
         assert_strong_list_precondition(traces)
-        assert forward_non_interleaving_with_deletes_from_client_logs(traces, characters) is False
+        assert forward_non_interleaving_with_deletes_from_client_logs(traces, characters) is True
 
 
 def test_same_yjs_family_trace_without_delete_does_not_interleave():
@@ -436,6 +436,6 @@ if __name__ == "__main__":
     test_deleted_sibling_exemptions_need_one_common_order()
     test_common_order_keeps_sibling_alternatives_and_combines_requirements()
     test_common_order_matches_exhaustive_total_orders()
-    test_yjs_family_delete_trace_really_interleaves_consecutive_insertions()
+    test_yjs_family_delete_trace_does_not_interleave_under_the_fugue_anchoring()
     test_same_yjs_family_trace_without_delete_does_not_interleave()
     print("OK")
