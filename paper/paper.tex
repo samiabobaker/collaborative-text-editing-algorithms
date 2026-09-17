@@ -379,6 +379,148 @@ For example, we find that TM1.1 \cite{Sun2017} and Randolph et al.'s functions \
 In our experiments we therefore treat an OT algorithm as a pair of a control algorithm and transformation functions, sometimes testing the same control algorithm with several transformation functions, and vice versa.
 We only test combinations where there is a match between the claimed properties of the transformation functions and the claimed assumptions of the control algorithm.
 
+\begin{table*}
+  \centering
+  \caption{Algorithms in our corpus, and properties checked by Darner. \noviol{}~= no violations found, \knownviol{}~= known violations reproduced, \newviol{}~= previously unreported violations found; \CIRCLE{}~= assumption required.}
+  \label{tab:algorithmproperties}
+  \small
+    \begin{tabular}{@{}c l *{5}{c} c@{}}
+        \toprule
+        & & \multicolumn{5}{c}{\textbf{Properties}} & \multicolumn{1}{c}{\textbf{Assumptions}} \\
+        \cmidrule(lr){3-7} \cmidrule(l){8-8}
+        & \textbf{Algorithm}
+        & \textbf{Converges}
+        & \textbf{Weak}~\cite{Attiya2016}
+        & \textbf{Strong}~\cite{Attiya2016}
+        & \textbf{Forward}~\cite{Weidner2025Fugue}
+        & \textbf{Max}~\cite{Weidner2025Fugue}
+        & \textbf{AllOnline} \\
+        \midrule
+        \multirow{10}{*}{\rotatebox[origin=c]{90}{\textit{Total-order-based OT}}}
+          & COT \cite{Sun2009} + TP1-satisfying functions \cite{Kleppmann2023} & \noviol & \noviol & \newviol & \newviol & \newviol & \Circle \\
+          & EasySync (Etherpad) \cite{AppJet2011} & \noviol & \noviol & \newviol & \newviol & \newviol & \Circle \\
+          & Jupiter \cite{Nichols1995} + TP1-satisfying functions \cite{Kleppmann2023} & \noviol & \noviol & \knownviol & \noviol & \knownviol & \Circle \\
+          & POT \cite{Xu2016} + TP1-satisfying functions \cite{Kleppmann2023}  & \noviol & \noviol & \newviol & \newviol & \newviol & \Circle \\
+          & ProseMirror \cite{Haverbeke2015} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
+          & ShareDB \cite{Smith2013} & \noviol & \noviol & \newviol & \noviol & \newviol & \Circle \\
+          & SOCT3 \cite{Vidot2000}  + Suleiman functions \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & SOCT3 + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & SOCT4 \cite{Vidot2000} + TP1-satisfying functions \cite{Kleppmann2023} & \noviol & \noviol & \newviol & \newviol & \newviol & \CIRCLE \\
+          & TIBOT \cite{Li2004ICPADS} & \noviol & \noviol & \newviol & \noviol & \newviol & \CIRCLE \\
+          & TIBOT 2.0 \cite{Xu2014} & \noviol & \noviol & \newviol & \noviol & \newviol & \CIRCLE \\
+        \midrule
+        \multirow{18}{*}{\rotatebox[origin=c]{90}{\textit{Causal-order-based OT}}}
+          & ABT \cite{Li2010} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + IMOR \cite{Imine2003} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Randolph \cite{Randolph2015} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Ressel \cite{Ressel1996} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Suleiman \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + TM1.1 \cite{Sun2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & dOPT + Ellis \cite{Ellis1989} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & GOT \cite{Sun1998TOCHI} & \newviol & \newviol & \newviol & \knownviol & \knownviol & \Circle \\
+          & GOTO \cite{Sun1998CSCW} + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & LBT \cite{Li2005} & \newviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
+          & SDT \cite{Li2008} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & SOCT2 \cite{Suleiman1997} + Suleiman functions \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & SOCT2 + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+        \midrule
+        \multirow{21}{*}{\rotatebox[origin=c]{90}{\textit{CRDT}}}
+          & Automerge \cite{Automerge2026} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
+          & Collabs \cite{Weidner2023} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
+          & Diamond Types (Eg-Walker) \cite{Gentle2025} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
+          & Diffsync \cite{Little2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
+          & Fugue \cite{Weidner2025Fugue} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
+          & FugueMax \cite{Weidner2025Fugue} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
+          & Logoot (original) \cite{Weiss2009} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & Logoot (fixed) \cite{Weiss2010} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & LogootSplit \cite{Andre2013} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & Loro \cite{Loro2026} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
+          & LSEQ \cite{Nedelec2013} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & Mark \& Retrace \cite{Gu2005} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
+          & Partial Persistent Sequences \cite{Wu2010} & \newviol & \newviol & \newviol & \knownviol & \knownviol & \Circle \\
+          & RGA (with S4Vectors) \cite{Roh2009} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
+          & RGA (Timestamped-insertion trees) \cite{Attiya2016} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
+          & RGA (Causal Trees) \cite{Grishchenko2010} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
+          & RGA (non-interleaving variant) \cite{Kleppmann2019} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & Sync7 \cite{Little2024} & \newviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
+          & Sync9 \cite{Toomim2019} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
+          & TreeDoc \cite{Preguica2009} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & Weidner's Text without CRDTs \cite{Weidner2025without} & \noviol & \noviol & \noviol & \noviol & \newviol & \Circle \\
+          & WOOT \cite{Oster2006WOOT}, WOOTO \cite{Weiss2007}, WOOTH \cite{AhmedNacer2011} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & Yjs \cite{Nicolaescu2015} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
+          & YjsMod \cite{Gentle2021} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
+        \bottomrule
+    \end{tabular}
+\end{table*}
+
+\section{Results of model checking} \label{sec:modelcheckerresults}
+
+To demonstrate the generality of Darner and its ability to find bugs, we implemented a corpus of collaborative text editing algorithms covering most research publications in this field, as well as a selection of popular open-source implementations.
+We are making this corpus available as open source along with Darner to facilitate the further study of these algorithms.
+Our implementations are not optimised for performance, but rather aim to be close to the published pseudocode, making it easy to check that our implementation correctly reflects the original publication.
+For any violations of a property found by Darner we additionally check by hand that the violation does indeed occur in the algorithm as originally published.
+
+In cases where an open source implementation already exists (often as part of a larger library that also provides many other features) we develop our own implementation against the Darner's API that focuses only on the collaborative text editing algorithm.
+If Darner finds a violation of a property, we replay the same scenario against the original implementation to ensure the behaviour is consistent.
+
+\subsection{Properties of each algorithm}
+
+\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. The properties are: convergence, Attiya et al.'s weak and strong list specifications, and the forward and maximal non-interleaving properties (titled \emph{Forward} and \emph{Max}). It also includes which algorithms assume all clients are online (\emph{AllOnline}) --- see \autoref{sec:assumptions}. When there is a choice of transformation functions,
+we choose transformation functions that would substantiate or disprove prior claims about the functions. For rows with no transformation functions, we used the transformation functions from the same paper as the control algorithm.
+
+In our opinion, convergence and the weak list specification are minimal requirements for a collaborative text editing algorithm to be useful in practice.
+Forward non-interleaving is also important, although algorithms differ on how frequently interleaving occurs in realistic editing scenarios (something we do not aim to quantify in this paper); an algorithm in which forward interleaving is rare but not impossible may still be acceptable in practice.
+Whether an algorithm satisfies the strong list specification and/or maximal non-interleaving is less important in practice, but we include them in our analysis as they are well-defined properties of theoretical interest, and they could be important for some applications.
+
+A common pattern we found across OT algorithms is that they exhibited interleaving in one direction, but not the other. Flipping the priority scheme flipped which direction of interleaving was exhibited. In these cases, we choose the direction that leads to forward non-interleaving being satisfied.
+
+\subsection{Properties of transformation functions}
+
+\autoref{tab:tfproperties} shows the properties of published transformation functions. It is important to note that these properties are only relevant to convergence, and make no guarantees about anything else. To determine these properties, we run Darner with the adOPTed algorithm, which is a TP2-requiring control algorithm. If no convergence violations are found on two clients, then we say the functions satisfy TP1. If no convergence violations are found on three or more clients, then we say they satisfy TP2. 
+
+In addition to the table, we believe that the only functions that explicitly satisfy the reversibility requirements are the tombstone transformation functions \cite{Oster2006TTF}. The functions provided alongside GOT claim to satisfy the reversibility requirements, but we show that this is false.
+
+\begin{table}
+  \caption{Various transformation functions and their properties. Key: \noviol=The checker could not find violations for this property. \knownviol=The checker
+    found violations for this property.}
+  \label{tab:tfproperties}
+    \begin{tabular}{lcc}
+        \toprule
+        Algorithm & TP1 & TP2 \\
+        \midrule
+        Ellis \cite{Ellis1989} & \knownviol & \knownviol \\
+        Ressel \cite{Ressel1996}  & \noviol & \knownviol \\
+        IMOR  \cite{Imine2003} & \knownviol & \knownviol \\
+        Suleiman \cite{Suleiman1997} & \knownviol & \knownviol \\
+        TM1.1 \cite{Sun2017} & \noviol & \noviol   \\
+        Tombstone \cite{Oster2006TTF}  & \noviol & \noviol \\
+        Randolph \cite{Randolph2015} & \noviol & \noviol \\
+        \bottomrule
+    \end{tabular}   
+\end{table}
+
+
+
+\subsection{Assumptions made by each algorithm}  \label{sec:assumptions}
+
+Some algorithms assume the existence of a server that imposes a total order on all operations, requiring a client to communicate with the server before the operation can be processed by any other client.
+For fault tolerance, the server can be replaced with a consensus protocol providing a replicated log, such as Raft \cite{Ongaro2014}.
+Algorithms that make this assumption are listed under the heading \emph{Centralised OT} in \autoref{tab:algorithmproperties}.
+Some work \cite{Sun2020arxiv} differentiates between a transformation-based server and a non-transformation-based server, based on whether or not the server actually performs any transformations. In our opinion this is not a meaningful distinction, because any algorithm with a transformation-based server can be implemented with a non-transformation-based server, by having the server simply serialise the operations and the clients simulate what the server would do.  
+
+Sometimes this assumption is made implicitly.
+SOCT3 and SOCT4 use a sequencer, which is a non-transformation-based server.
+Some TP2-avoiding algorithms do so by assuming totally ordered delivery, which has been proven to be equivalent to consensus \cite{Chandra1996}; we therefore place these algorithms in the same category as server-based algorithms.
+
+Three algorithms we considered (SOCT4 \cite{Vidot2000}, TIBOT \cite{Li2004ICPADS}, and TIBOT 2.0 \cite{Xu2014}) even assume that all clients are online, and stop making progress if one or more clients become unavailable.
+While a server-based algorithm can be made fault-tolerant using a consensus protocol, that is not the case for these algorithms, making them fundamentally unable to tolerate faults.
+
+\autoref{tab:algorithmproperties} includes information about the assumptions made by the algorithms.
+We call algorithms that do not assume a server or consensus protocol \emph{decentralised}, since they can operate in a peer-to-peer network under network partitions.
+All CRDT algorithms studied in this paper are decentralised.
+
 \section{Evaluating Darner}
 
 \autoref{tab:algorithmproperties} shows the list of algorithms we implemented in our corpus, and the results we found from model checking each algorithm using Darner.
@@ -465,148 +607,6 @@ How many traces should a random search check? \autoref{fig:numberofseeds} shows 
 \end{figure}
 
 
-
-\section{Results of model checking} \label{sec:modelcheckerresults}
-
-To demonstrate the generality of Darner and its ability to find bugs, we implemented a corpus of collaborative text editing algorithms covering most research publications in this field, as well as a selection of popular open-source implementations.
-We are making this corpus available as open source along with Darner to facilitate the further study of these algorithms.
-Our implementations are not optimised for performance, but rather aim to be close to the published pseudocode, making it easy to check that our implementation correctly reflects the original publication.
-For any violations of a property found by Darner we additionally check by hand that the violation does indeed occur in the algorithm as originally published.
-
-In cases where an open source implementation already exists (often as part of a larger library that also provides many other features) we develop our own implementation against the Darner's API that focuses only on the collaborative text editing algorithm.
-If Darner finds a violation of a property, we replay the same scenario against the original implementation to ensure the behaviour is consistent.
-
-\subsection{Properties of each algorithm}
-
-\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. The properties are: convergence, Attiya et al.'s weak and strong list specifications, and the forward and maximal non-interleaving properties (titled \emph{Forward} and \emph{Max}). It also includes which algorithms assume all clients are online (\emph{AllOnline}) --- see \autoref{sec:assumptions}. When there is a choice of transformation functions,
-we choose transformation functions that would substantiate or disprove prior claims about the functions. For rows with no transformation functions, we used the transformation functions from the same paper as the control algorithm.
-
-In our opinion, convergence and the weak list specification are minimal requirements for a collaborative text editing algorithm to be useful in practice.
-Forward non-interleaving is also important, although algorithms differ on how frequently interleaving occurs in realistic editing scenarios (something we do not aim to quantify in this paper); an algorithm in which forward interleaving is rare but not impossible may still be acceptable in practice.
-Whether an algorithm satisfies the strong list specification and/or maximal non-interleaving is less important in practice, but we include them in our analysis as they are well-defined properties of theoretical interest, and they could be important for some applications.
-
-A common pattern we found across OT algorithms is that they exhibited interleaving in one direction, but not the other. Flipping the priority scheme flipped which direction of interleaving was exhibited. In these cases, we choose the direction that leads to forward non-interleaving being satisfied.
-
-\begin{table*}
-  \centering
-  \caption{Algorithms in our corpus, and properties checked by Darner. \noviol{}~= no violations found, \knownviol{}~= known violations reproduced, \newviol{}~= previously unreported violations found; \CIRCLE{}~= assumption required.}
-  \label{tab:algorithmproperties}
-  \small
-    \begin{tabular}{@{}c l *{5}{c} c@{}}
-        \toprule
-        & & \multicolumn{5}{c}{\textbf{Properties}} & \multicolumn{1}{c}{\textbf{Assumptions}} \\
-        \cmidrule(lr){3-7} \cmidrule(l){8-8}
-        & \textbf{Algorithm}
-        & \textbf{Converges}
-        & \textbf{Weak}~\cite{Attiya2016}
-        & \textbf{Strong}~\cite{Attiya2016}
-        & \textbf{Forward}~\cite{Weidner2025Fugue}
-        & \textbf{Max}~\cite{Weidner2025Fugue}
-        & \textbf{AllOnline} \\
-        \midrule
-        \multirow{10}{*}{\rotatebox[origin=c]{90}{\textit{Total-order-based OT}}}
-          & COT \cite{Sun2009} + TP1-satisfying functions \cite{Kleppmann2023} & \noviol & \noviol & \newviol & \newviol & \newviol & \Circle \\
-          & EasySync (Etherpad) \cite{AppJet2011} & \noviol & \noviol & \newviol & \newviol & \newviol & \Circle \\
-          & Jupiter \cite{Nichols1995} + TP1-satisfying functions \cite{Kleppmann2023} & \noviol & \noviol & \knownviol & \noviol & \knownviol & \Circle \\
-          & POT \cite{Xu2016} + TP1-satisfying functions \cite{Kleppmann2023}  & \noviol & \noviol & \newviol & \newviol & \newviol & \Circle \\
-          & ProseMirror \cite{Haverbeke2015} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
-          & ShareDB \cite{Smith2013} & \noviol & \noviol & \newviol & \noviol & \newviol & \Circle \\
-          & SOCT3 \cite{Vidot2000}  + Suleiman functions \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & SOCT3 + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
-          & SOCT4 \cite{Vidot2000} + TP1-satisfying functions \cite{Kleppmann2023} & \noviol & \noviol & \newviol & \newviol & \newviol & \CIRCLE \\
-          & TIBOT \cite{Li2004ICPADS} & \noviol & \noviol & \newviol & \noviol & \newviol & \CIRCLE \\
-          & TIBOT 2.0 \cite{Xu2014} & \noviol & \noviol & \newviol & \noviol & \newviol & \CIRCLE \\
-        \midrule
-        \multirow{18}{*}{\rotatebox[origin=c]{90}{\textit{Causal-order-based OT}}}
-          & ABT \cite{Li2010} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
-          & AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed \cite{Ressel1996} + IMOR \cite{Imine2003} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed \cite{Ressel1996} + Randolph \cite{Randolph2015} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
-          & AdOPTed \cite{Ressel1996} + Ressel \cite{Ressel1996} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed \cite{Ressel1996} + Suleiman \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed \cite{Ressel1996} + TM1.1 \cite{Sun2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
-          & AdOPTed \cite{Ressel1996} + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
-          & dOPT + Ellis \cite{Ellis1989} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & GOT \cite{Sun1998TOCHI} & \newviol & \newviol & \newviol & \knownviol & \knownviol & \Circle \\
-          & GOTO \cite{Sun1998CSCW} + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
-          & LBT \cite{Li2005} & \newviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
-          & SDT \cite{Li2008} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & SOCT2 \cite{Suleiman1997} + Suleiman functions \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & SOCT2 + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
-        \midrule
-        \multirow{21}{*}{\rotatebox[origin=c]{90}{\textit{CRDT}}}
-          & Automerge \cite{Automerge2026} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
-          & Collabs \cite{Weidner2023} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
-          & Diamond Types (Eg-Walker) \cite{Gentle2025} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
-          & Diffsync \cite{Little2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
-          & Fugue \cite{Weidner2025Fugue} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
-          & FugueMax \cite{Weidner2025Fugue} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
-          & Logoot (original) \cite{Weiss2009} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & Logoot (fixed) \cite{Weiss2010} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
-          & LogootSplit \cite{Andre2013} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
-          & Loro \cite{Loro2026} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
-          & LSEQ \cite{Nedelec2013} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
-          & Mark \& Retrace \cite{Gu2005} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
-          & Partial Persistent Sequences \cite{Wu2010} & \newviol & \newviol & \newviol & \knownviol & \knownviol & \Circle \\
-          & RGA (with S4Vectors) \cite{Roh2009} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
-          & RGA (Timestamped-insertion trees) \cite{Attiya2016} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
-          & RGA (Causal Trees) \cite{Grishchenko2010} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
-          & RGA (non-interleaving variant) \cite{Kleppmann2019} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & Sync7 \cite{Little2024} & \newviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
-          & Sync9 \cite{Toomim2019} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
-          & TreeDoc \cite{Preguica2009} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
-          & Weidner's Text without CRDTs \cite{Weidner2025without} & \noviol & \noviol & \noviol & \noviol & \newviol & \Circle \\
-          & WOOT \cite{Oster2006WOOT}, WOOTO \cite{Weiss2007}, WOOTH \cite{AhmedNacer2011} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
-          & Yjs \cite{Nicolaescu2015} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
-          & YjsMod \cite{Gentle2021} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
-        \bottomrule
-    \end{tabular}
-\end{table*}
-\subsection{Properties of transformation functions}
-
-
-\autoref{tab:tfproperties} shows the properties of published transformation functions. It is important to note that these properties are only relevant to convergence, and make no guarantees about anything else. To determine these properties, we run Darner with the adOPTed algorithm, which is a TP2-requiring control algorithm. If no convergence violations are found on two clients, then we say the functions satisfy TP1. If no convergence violations are found on three or more clients, then we say they satisfy TP2. 
-
-In addition to the table, we believe that the only functions that explicitly satisfy the reversibility requirements are the tombstone transformation functions \cite{Oster2006TTF}. The functions provided alongside GOT claim to satisfy the reversibility requirements, but we show that this is false.
-
-\begin{table}
-  \caption{Various transformation functions and their properties. Key: \noviol=The checker could not find violations for this property. \knownviol=The checker
-    found violations for this property.}
-  \label{tab:tfproperties}
-    \begin{tabular}{lcc}
-        \toprule
-        Algorithm & TP1 & TP2 \\
-        \midrule
-        Ellis \cite{Ellis1989} & \knownviol & \knownviol \\
-        Ressel \cite{Ressel1996}  & \noviol & \knownviol \\
-        IMOR  \cite{Imine2003} & \knownviol & \knownviol \\
-        Suleiman \cite{Suleiman1997} & \knownviol & \knownviol \\
-        TM1.1 \cite{Sun2017} & \noviol & \noviol   \\
-        Tombstone \cite{Oster2006TTF}  & \noviol & \noviol \\
-        Randolph \cite{Randolph2015} & \noviol & \noviol \\
-        \bottomrule
-    \end{tabular}   
-\end{table}
-
-
-
-\subsection{Assumptions made by each algorithm}  \label{sec:assumptions}
-
-Some algorithms assume the existence of a server that imposes a total order on all operations, requiring a client to communicate with the server before the operation can be processed by any other client.
-For fault tolerance, the server can be replaced with a consensus protocol providing a replicated log, such as Raft \cite{Ongaro2014}.
-Algorithms that make this assumption are listed under the heading \emph{Centralised OT} in \autoref{tab:algorithmproperties}.
-Some work \cite{Sun2020arxiv} differentiates between a transformation-based server and a non-transformation-based server, based on whether or not the server actually performs any transformations. In our opinion this is not a meaningful distinction, because any algorithm with a transformation-based server can be implemented with a non-transformation-based server, by having the server simply serialise the operations and the clients simulate what the server would do.  
-
-Sometimes this assumption is made implicitly.
-SOCT3 and SOCT4 use a sequencer, which is a non-transformation-based server.
-Some TP2-avoiding algorithms do so by assuming totally ordered delivery, which has been proven to be equivalent to consensus \cite{Chandra1996}; we therefore place these algorithms in the same category as server-based algorithms.
-
-Three algorithms we considered (SOCT4 \cite{Vidot2000}, TIBOT \cite{Li2004ICPADS}, and TIBOT 2.0 \cite{Xu2014}) even assume that all clients are online, and stop making progress if one or more clients become unavailable.
-While a server-based algorithm can be made fault-tolerant using a consensus protocol, that is not the case for these algorithms, making them fundamentally unable to tolerate faults.
-
-\autoref{tab:algorithmproperties} includes information about the assumptions made by the algorithms.
-We call algorithms that do not assume a server or consensus protocol \emph{decentralised}, since they can operate in a peer-to-peer network under network partitions.
-All CRDT algorithms studied in this paper are decentralised.
 
 \section{Related work}
 
