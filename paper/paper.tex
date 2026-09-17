@@ -45,7 +45,7 @@
 
 \begin{abstract}
     Collaborative text-editing algorithms, which are used in popular software such as Google Docs and Overleaf, have a troubled history: many published algorithms violate their purported consistency guarantees, and many algorithms' claimed properties have not been independently validated, making it unclear which algorithms are safe to use.
-    Formal specifications that define what it means for a collaborative text-editing algorithm to be correct have been proposed recently, but few algorithms have been checked against these specifications, and to date there is no executable checker for these specifications. 
+    Formal specifications that define what it means for a collaborative text-editing algorithm to be correct have been proposed recently, but few algorithms have been checked against these specifications, and to date there is no executable checker for them. 
     In this paper we introduce Darner, the first model checker specialised for finding violations of these specifications, supporting both randomised and exhaustive search.
     We also implement a corpus of over 50 such algorithms, covering most of the research literature and popular open source libraries.
     Applying Darner to this corpus reveals that 17 of these algorithms do not meet the requirements that we consider essential for a collaborative text-editing algorithm to be practically useful; of these, 11 reproduce known results and 6 are new flaws not reported previously.
@@ -78,7 +78,7 @@ As a result, some work in this field has gained a reputation of being full of er
 
 To address this situation, this paper makes the following contributions:
 \begin{itemize}
-    \item We implement Darner --- a specialised model checker for testing collaborative text editing algorithms --- which includes checks for five properties: convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}. It is named after a family of dragonflies that hunts bugs in flight, and also after a darning needle for mending holes in textiles.
+    \item We introduce Darner,\footnote{Named after a family of dragonflies that hunts bugs in flight, and also after a darning needle for mending holes in textiles.} a specialised model checker for testing collaborative text editing algorithms, which includes checks for five properties: convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}.
     \item We implement a corpus of 50 collaborative text editing algorithms covering most of the research literature and open source libraries, and use Darner to test these algorithms against the aforementioned properties.
         For many of these algorithms, this is the first publicly available implementation, and the first time their properties have been independently checked.
         Our results provide, for the first time, a comprehensive survey of the collaborative text editing literature from a correctness point of view, and for several published algorithms we find novel bugs that have not been reported previously.
@@ -282,7 +282,7 @@ Note that some papers use the terms \emph{forward} and \emph{backward transposit
 
 \section{Darner implementation} \label{sec:modelcheckerimplementation}
 
-In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the strong and weak list specifications and for the non-interleaving properties. Both Darner and the algorithm implementations are written in Python, without the use of any existing model checking tool. Darner is about 2300 lines of codes, and the algorithm corpus is about 17000 lines of code in total (averaging about 400 lines of code per algorithm).
+In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the strong and weak list specifications and for the non-interleaving properties. Both Darner and the algorithm implementations are written in Python, without the use of any existing model checking tool. Darner is about 2,300 lines of code, and the algorithm corpus is about 17,000 lines of code in total (averaging about 400 lines of code per algorithm).
 
 \subsection{Interface between algorithms and Darner}
 
@@ -364,7 +364,7 @@ Knowing these, the condition for forward non-interleaving is easy to check. The 
 violation is reported.
 
 For maximal non-interleaving, the condition for backward non-interleaving can be checked analogously. Maximal non-interleaving's third condition defines the ordering 
-of characters with the same left and right origin. Mathematically, this was included to ensure a unique ordering. It mentions an ID but does not enforce what that ID is. We leave the choice of this ID to the algorithm, as the one piece of freedom it has over the ordering of characters. For that reason, we do not check condition 3
+of characters with the same left and right origin; this was included to ensure the ordering is unique. It mentions an ID but does not enforce what that ID is. We leave the choice of this ID to the algorithm; thus, algorithms that satisfy maximal non-interleaving still have the choice of ID as a degree of freedom over the ordering of characters. For that reason, we do not check condition 3
 of maximal non-interleaving.  
 
 \subsection{Checking properties of transformation functions}
@@ -373,73 +373,78 @@ In most of the OT literature, algorithms are split into two layers, control algo
 Some papers specify only a control algorithm but no transformation functions, or vice versa.
 Prior work has focussed on checking the TP1 and TP2 properties of transformation functions \cite{Imine2003,Jungnickel2015}.
 
-We depart from that tradition in this paper, and always test a control algorithm in conjunction with a particular set of transformation functions, because we have found that the two cannot be separated from each other so cleanly.
-For example, the TP1 and TP2 properties are only relevant for ensuring convergence, but say nothing about whether an algorithm will satisfy the strong or weak list specification.
-In \autoref{sec:tm11andrandolphfunctions}, we find two transformation functions that both satisfy TP1 and TP2 but give different properties when tested with the same control algorithm.
+We depart from that tradition in this paper, and always test a control algorithm in conjunction with a particular set of transformation functions, because we found that the two cannot be separated from each other so cleanly.
+The TP1 and TP2 properties are only relevant for ensuring convergence, but say nothing about whether an algorithm will satisfy the strong or weak list specification.
+For example, we find that TM1.1 \cite{Sun2017} and Randolph et al.'s functions \cite{Randolph2015} both satisfy TP1 and TP2, but give different properties when tested with the same control algorithm.
 In our experiments we therefore treat an OT algorithm as a pair of a control algorithm and transformation functions, sometimes testing the same control algorithm with several transformation functions, and vice versa.
 We only test combinations where there is a match between the claimed properties of the transformation functions and the claimed assumptions of the control algorithm.
 
 \section{Evaluating Darner}
 
-Because we are only checking cases, rather than writing a proof, we can never be absolutely certain that a \noviol in \autoref{tab:algorithmproperties} means that the property is satisfied. The purpose of this evaluation is to give confidence that, if Darner is unable to find property violations in the algorithm, then it is unlikely that one exists. 
+\autoref{tab:algorithmproperties} shows the list of algorithms we implemented in our corpus, and the results we found from model checking each algorithm using Darner.
+Because we only check a finite number of cases, rather than writing a proof, a \noviol in \autoref{tab:algorithmproperties} does not guarantee that the property is satisfied. The purpose of this evaluation is to give confidence that, if Darner is unable to find property violations in the algorithm, then it is unlikely that one exists. 
 
-We use our large collection of algorithm implementations to collect data on the presence of violations, the time to find violations and to compare different search strategies. We present this data in this section. When running Darner, we have many choices over the configurations we use to search for violations. This includes: the number of operations generated, the number of clients, the number of seeds checked, whether to use random or exhaustive search and what search order to use for an exhaustive search. We investigate how changing each of these affects the likelihood of finding a violation, and we justify our use of random checking over exhaustive checking. 
+We use our large collection of algorithm implementations to collect data on the presence of violations, the time to find violations and to compare different search strategies. When running Darner, we have many choices over the configurations we use to search for violations. This includes: the number of traces generated, the number of operations per trace, the number of clients, whether to use random or exhaustive search, and what search order to use for an exhaustive search.
+We use a seed to initialise a pseudorandom generator on each execution trace, which is used for all random choices, allowing us to reproduce each trace deterministically from that seed.
+We investigate how the configuration affects the likelihood of finding a violation, and we justify our use of random checking over exhaustive checking. 
 
+For space reasons, the property violations we found with specific algorithms are detailed in an appendix.
 
 \subsection{Reproducing known properties}
 
-Darner was able to reproduce all published results about the algorithms. This is a list of known results about these algorithms Darner was able to reproduce by finding violations (within seconds) using randomised testing:
+Darner was able to reproduce all published consistency properties of the algorithms tested, including the following violations, found within seconds using randomised testing:
 
 \begin{itemize}
   \item
-    Five transformations functions: Ellis \cite{Ellis1989}, Ressel \cite{Ressel1996}, Imine \cite{Imine2003}, Suleiman \cite{Suleiman1997} and SDT \cite{Li2008} were all shown to fail to satisfy TP2 \cite{Oster2005Proving} (and some do not satisfy TP1). We combined each of these functions with the adOPTed algorithm, and all produced convergence violations for three or more clients (which is when TP2 violations occur).
+    Five transformations functions: Ellis \cite{Ellis1989}, Ressel \cite{Ressel1996}, Imine \cite{Imine2003}, Suleiman \cite{Suleiman1997} and SDT \cite{Li2008} were all shown not to satisfy TP2 \cite{Oster2005Proving} (and some do not satisfy TP1). We combined each of these functions with the adOPTed algorithm, and all produced convergence violations for $\ge 3$ clients (which is when TP2 is relevant).
   \item
     The dOPT algorithm is known not to converge \cite{Sun1996}.
   \item
-    Fugue is known to not satisfy maximal non-interleaving \cite{Weidner2025Fugue}.
+    Fugue does not satisfy maximal non-interleaving \cite{Weidner2025Fugue}.
   \item
     Jupiter is known to not satisfy the strong list specification \cite{Attiya2016}.
   \item
-    The Fugue paper \cite{Weidner2025Fugue} gives a list of algorithms for which they could find forward interleaving (e.g. Logoot, LSEQ, Treedoc, WOOT) and could not find forward interleaving (e.g RGA, Yjs, Sync9). Our results are consistent with those (apart from when we were able to avoid forward interleaving by reversing the priority schemes, see \autoref{sec:doptjupiteradoptedimplementation}). 
+    The Fugue paper \cite{Weidner2025Fugue} gives a list of algorithms for which the authors could find forward interleaving (e.g.\ Logoot, LSEQ, Treedoc, WOOT) and could not find forward interleaving (e.g.\ RGA, Yjs, Sync9). Our results are consistent with those (apart from when we were able to avoid forward interleaving by reversing the priority schemes, see \autoref{sec:doptjupiteradoptedimplementation}). 
   \item
     The Logoot algorithm is known to have flaws which lead it to get stuck in an infinite loop \cite{Sun2018}.
 \end{itemize}
 
 
-Similarly, when an algorithm is known to satisfy a particular property, Darner did not falsely report violations of that property. This includes Fugue \cite{Weidner2025Fugue} satisfying the strong list specification and forward non-interleaving, and FugueMax additionally satisfying maximal non-interleaving. Similarly, we found Jupiter satisfied the weak list specification, and RGA satisfied the strong list specification, which are both proven properties \cite{Wei2018, Attiya2016}.  
+Similarly, when an algorithm is known to satisfy a particular property, Darner did not falsely report violations of that property. This includes Fugue \cite{Weidner2025Fugue} satisfying the strong list specification and forward non-interleaving, and FugueMax additionally satisfying maximal non-interleaving. Similarly, we found Jupiter satisfies the weak list specification, and RGA satisfies the strong list specification, which are both proven properties \cite{Wei2018, Attiya2016}.  
 
 
 \subsection{How commonly violations appear}
 
-\autoref{fig:violationrate} show how the percentage of violations in a set of 10000 traces changes when the number of operations generated by the checker changes. This is useful because it suggests what depth an exhaustive search would need to be run at; if we know a violation does not appear until a certain depth, then doing an exhaustive search below that depth is not useful. Similarly, it suggests what number of operations to generate when doing a randomised search. We pick a set of algorithms for each property. There is no guarantee that the patterns here will apply to every single one of these algorithms, but these figures do illustrate some of the behaviours that are possible, that we should consider when choosing a search strategy.
+\autoref{fig:violationrate} shows how the percentage of property-violating traces changes as a function of the number of operations per trace. This data is useful because it suggests what depth an exhaustive search would need to be run at; if we know a violation does not appear until a certain depth, then doing an exhaustive search below that depth will not find violations. Similarly, it suggests what number of operations to generate when doing a randomised search. We pick a set of algorithms for each property. There is no guarantee that these patterns will apply to every one of these algorithms, but these figures do illustrate some of the behaviours that are possible, that we should consider when choosing a search strategy.
 
 \begin{figure*}
-  \caption[width=\textwidth]{The percentage of traces which contained violations out of a randomised test of 10000 traces as operations changed, for a selection of algorithms and properties.}
+  \caption[width=\textwidth]{The percentage of traces containing property violations out of a randomised test of 10,000 traces with a varying number of operations per trace, for a selection of algorithms and properties.}
   \includegraphics{violation_rate}
   \label{fig:violationrate}
 \end{figure*}
 
-We observe that some of the violations (such as convergence violations in dOPT, or forward non-interleaving violations in TreeDoc) appear very commonly. The violations appear at less than 10 operations, and once the number of operations are large enough, the violations can appear nearly always.
+We observe that some of the violations (such as convergence violations in dOPT, or forward non-interleaving violations in TreeDoc) appear very commonly. The violations appear at fewer than 10 operations, and once the number of operations is large enough, violations appear nearly always.
 
-Other violations (such as the strong list specification violations) do not appear as commonly. They do not appear at all when there are less than 10 operations, and may still be unlikely above that. These are violations which require a more specific set of operations to be exhibited, so Darner does not find them as often. For example, a maximal non-interleaving violation (that is not also a forward non-interleaving violations) may require the operations to include both include forward interleaving and backward interleaving.  These tell us also that running an exhaustive search below 10 operations is likely to miss many of these violations.
+Other violations (such as the strong list specification violations) do not appear as commonly. They do not appear at all when there are fewer than 10 operations, and may still be unlikely above that. Violating these properties requires a more specific combination of operations, so Darner does not find them as often. For example, a maximal non-interleaving violation (that is not also a forward non-interleaving violation) may require the trace to include both forward insertions and backward insertions. Running an exhaustive search with fewer than 10 operations per trace may miss these violations.
 
-We also experimented with how the number of clients changes how often violations appear, but we found no clear effect. Mainly, we find that some violations only appear when there are more than two clients (such as TP2 violations), but beyond that there is no clear effect. Because there is no limit to how an algorithm can behave however, there may be violations where this is not the case. One exceptional case we found was in PPS where violations could only appear with greater than 10 clients (see \autoref{sec:ppsimplementation}).
+We also measured whether the number of clients changes how often violations appear. We found that some violations only appear when there are more than two clients (such as TP2 violations), but increasing the number of clients beyond three has no clear effect in most algorithms. An exception is PPS, where violations appeared only with more than 10 clients (see \autoref{sec:ppsimplementation}).
 
-\subsection{What depth to do an exhaustive search}
+\subsection{What depth to use for exhaustive search}
 
-The previous section suggests that the minimum depth to check the strong list specification at should be above 10 because violations sometimes do not appear below that. Running an exhaustive search at those depths is infeasible, as shown by \autoref{fig:exhaustivesearchcost}. Running an exhaustive search at 10 operations would take multiple years. Parallelisation and more efficient checking algorithms can reduce this, but it will not change the asymptotic behaviour. 
+The previous section suggests that the minimum depth to check the strong list specification at should be above 10 because violations sometimes do not appear below that. Running an exhaustive search to that depth would take years of CPU time, as shown in \autoref{fig:exhaustivesearchcost}, which exceeds our available resources. We therefore focus on randomised search.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{depth_cost}
-  \caption{The time taken to run an exhaustive search of convergence violations for the RGA algorithm at different depths.}
+  \caption{The time taken to run an exhaustive search of convergence violations for the RGA algorithm at different depths, with extrapolation.}
   \label{fig:exhaustivesearchcost}
 \end{figure}
 
 \subsection{Comparing random and exhaustive search}
 
-Because of the time cost of doing an exhaustive search, we instead do a randomised search. \autoref{fig:successrate} aims to show that randomised search is a suitable alternative for exhaustive search. For all algorithm, property pairs for which we found a violation, we run a search for each of these violations and measure how long it took to find it. We find that while randomised testing is able to find all the violations, all of the exhuastive search strategies are only able to find a fraction of the violations, and taking exponentially longer to do so. 
+\autoref{fig:successrate} demonstrates the effectiveness of randomised search compared to exhaustive search. For all (algorithm, property) pairs for which we found a violation, we run a search and measure how long it takes to find the first violation. We find that randomised search finds a violation orders of magnitude faster than exhaustive search.
+% NOTE: I think it's not correct to say that exhaustive search was only able to find a fraction of the violations -- if you had enough compute time, presumably it would be able to find all violations. It just takes much longer.
 
-We considered multiple search strategies for exhaustive search; the first is breadth-first search vs depth-first search, and the second is a deterministic search order vs a randomised (but still exhaustive) search order. The motive behind using a randomised exhaustive search is that a deterministic search order tends to search through many `uninteresting' cases first, such as all operations being on one client. This means that the search can spend a long time looking through cases which are unlikely to contain bug. Randomised exhaustive search randomises the order of siblings in the search tree. The advantage of a depth-first search is that it is guaranteed to check large number of operations, whereas a breadth-first will spend a long time before reaching the maximum number of operations. The issue with a depth-first is that it can spend a long time searching through subtrees that are not likely to contain any violations. We observe that none of these alterations produced a clear improvement in the success rate of the search.
+We considered multiple search strategies for exhaustive search: breadth-first vs.\ depth-first search, and deterministic vs.\ randomised (but still exhaustive) search order. The motive behind using a randomised exhaustive search is that a deterministic search order tends to search through many `uninteresting' cases first, such as all operations being on one client. This means that the search can spend a long time testing cases that are unlikely to trigger bugs. Randomised exhaustive search randomises the order of siblings in the search tree. The advantage of a depth-first search is that it is guaranteed to check large number of operations, whereas a breadth-first will spend a long time before reaching the maximum number of operations. The issue with a depth-first is that it can spend a long time searching through subtrees that are not likely to contain any violations. We observe that none of these alterations produced a clear improvement in the success rate of the search.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{time_to_violation}
@@ -447,11 +452,11 @@ We considered multiple search strategies for exhaustive search; the first is bre
   \label{fig:successrate}
 \end{figure}
 
-The Jupiter strong list specification violations is an example of a violation that random search found, but exhaustive search could not within a reasonable amount of time. There were no examples of violations we could find through exhaustive search, but not through randomised. It may be worth considering in future work whether there are heuristics, which would help a randomised or exhaustive search to find certain properties faster.
+The Jupiter strong list specification violation is an example of a violation that random search found, but exhaustive search could not within a reasonable amount of time. There were no examples of violations we could find through exhaustive search, but not through randomised. It may be worth considering in future work whether there are heuristics that would help a randomised or exhaustive search to find certain properties faster.
 
 \subsection{How many seeds to do a random search for}
 
-There is a question of how many traces to run a random search for. \autoref{fig:numberofseeds} shows the proportion of times a violation was found within a certain number of traces for various violations. We see that, even when running the randomised search for a short amount of time, it is still likely to find a violation. This acts as evidence that for most violations, running a randomised search should be likely to find it, even without running the search for very long.
+How many traces should a random search check? \autoref{fig:numberofseeds} shows the proportion of times a violation was found within a certain number of traces for various violations. We see that for many properties, a violation can be found reliably with just a few hundred traces. This suggests that for most violations, running a randomised search should be likely to find it, even without running the search for very long.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{detection}
@@ -515,15 +520,15 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
         \multirow{18}{*}{\rotatebox[origin=c]{90}{\textit{Causal-order-based OT}}}
           & ABT \cite{Li2010} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
           & AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed + IMOR \cite{Imine2003} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed + Randolph \cite{Randolph2015} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
-          & AdOPTed + Ressel \cite{Ressel1996} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed + Suleiman \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed + TM1.1 \cite{Sun2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
-          & AdOPTed + Tombstone \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + IMOR \cite{Imine2003} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Randolph \cite{Randolph2015} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Ressel \cite{Ressel1996} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Suleiman \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + TM1.1 \cite{Sun2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & dOPT + Ellis \cite{Ellis1989} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
           & GOT \cite{Sun1998TOCHI} & \newviol & \newviol & \newviol & \knownviol & \knownviol & \Circle \\
-          & GOTO + TTF \cite{Sun1998CSCW} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & GOTO \cite{Sun1998CSCW} + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & LBT \cite{Li2005} & \newviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
           & SDT \cite{Li2008} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
           & SOCT2 \cite{Suleiman1997} + Suleiman functions \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
@@ -536,8 +541,8 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
           & Diffsync \cite{Little2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
           & Fugue \cite{Weidner2025Fugue} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & FugueMax \cite{Weidner2025Fugue} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
-          & Logoot \cite{Weiss2009} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & Logoot (fixed) \cite{Weiss2009} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & Logoot (original) \cite{Weiss2009} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & Logoot (fixed) \cite{Weiss2010} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & LogootSplit \cite{Andre2013} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & Loro \cite{Loro2026} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & LSEQ \cite{Nedelec2013} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
