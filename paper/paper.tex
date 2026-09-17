@@ -455,7 +455,7 @@ We only test combinations where there is a match between the claimed properties 
     \end{tabular}
 \end{table*}
 
-\section{Results of model checking} \label{sec:modelcheckerresults}
+\section{The Darner algorithm corpus} \label{sec:modelcheckerresults}
 
 To demonstrate the generality of Darner and its ability to find bugs, we implemented a corpus of collaborative text editing algorithms covering most research publications in this field, as well as a selection of popular open-source implementations.
 We are making this corpus available as open source along with Darner to facilitate the further study of these algorithms.
@@ -467,8 +467,10 @@ If Darner finds a violation of a property, we replay the same scenario against t
 
 \subsection{Properties of each algorithm}
 
-\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. The properties are: convergence, Attiya et al.'s weak and strong list specifications, and the forward and maximal non-interleaving properties (titled \emph{Forward} and \emph{Max}). It also includes which algorithms assume all clients are online (\emph{AllOnline}) --- see \autoref{sec:assumptions}. When there is a choice of transformation functions,
+\autoref{tab:algorithmproperties} shows the list of algorithms we implemented in our corpus, and the results we found from model checking each algorithm using Darner.
+The properties are: convergence, Attiya et al.'s weak and strong list specifications, and the forward and maximal non-interleaving properties (titled \emph{Forward} and \emph{Max}). It also includes which algorithms assume all clients are online (\emph{AllOnline}) --- see \autoref{sec:assumptions}. When there is a choice of transformation functions,
 we choose transformation functions that would substantiate or disprove prior claims about the functions. For rows with no transformation functions, we used the transformation functions from the same paper as the control algorithm.
+For space reasons, the property violations we found with specific algorithms are detailed in an appendix.
 
 In our opinion, convergence and the weak list specification are minimal requirements for a collaborative text editing algorithm to be useful in practice.
 Forward non-interleaving is also important, although algorithms differ on how frequently interleaving occurs in realistic editing scenarios (something we do not aim to quantify in this paper); an algorithm in which forward interleaving is rare but not impossible may still be acceptable in practice.
@@ -507,7 +509,7 @@ In addition to the table, we believe that the only functions that explicitly sat
 
 Some algorithms assume the existence of a server that imposes a total order on all operations, requiring a client to communicate with the server before the operation can be processed by any other client.
 For fault tolerance, the server can be replaced with a consensus protocol providing a replicated log, such as Raft \cite{Ongaro2014}.
-Algorithms that make this assumption are listed under the heading \emph{Centralised OT} in \autoref{tab:algorithmproperties}.
+Algorithms that make this assumption are listed in the category \emph{Total-order-based OT} in \autoref{tab:algorithmproperties}.
 Some work \cite{Sun2020arxiv} differentiates between a transformation-based server and a non-transformation-based server, based on whether or not the server actually performs any transformations. In our opinion this is not a meaningful distinction, because any algorithm with a transformation-based server can be implemented with a non-transformation-based server, by having the server simply serialise the operations and the clients simulate what the server would do.  
 
 Sometimes this assumption is made implicitly.
@@ -517,20 +519,17 @@ Some TP2-avoiding algorithms do so by assuming totally ordered delivery, which h
 Three algorithms we considered (SOCT4 \cite{Vidot2000}, TIBOT \cite{Li2004ICPADS}, and TIBOT 2.0 \cite{Xu2014}) even assume that all clients are online, and stop making progress if one or more clients become unavailable.
 While a server-based algorithm can be made fault-tolerant using a consensus protocol, that is not the case for these algorithms, making them fundamentally unable to tolerate faults.
 
-\autoref{tab:algorithmproperties} includes information about the assumptions made by the algorithms.
-We call algorithms that do not assume a server or consensus protocol \emph{decentralised}, since they can operate in a peer-to-peer network under network partitions.
-All CRDT algorithms studied in this paper are decentralised.
+OT algorithms that do not assume a server or consensus protocol, as well as the CRDT algorithms studied in this paper, instead make a weaker assumption of \emph{causally ordered delivery}.
+This model allows concurrent operations to be delivered in any order.
+It can be efficiently implemented over peer-to-peer networks (e.g.\ using vector clocks), and even during network partitions it allows any users to continue collaborating if they are still able to communicate.
 
-\section{Evaluating Darner}
+\section{Evaluation}
 
-\autoref{tab:algorithmproperties} shows the list of algorithms we implemented in our corpus, and the results we found from model checking each algorithm using Darner.
 Because we only check a finite number of cases, rather than writing a proof, a \noviol in \autoref{tab:algorithmproperties} does not guarantee that the property is satisfied. The purpose of this evaluation is to give confidence that, if Darner is unable to find property violations in the algorithm, then it is unlikely that one exists. 
 
 We use our large collection of algorithm implementations to collect data on the presence of violations, the time to find violations and to compare different search strategies. When running Darner, we have many choices over the configurations we use to search for violations. This includes: the number of traces generated, the number of operations per trace, the number of clients, whether to use random or exhaustive search, and what search order to use for an exhaustive search.
 We use a seed to initialise a pseudorandom generator on each execution trace, which is used for all random choices, allowing us to reproduce each trace deterministically from that seed.
 We investigate how the configuration affects the likelihood of finding a violation, and we justify our use of random checking over exhaustive checking. 
-
-For space reasons, the property violations we found with specific algorithms are detailed in an appendix.
 
 \begin{figure*}
   \caption[width=\textwidth]{The percentage of traces containing property violations out of a randomised test of 10,000 traces with a varying number of operations per trace, for a selection of algorithms and properties.}
@@ -614,47 +613,46 @@ How many traces should a random search check? \autoref{fig:numberofseeds} shows 
 This section reviews the existing efforts to verify collaborative text-editing algorithms. None of these check as many algorithms as we do, and none check for either the strong list specification or the non-interleaving properties.
 
 
-Imine et al. used the automated theorem prover SPIKE to verify TP1 and TP2 properties of various transformation functions \cite{Imine2003, Oster2005Proving, Imine2006}. SPIKE found counter examples in many published transformation functions at the time. The work only considers transformation functions in isolation, without any control algorithm. 
+Imine et al.~\cite{Imine2003, Oster2005Proving, Imine2006} use the automated theorem prover SPIKE to verify TP1 and TP2 properties of various transformation functions, finding violations in five. The work only considers transformation functions in isolation, without any control algorithm. 
 It therefore only establishes convergence, and not any of the other properties we check. 
-It also does not actually execute the functions, but makes deductions based on the provided specification. 
-This led to them falsely proving functions satisfied TP2; the same authors found the proof was incorrect because of an error in their specification. 
-They also produced similar counter examples using the UPPAAL model checker \cite{Boucheneb2009}, which was also only used to check for convergence.
+% NOTE: commented out the following because it's a bit unfair -- a specification error can happen to anyone, and I don't think we would be immune to it.
+% It also does not actually execute the functions, but makes deductions based on the provided specification. 
+% This led to them falsely proving functions satisfied TP2; the same authors found the proof was incorrect because of an error in their specification. 
+Boucheneb and Imine \cite{Boucheneb2009} also obtained similar results for convergence using the UPPAAL model checker.
 
 
 Previous work has also used the TLC model checker and TLA+ specification language to verify various correctness properties. 
-Oster et al. used this to verify convergence in the WOOT algorithm \cite{Oster2005WOOT}, exhaustively up to four sites and five characters. 
+Oster et al. used this to verify convergence in the WOOT algorithm \cite{Oster2005WOOT}, exhaustively up to four clients and five characters. 
 Wei et al. used this to specify Jupiter, and to show that Jupiter satisfied strong eventual consistency and the weak list specification \cite{Wei2020}.
-Zhang et al. introduced a MET framework \cite{Zhang2024} which uses TLC to model check strong eventual consistency in CRDTs specified in TLA+, and then reuses the traces that the checker explored as test cases in a real implementation.
+Zhang et al. introduced the MET framework \cite{Zhang2024}, which uses TLC to model check strong eventual consistency in CRDTs specified in TLA+, and then reuses the traces that the checker explored as test cases in a real implementation.
 
 
 Wei et al. also showed that Jupiter satisfied the weak list specification, by proposing a new algorithm CJupiter. They showed CJupiter satisfied the weak list specification, and that the algorithm was equivalent to Jupiter \cite{Wei2018}.
 
 
-Gomes et al. use the Isabelle/HOL proof assistant to prove strong eventual consistency for three CRDTS including RGA, but only for the convergence property \cite{Gomes2017}.
+Gomes et al. use the Isabelle/HOL proof assistant to prove strong eventual consistency for three CRDTs including RGA, but only for the convergence property \cite{Gomes2017}.
 
+Replication Benchmarker \cite{Urso2016} is a collection of collaborative text editing algorithm implementations, but it is oriented towards benchmarking rather than model checking, and it covers far fewer algorithms.
 
-There are many algorithms that solve related problems to collaborative text-editing, but were too different to include in our implementations. Collaborative XML editing \cite{Davis2002, Martin2010report}, graphics editing \cite{Sun2002}, tree editing \cite{Molli2003, Jungnickel2015}, JSON editing \cite{Jungnickel2016} and rich-text editing \cite{Litt2022} all apply these ideas to different kinds of documents, often using the same algorithms. Darner can only model plain text, and the properties are only well-defined on plain text, so we leave these out. 
+There are many algorithms that solve related problems to collaborative text-editing: collaborative XML editing \cite{Davis2002, Martin2010report}, graphics editing \cite{Sun2002}, tree editing \cite{Molli2003, Jungnickel2015}, JSON editing \cite{Jungnickel2016, Kleppmann2017} and rich-text editing \cite{Litt2022} all apply these ideas to different kinds of documents, often using similar algorithms. At present, Darner only models plain text and properties that are well-defined on plain text, and we leave an extension to other document types to future work.
 
 \section{Conclusion}
 
-We presented Darner --- a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against the majority of collaborative text-editing algorithms. 
-We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text-editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties. Earlier collection of algorithm implementations exist \cite{Urso2016}, but ours covers many more. 
-Our implementations resolve multiple ambiguities in previous research, and for many algorithms, are the first publicly available implementations of these algorithms. We find 6 previously unreported property violations.
-Darner supports both randomised and exhaustive checking and we evaluate the behaviour of these two strategies, and justify our use of random over exhaustive checking. We hope Darner helps to quickly rule out broken algorithms, so future research in this area avoids many of the correctness issues that have plagued work in the past.
+We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
+We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text-editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties.
+Our implementations resolve multiple ambiguities in previous research, and for many algorithms, ours is the first publicly available implementation. We find previously unreported convergence violations in four algorithms, violations of the weak list specification in six, and many violations of the other properties.
+Darner supports both randomised and exhaustive checking and we evaluate the behaviour of these two strategies, justifying our use of random over exhaustive checking. We hope Darner will help to quickly rule out broken algorithms, so future research in this area may avoid the correctness issues that have plagued this field in the past.
 
-Future work may apply more rigorous formal verification techniques on the algorithms Darner is unable to find a violation for. 
-Our work can never guarantee a property is satisfied in all cases, which a formal proof, written in a proof assistant for example, could. 
-Also, our work does not check for deletions with non-interleaving. Further consideration of how the non-interleaving properties apply to algorithms that do not use tombstones should be done in future work. The performance properties of algorithms are also something that should be investigated in future work. 
-An algorithm may be correct but impractical due to performance concerns.
-Comparing performance fairly has been difficult, as it depends on what level of performance optimisations are applied by the implementation \cite{Gentle2025}. Documenting these performance optimisations and developing fair approaches of comparing them should be considered in future work.
-
+Future work may apply more rigorous proof techniques to verify the algorithms for which Darner is unable to find a violation. 
+Also, our work does not check for deletions with non-interleaving; future work should investigate how the non-interleaving properties apply to algorithms that do not use tombstones.
+Performance characteristics of these algorithms would also be interesting to study, though this is challenging as much depends on the data structure optimisations used by particular implementations \cite{Gentle2025}.
 
 
 %% AI Disclosure
 
 \section*{AI Disclosure}
 
-AI was used to assist during development of some of the algorithms, and to search through papers for algorithm specifications, definitions and claims about algorithms. Most of the code was hand-written, and any AI-generated code was carefully checked. AI was not used in any of the model checking logic. Beyond small fixes (grammar and spelling), AI was not used to generate any of the text in this paper. 
+AI was used to assist with the development of some of the algorithms, and to search through papers for algorithm specifications, definitions, and claims about algorithms. Most of the code was hand-written, and any AI-generated code was carefully checked. AI was not used in any of the model checking logic. Beyond small grammar and spelling fixes, AI was not used to generate any of the text in this paper. 
 
 %% Bibliography
 \bibliographystyle{ACM-Reference-Format}
