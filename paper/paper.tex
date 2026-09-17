@@ -467,7 +467,7 @@ If Darner finds a violation of a property, we replay the same scenario against t
 
 \subsection{Properties of each algorithm}
 
-\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. The properties are: convergence (Conv), Attiya et al.'s weak and strong list specifications (WLS and SLS) and the forward and maximal non-interleaving properties (FNI and MNI). It also includes which algorithms assume all clients are online (ACO) --- see \autoref{sec:assumptions}. When there is a choice of transformation functions,
+\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. The properties are: convergence, Attiya et al.'s weak and strong list specifications, and the forward and maximal non-interleaving properties (titled \emph{Forward} and \emph{Max}). It also includes which algorithms assume all clients are online (\emph{AllOnline}) --- see \autoref{sec:assumptions}. When there is a choice of transformation functions,
 we choose transformation functions that would substantiate or disprove prior claims about the functions. For rows with no transformation functions, we used the transformation functions from the same paper as the control algorithm.
 
 In our opinion, convergence and the weak list specification are minimal requirements for a collaborative text editing algorithm to be useful in practice.
@@ -478,22 +478,22 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
 
 \begin{table*}
   \centering
-  \setlength{\aboverulesep}{0pt}\setlength{\belowrulesep}{0pt}\setlength{\abovetopsep}{0pt}\setlength{\belowbottomsep}{0pt}\setlength{\abovecaptionskip}{0pt}\setlength{\belowcaptionskip}{2pt}
-  \caption{Properties and assumptions. $\checkmark${}~= no violations found, $\square${}~= violations found, $\square^*${}~= previously unreported violations found; \CIRCLE{}~= assumption required.}
+  \caption{Algorithms in our corpus, and properties checked by Darner. $\checkmark${}~= no violations found, $\square${}~= known violations reproduced, $\square^*${}~= previously unreported violations found; \CIRCLE{}~= assumption required.}
   \label{tab:algorithmproperties}
-    \begin{tabular}{@{}c l *{5}{c} | c@{}}
+  \small
+    \begin{tabular}{@{}c l *{5}{c} c@{}}
         \toprule
-        & & \multicolumn{5}{c}{Properties} & \multicolumn{1}{c}{Assumptions} \\
+        & & \multicolumn{5}{c}{\textbf{Properties}} & \multicolumn{1}{c}{\textbf{Assumptions}} \\
         \cmidrule(lr){3-7} \cmidrule(l){8-8}
-        & Algorithm
-        & Conv
-        & WLS~\cite{Attiya2016}
-        & SLS~\cite{Attiya2016}
-        & FNI~\cite{Weidner2025Fugue}
-        & MNI~\cite{Weidner2025Fugue}
-        & ACO \\
+        & \textbf{Algorithm}
+        & \textbf{Converges}
+        & \textbf{Weak}~\cite{Attiya2016}
+        & \textbf{Strong}~\cite{Attiya2016}
+        & \textbf{Forward}~\cite{Weidner2025Fugue}
+        & \textbf{Max}~\cite{Weidner2025Fugue}
+        & \textbf{AllOnline} \\
         \midrule
-        \multirow{10}{*}{\rotatebox[origin=c]{90}{\textit{Centralised OT}}}
+        \multirow{10}{*}{\rotatebox[origin=c]{90}{\textit{Total-order-based OT}}}
           & COT \cite{Sun2009} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
           & EasySync (Etherpad) \cite{AppJet2011} & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & $\square$ & \Circle \\
           & Jupiter \cite{Nichols1995} + TP1-satisfying functions \cite{Kleppmann2023} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \Circle \\
@@ -506,7 +506,7 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
           & TIBOT \cite{Li2004ICPADS} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \CIRCLE \\
           & TIBOT 2.0 \cite{Xu2014} & $\checkmark$ & $\checkmark$ & $\square$ & $\checkmark$ & $\square$ & \CIRCLE \\
         \midrule
-        \multirow{18}{*}{\rotatebox[origin=c]{90}{\textit{Decentralised OT}}}
+        \multirow{18}{*}{\rotatebox[origin=c]{90}{\textit{Causal-order-based OT}}}
           & ABT \cite{Li2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
           & AdOPTed + IMOR \cite{Imine2003} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
@@ -531,16 +531,16 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
           & Fugue \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & FugueMax \cite{Weidner2025Fugue} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & \Circle \\
           & Logoot \cite{Weiss2009} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
-          & Logoot (with fix) \cite{Weiss2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
+          & Logoot (fixed) \cite{Weiss2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & LogootSplit \cite{Andre2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & Loro \cite{Loro2026} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & LSEQ \cite{Nedelec2013} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & Mark \& Retrace \cite{Gu2005} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
           & Partial Persistent Sequences \cite{Wu2010} & $\square^*$ & $\square^*$ & $\square$ & $\square$ & $\square$ & \Circle \\
-          & RGA (with S4 Vectors) \cite{Roh2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & RGA (with S4Vectors) \cite{Roh2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & RGA (Timestamped-insertion trees) \cite{Attiya2016} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
-          & Causal Trees \cite{Grishchenko2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
-          & RGA (Non-interleaving fix) \cite{Kleppmann2019} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
+          & RGA (Causal Trees) \cite{Grishchenko2010} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
+          & RGA (non-interleaving variant) \cite{Kleppmann2019} & $\square$ & $\square$ & $\square$ & $\square$ & $\square$ & \Circle \\
           & Sync7 \cite{Little2024} & $\square^*$ & $\square^*$ & $\square$ & $\square$ & $\square$ & \Circle \\
           & Sync9 \cite{Toomim2019} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & \Circle \\
           & TreeDoc \cite{Preguica2009} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\square$ & $\square$ & \Circle \\
