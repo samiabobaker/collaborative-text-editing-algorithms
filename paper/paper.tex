@@ -390,6 +390,12 @@ We investigate how the configuration affects the likelihood of finding a violati
 
 For space reasons, the property violations we found with specific algorithms are detailed in an appendix.
 
+\begin{figure*}
+  \caption[width=\textwidth]{The percentage of traces containing property violations out of a randomised test of 10,000 traces with a varying number of operations per trace, for a selection of algorithms and properties.}
+  \includegraphics{violation_rate}
+  \label{fig:violationrate}
+\end{figure*}
+
 \subsection{Reproducing known properties}
 
 Darner was able to reproduce all published consistency properties of the algorithms tested, including the following violations, found within seconds using randomised testing:
@@ -416,12 +422,6 @@ Similarly, when an algorithm is known to satisfy a particular property, Darner d
 \subsection{How commonly violations appear}
 
 \autoref{fig:violationrate} shows how the percentage of property-violating traces changes as a function of the number of operations per trace. This data is useful because it suggests what depth an exhaustive search would need to be run at; if we know a violation does not appear until a certain depth, then doing an exhaustive search below that depth will not find violations. Similarly, it suggests what number of operations to generate when doing a randomised search. We pick a set of algorithms for each property. There is no guarantee that these patterns will apply to every one of these algorithms, but these figures do illustrate some of the behaviours that are possible, that we should consider when choosing a search strategy.
-
-\begin{figure*}
-  \caption[width=\textwidth]{The percentage of traces containing property violations out of a randomised test of 10,000 traces with a varying number of operations per trace, for a selection of algorithms and properties.}
-  \includegraphics{violation_rate}
-  \label{fig:violationrate}
-\end{figure*}
 
 We observe that some of the violations (such as convergence violations in dOPT, or forward non-interleaving violations in TreeDoc) appear very commonly. The violations appear at fewer than 10 operations, and once the number of operations is large enough, violations appear nearly always.
 
