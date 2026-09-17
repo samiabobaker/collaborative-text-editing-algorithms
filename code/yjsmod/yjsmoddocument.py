@@ -112,6 +112,19 @@ class YjsModDocument:
 
         raise IndexError()
 
+    def __find_left_origin_index(self, position: int) -> int:
+        if position == 0:
+            return -1
+        remaining = position
+        for index, item in enumerate(self.items):
+            if item.deleted:
+                continue
+            remaining -= 1
+            if remaining == 0:
+                return index
+
+        raise IndexError()
+
     # ---- local operations ----------------------------------------------
 
     def insert_char(self, position: int, id: YjsModId, char: UniqueChar) -> YjsModItem:
@@ -121,12 +134,12 @@ class YjsModDocument:
         tombstones - that is deliberate, since only ids are stable enough to
         anchor concurrent insertions against.
         """
-        index = self.__find_index_at_position(position)
+        left_index = self.__find_left_origin_index(position)
 
         item = YjsModItem(
             id,
-            self.items[index - 1].id if index > 0 else None,
-            self.items[index].id if index < len(self.items) else None,
+            self.items[left_index].id if left_index >= 0 else None,
+            self.items[left_index + 1].id if left_index + 1 < len(self.items) else None,
             char,
         )
         self.integrate(item)
