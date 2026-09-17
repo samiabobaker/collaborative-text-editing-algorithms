@@ -4,6 +4,7 @@ from algorithm_setup.algorithm_setup import DeviceSetup
 from device.clientdevice import ClientDevice
 from interleaving_checker.interleaving_checker import (
     forward_non_interleaving,
+    forward_non_interleaving_with_deletes,
     maximally_non_interleaving,
 )
 
@@ -52,6 +53,29 @@ def forward_interleaving_with_seed(
     if not forward_non_interleaving(client_dict, server, num_of_ops, print_ops):
         print(f"Failed with seed {n}")
 
+        for client in clients:
+            print(f"{client.client_id}:", *client.read_state(), sep="")
+        if pause_on_failure:
+            input()
+        print("-" * 80)
+        return False
+    return True
+
+
+def forward_interleaving_with_deletes_with_seed(
+    n: int,
+    device_setup: DeviceSetup,
+    num_of_clients: int = 3,
+    num_of_ops: int = 30,
+    print_ops: bool = False,
+    pause_on_failure: bool = True,
+) -> bool:
+    random.seed(n)
+    server, clients = device_setup(num_of_clients)
+    client_dict = {client.client_id: client for client in clients}
+
+    if not forward_non_interleaving_with_deletes(client_dict, server, num_of_ops, print_ops):
+        print(f"Failed with seed {n}")
         for client in clients:
             print(f"{client.client_id}:", *client.read_state(), sep="")
         if pause_on_failure:

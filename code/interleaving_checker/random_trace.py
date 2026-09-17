@@ -19,7 +19,10 @@ from random_operation_generator.random_operation_generator import (
 
 
 def build_random_trace_clients(
-    clients: dict[int, ClientDevice], num_of_operations: int = 30, print_ops: bool = False
+    clients: dict[int, ClientDevice],
+    num_of_operations: int = 30,
+    print_ops: bool = False,
+    with_deletes: bool = False,
 ) -> tuple[dict[int, ClientTrace], dict[int, Character]]:
     client_traces: dict[int, ClientTrace] = {}
 
@@ -29,14 +32,12 @@ def build_random_trace_clients(
         client_traces[client_id] = ClientTrace()
 
     for _ in range(num_of_operations):
-        operation = generate_random_client_client_operation(list(clients.values()), with_deletes=False)
+        operation = generate_random_client_client_operation(list(clients.values()), with_deletes=with_deletes)
 
         client = clients[operation.client_id]
         if print_ops:
             print(operation)
         operation_seen = client.perform_operation(operation)
-
-        assert not isinstance(operation_seen, ClientDeleteOperation)
 
         state = list(client.read_state())
         if isinstance(operation, ClientInsertOperation):
@@ -58,7 +59,7 @@ def build_random_trace_clients(
             characters[character.char.id] = character
 
         if len(operation_seen) != 0:
-            performed_locally = isinstance(operation, ClientInsertOperation)
+            performed_locally = isinstance(operation, (ClientInsertOperation, ClientDeleteOperation))
             client_traces[operation.client_id].add_event(Event(operation_seen, performed_locally), state)
 
     # Deliver the messages still in flight, so the checkers see the settled states.
@@ -100,7 +101,11 @@ def build_random_trace_clients(
 
 
 def build_random_trace_client_server(
-    clients: dict[int, ClientDevice], server: ServerDevice, num_of_operations: int = 30, print_ops: bool = False
+    clients: dict[int, ClientDevice],
+    server: ServerDevice,
+    num_of_operations: int = 30,
+    print_ops: bool = False,
+    with_deletes: bool = False,
 ) -> tuple[dict[int, ClientTrace], dict[int, Character]]:
     client_traces: dict[int, ClientTrace] = {}
 
@@ -110,14 +115,12 @@ def build_random_trace_client_server(
     characters: dict[int, Character] = {}
 
     for _ in range(num_of_operations):
-        operation = generate_random_client_server_operation(server, list(clients.values()), with_deletes=False)
+        operation = generate_random_client_server_operation(server, list(clients.values()), with_deletes=with_deletes)
         if print_ops:
             print(operation)
         if isinstance(operation, ClientOperation):
             client = clients[operation.client_id]
             operation_seen = client.perform_operation(operation)
-
-            assert not isinstance(operation_seen, ClientDeleteOperation)
 
             state = list(client.read_state())
 
@@ -140,7 +143,7 @@ def build_random_trace_client_server(
                 characters[character.char.id] = character
 
             if len(operation_seen) != 0:
-                performed_locally = isinstance(operation, ClientInsertOperation)
+                performed_locally = isinstance(operation, (ClientInsertOperation, ClientDeleteOperation))
                 client_traces[operation.client_id].add_event(Event(operation_seen, performed_locally), state)
         else:
             server.perform_operation(operation)
@@ -183,8 +186,9 @@ def build_random_trace(
     server: ServerDevice | None = None,
     num_of_operations: int = 30,
     print_ops: bool = False,
+    with_deletes: bool = False,
 ) -> tuple[dict[int, ClientTrace], dict[int, Character]]:
     if server:
-        return build_random_trace_client_server(clients, server, num_of_operations, print_ops)
+        return build_random_trace_client_server(clients, server, num_of_operations, print_ops, with_deletes)
     else:
-        return build_random_trace_clients(clients, num_of_operations, print_ops)
+        return build_random_trace_clients(clients, num_of_operations, print_ops, with_deletes)

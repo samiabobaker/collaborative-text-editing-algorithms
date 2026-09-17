@@ -1,4 +1,5 @@
 from device.clientdevice import ClientDevice
+from device.operations import ClientInsertOperation
 from device.serverdevice import ServerDevice
 from interleaving_checker.client_trace import Character, ClientTrace
 from interleaving_checker.random_trace import build_random_trace
@@ -45,6 +46,164 @@ def forward_non_interleaving_for_client_log(
                                     print(character)
                         return False
     return True
+
+
+def forward_non_interleaving_with_deletes(
+    clients: dict[int, ClientDevice],
+    server: ServerDevice | None = None,
+    num_of_ops: int = 30,
+    print_ops: bool = False,
+) -> bool:
+    """Soundly check forward non-interleaving on traces containing deletes.
+
+    Deleted elements are absent from visible states, but any ordering that was observed
+    while they were visible remains part of the strong-list-specification witness order.
+    All separated visible origin/child pairs must admit one common order in which an
+    already-delivered sibling comes before the child. This remains conservative about
+    adjacency involving deleted endpoints. As with the insert-only checker, this assumes
+    that the algorithm satisfies the strong list spec.
+    """
+    client_logs, characters = build_random_trace(clients, server, num_of_ops, print_ops, with_deletes=True)
+    return forward_non_interleaving_with_deletes_from_client_logs(client_logs, characters, print_ops)
+
+
+def forward_non_interleaving_with_deletes_from_client_logs(
+    client_logs: dict[int, ClientTrace], characters: dict[int, Character], print_ops: bool = False
+) -> bool:
+    list_order = build_observed_list_order(client_logs)
+    earlier_siblings: dict[UniqueChar, set[frozenset[UniqueChar]]] = {}
+
+    for client_log in client_logs.values():
+        observed_characters: set[UniqueChar] = set()
+        for state_index, state in enumerate(client_log.states_after_events):
+            # A character missing from this state can be a deleted sibling only if its
+            # insertion has already been delivered to this replica. Characters first
+            # delivered in a later event must not affect this state.
+            if state_index < len(client_log.events_seen):
+                observed_characters.update(
+                    operation.character
+                    for operation in client_log.events_seen[state_index].operation
+                    if isinstance(operation, ClientInsertOperation)
+                )
+            observed_characters.update(state)
+            for index, B in enumerate(state):
+                A = characters[B.id].left_origin
+                if A == "start" or A not in state or (index > 0 and state[index - 1] == A):
+                    continue
+                # Since A and B are separated, B must not be A's earliest delivered
+                # child. Keep the alternatives together instead of choosing a sibling.
+                siblings = frozenset(
+                    sibling
+                    for sibling in characters[A.id].left_origin_of
+                    if sibling != B and sibling in observed_characters
+                )
+                earlier_siblings.setdefault(B, set()).add(siblings)
+
+    if not has_common_forward_order(list_order, earlier_siblings):
+        if print_ops:
+            print("Failed forward interleaving with deletes: no common order for separated visible pairs.")
+            print_client_logs(client_logs)
+        return False
+    return True
+
+
+def has_common_forward_order(
+    list_order: set[tuple[UniqueChar, UniqueChar]],
+    earlier_siblings: dict[UniqueChar, set[frozenset[UniqueChar]]],
+) -> bool:
+    """Topologically order elements, satisfying every earlier-sibling requirement.
+
+    Each requirement for B is a set of alternatives, at least one of which must precede
+    B. An eligible element can always be moved to the front of any valid remaining
+    order: it has no unplaced predecessors and moving it earlier can only help other
+    requirements. Thus no backtracking is needed; getting stuck proves impossibility.
+    """
+    predecessors: dict[UniqueChar, set[UniqueChar]] = {}
+    for left, right in list_order:
+        predecessors.setdefault(left, set())
+        predecessors.setdefault(right, set()).add(left)
+    for element, requirements in earlier_siblings.items():
+        predecessors.setdefault(element, set())
+        for alternatives in requirements:
+            for sibling in alternatives:
+                predecessors.setdefault(sibling, set())
+
+    placed: set[UniqueChar] = set()
+    while predecessors:
+        for element, required in predecessors.items():
+            if required <= placed and all(alternatives & placed for alternatives in earlier_siblings.get(element, ())):
+                break
+        else:
+            return False
+        placed.add(element)
+        del predecessors[element]
+    return True
+
+
+def build_observed_list_order(client_logs: dict[int, ClientTrace]) -> set[tuple[UniqueChar, UniqueChar]]:
+    """Record every ordered pair that was co-visible in an observed state."""
+    list_order: set[tuple[UniqueChar, UniqueChar]] = set()
+    for client_log in client_logs.values():
+        for state in client_log.states_after_events:
+            for i, left in enumerate(state):
+                for right in state[i + 1 :]:
+                    list_order.add((left, right))
+    return list_order
+
+
+def transitive_closure(list_order: set[tuple[UniqueChar, UniqueChar]]) -> set[tuple[UniqueChar, UniqueChar]]:
+    adjacency: dict[UniqueChar, set[UniqueChar]] = {}
+    for left, right in list_order:
+        adjacency.setdefault(left, set()).add(right)
+        adjacency.setdefault(right, set())
+
+    closure: set[tuple[UniqueChar, UniqueChar]] = set()
+    for source, direct_successors in adjacency.items():
+        reachable: set[UniqueChar] = set()
+        pending = list(direct_successors)
+        while pending:
+            target = pending.pop()
+            if target in reachable:
+                continue
+            reachable.add(target)
+            pending.extend(adjacency[target])
+        closure.update((source, target) for target in reachable)
+    return closure
+
+
+def check_condition_1_with_deletes(
+    state: list[UniqueChar],
+    characters: dict[int, Character],
+    list_order: set[tuple[UniqueChar, UniqueChar]],
+    observed_characters: set[UniqueChar],
+    A: UniqueChar,
+    B: UniqueChar,
+) -> bool:
+    """Check condition 1 only when its premise is certain in every totalization.
+
+    ``observed_characters`` contains insertions delivered to the current replica through
+    this state, including characters subsequently deleted or inserted and deleted in one event.
+    """
+    if characters[B.id].left_origin != A:
+        return True
+
+    for sibling in characters[A.id].left_origin_of:
+        if sibling == B or sibling not in observed_characters:
+            continue
+        if (sibling, B) in list_order:
+            return True
+        if (B, sibling) not in list_order:
+            return True
+
+    return state.index(A) + 1 == state.index(B)
+
+
+def print_client_logs(client_logs: dict[int, ClientTrace]) -> None:
+    for client_id, client_log in client_logs.items():
+        print(f"CLIENT {client_id}")
+        for state in client_log.states_after_events:
+            print(*state, sep="")
+        print()
 
 
 def maximally_non_interleaving(
