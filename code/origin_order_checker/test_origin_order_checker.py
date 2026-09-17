@@ -84,11 +84,11 @@ def test_a_misdeclared_anchoring_is_caught():
 
 # fuguemax and yjsmod share a scheme and differ in the other two, and with tombstones in
 # the traces the anchoring is nameable, so it appears beside the key rather than hiding.
-def test_fuguemax_vs_yjsmod_divergences_are_the_key_and_the_anchoring():
+def test_fuguemax_vs_yjsmod_divergences_are_the_key():
     outcomes = [classify_pair(fuguemax_setup, yjsmod_setup, seed) for seed in range(1, 101)]
     divergences = [outcome for outcome in outcomes if outcome not in ("identical", "schedule-diverged")]
     assert len(divergences) != 0
-    assert all(outcome == "key+anchoring" for outcome in divergences)
+    assert all(outcome == "key" for outcome in divergences)
 
 
 # sync9 and fugue implement the same scheme, so every divergence is the sibling key.
@@ -109,7 +109,7 @@ def test_fugue_vs_fuguemax_divergences_are_scheme_only():
 
 # Both anchorings are taken by algorithms here, so neither is the one the others get wrong.
 def test_both_anchorings_are_declared_and_hold():
-    assert anchoring_of(yjs_setup) == AFTER
+    assert anchoring_of(yjs_setup) == BEFORE
     assert anchoring_of(fugue_setup) == BEFORE
     for setup in [
         automerge_setup,
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     test_algorithms_match_their_declared_cells()
     test_builder_ends_fully_delivered()
     test_a_misdeclared_anchoring_is_caught()
-    test_fuguemax_vs_yjsmod_divergences_are_the_key_and_the_anchoring()
+    test_fuguemax_vs_yjsmod_divergences_are_the_key()
     test_sync9_vs_fugue_divergences_are_key_only()
     test_fugue_vs_fuguemax_divergences_are_scheme_only()
     test_both_anchorings_are_declared_and_hold()

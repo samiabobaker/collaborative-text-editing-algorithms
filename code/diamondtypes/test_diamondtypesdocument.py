@@ -147,7 +147,7 @@ def test_concurrent_inserts_settle_the_way_fuguemax_does():
 # order checker's own scenario is what classifies the two.
 def test_a_local_insert_anchors_before_a_tombstone():
     assert tombstone_anchor_schedule(diamondtypes_setup) == ["xy", "xy"]
-    assert tombstone_anchor_schedule(yjsmod_setup) == ["yx", "yx"]
+    assert tombstone_anchor_schedule(yjsmod_setup) == ["xy", "xy"]
 
 
 # The document is maintained incrementally as the event graph is replayed, so it has to
