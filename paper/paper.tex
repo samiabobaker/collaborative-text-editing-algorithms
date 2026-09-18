@@ -503,6 +503,27 @@ In addition to the properties shown in the table, we believe that the only funct
     \end{tabular}   
 \end{table}
 
+\subsection{Novel results}
+
+This subsection summarises the novel results in \autoref{tab:algorithmproperties}. For more details, see the appendix.
+
+\begin{itemize}
+  \item
+    The GOT algorithm \cite{Sun1998TOCHI}, claiming to be a decentralised TP2-avoiding algorithm, fails to converge with the transformation functions given in the same paper. The main cause is that the transformation functions fail to satisfy the reversibility requirements which GOT requires.
+  \item
+    The TM1.1 transformation functions \cite{Sun2017} claim to satisfy TP2. We could not find any TP2 violations, as the functions converged with adOPTed. However, we found the functions were not practical, because they led to weak list specification violations. In certain cases, the functions will delete an extra character the user did not intend to delete.
+  \item
+    The algorithm used by the ProseMirror text editor \cite{Haverbeke2015} exhibits weak list specification violations. In certain cases, the algorithm can reorder characters without the user intending this.
+  \item
+    We found the LBT \cite{Li2005} algorithm did not converge. While its predecessor, SDT \cite{Li2008}, was already known not to work \cite{Oster2005Proving}, LBT had not been tested independently. In contrast, we could not find any convergence or weak or strong list specification violations for ABT \cite{Li2010}, which is LBT's successor.
+  \item
+    Partial persistent sequences \cite{Wu2010} represent the position of characters using rational numbers. The algorithm requires a mechanism for ensuring every character has a unique position, even if two clients concurrently insert a character at the same position. There are two mechanisms identified in the papers \cite{Wu2009, Wu2010} that aim to solve this, both do not fully work. This leads to the algorithm exhibiting convergence violations.
+  \item
+    Two open source projects, Sync7 \cite{Little2024} and Diffsync \cite{Little2017}, both do not work. Sync7 fails to converge, and Diffsync fails to satisfy the weak list specification.
+  \item
+    Although these are not surprising, we found many strong list specification and interleaving violations in algorithms that were not explicitly checked previously.
+\end{itemize}
+
 
 
 \subsection{Assumptions made by each algorithm}  \label{sec:assumptions}
