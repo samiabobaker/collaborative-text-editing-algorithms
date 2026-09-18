@@ -285,6 +285,7 @@ Note that some papers use the terms \emph{forward} and \emph{backward transposit
 \section{Darner implementation} \label{sec:modelcheckerimplementation}
 
 In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the weak and strong list specifications and for the non-interleaving properties. Both Darner and the algorithm implementations are written in Python, without the use of any existing model checking tool. Darner is about 2,300 lines of code, and the algorithm corpus is about 17,000 lines of code in total (averaging about 400 lines of code per algorithm).
+We are releasing both Darner and its corpus as open source.\footnote{\url{\artifacturl}}
 
 \subsection{Interface between algorithms and Darner}
 
@@ -460,7 +461,6 @@ We only test combinations where there is a match between the claimed properties 
 \section{The Darner algorithm corpus} \label{sec:modelcheckerresults}
 
 To demonstrate the generality of Darner and its ability to find bugs, we implemented a corpus of collaborative text editing algorithms covering most research publications in this field, as well as a selection of popular open-source implementations.
-We are making this corpus available as open source along with Darner to facilitate the further study of these algorithms.\footnote{\url{\artifacturl}}
 Our implementations are not optimised for performance, but rather aim to be close to the published pseudocode, making it easy to check that our implementation correctly reflects the original publication.
 For any violation of a property found by Darner, we additionally check by hand that the violation does indeed occur in the algorithm as originally published.
 
