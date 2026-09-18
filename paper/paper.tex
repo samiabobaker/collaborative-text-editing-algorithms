@@ -80,7 +80,7 @@ As a result, some work in this field has gained a reputation of being full of er
 
 To address this situation, this paper makes the following contributions:
 \begin{itemize}
-    \item We introduce Darner,\footnote{Named after a family of dragonflies that hunts bugs in flight, and also after a darning needle for mending holes in textiles.} a specialised model checker for testing collaborative text editing algorithms, which includes checks for five properties: convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}.
+    \item We introduce Darner,\footnote{Named after a family of dragonflies that hunts bugs in flight, and also after a darning needle for mending holes in textiles.} a specialised model checker for testing collaborative text editing algorithms, which includes checks for five properties: convergence, Attiya et al.'s weak and strong list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}.
     \item We implement a corpus of over 50 collaborative text editing algorithms covering most of the research literature and open-source libraries, and use Darner to test these algorithms against the aforementioned properties.
         For many of these algorithms, this is the first publicly available implementation, and the first time their properties have been independently checked.
         Our results provide, for the first time, a comprehensive survey of the collaborative text editing literature from a correctness point of view, and for several published algorithms we find novel bugs that have not been reported previously.
@@ -125,10 +125,10 @@ While the first two properties are well-defined, the meaning of ``intention'' in
 The weak and strong list specifications of Attiya et al.~\cite{Attiya2016} are precise correctness properties for collaborative text editing (or, more generally, a list object supporting insertion and deletion at arbitrary positions) that go beyond convergence and causality preservation.
 We use these properties in Darner.
 
-The weak and strong list specifications describe what characters must appear in the document, and in what order, at every point in the execution.
+The weak and strong list specifications describe what characters must appear in the document, constraining the order, at every point in the execution.
 Firstly, a character must appear in the document if and only if an insertion operation
 of it has been seen, and a deletion operation has not been seen. Secondly, if a character $a$ appears before a character $b$ in some client's document state, $a$ must appear before $b$ in every client's document
-state. The difference between the two is that the weak list specification is more relaxed about the ordering of deleted characters.
+state. The difference between the two is that the weak list specification is more relaxed about the ordering relative to deleted characters.
 
 
 We quote the relevant parts of these specifications here, but refer to the original paper \cite{Attiya2016}
@@ -284,7 +284,7 @@ Note that some papers use the terms \emph{forward} and \emph{backward transposit
 
 \section{Darner implementation} \label{sec:modelcheckerimplementation}
 
-In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the strong and weak list specifications and for the non-interleaving properties. Both Darner and the algorithm implementations are written in Python, without the use of any existing model checking tool. Darner is about 2,300 lines of code, and the algorithm corpus is about 17,000 lines of code in total (averaging about 400 lines of code per algorithm).
+In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the weak and strong list specifications and for the non-interleaving properties. Both Darner and the algorithm implementations are written in Python, without the use of any existing model checking tool. Darner is about 2,300 lines of code, and the algorithm corpus is about 17,000 lines of code in total (averaging about 400 lines of code per algorithm).
 
 \subsection{Interface between algorithms and Darner}
 
@@ -352,15 +352,15 @@ state, and only on the characters in that state. As before, there is a single ch
 \subsection{Issues with checking for non-interleaving}
 
 The non-interleaving properties assume that the algorithms use tombstones, because the right origin may be a tombstone. We find this causes difficulties when the algorithm does not use tombstones, as the properties are not explicit in that case. It is not straightforward to add tombstones to an algorithm that does not use them, as the position of the tombstones is not well-defined. Further consideration may be needed as to what extent these properties can be tested
-on those algorithms. We avoid these issues by generating only insertions when checking for interleaving, and omitting deletions. The behaviour of deletions is still checked in the strong and weak list specifications, so we consider this an acceptable omission.
+on those algorithms. We avoid these issues by generating only insertions when checking for interleaving, and omitting deletions. The behaviour of deletions is still checked in the weak and strong list specifications, so we consider this an acceptable omission.
 
 Another reason for omitting deletions from the interleaving tests is that the non-interleaving properties are defined in terms of the total list order from the strong list specification.
 For algorithms that satisfy the weak but not the strong list specification, this total order is not uniquely defined, and thus the question of whether interleaving is present is difficult to answer unambiguously.
-In executions containing only insertions, there is no difference between the strong and weak list specifications, and thus the presence of interleaving can easily be determined from the final document state after all clients converge.
+In executions containing only insertions, there is no difference between the weak and strong list specifications, and thus the presence of interleaving can easily be determined from the final document state after all clients converge.
 
 \subsection{Checking for non-interleaving}
 
-The trace used in the non-interleaving checkers is the same as that for the strong and weak list specifications, but now includes the left and right origins of each character. These are straightforward to determine by simply checking the elements immediately before and after the character at the time of insertion. Since there are no deletions, it is not possible for the right origin to be a tombstone.
+The trace used in the non-interleaving checkers is the same as that for the weak and strong list specifications, but now includes the left and right origins of each character. These are straightforward to determine by simply checking the elements immediately before and after the character at the time of insertion. Since there are no deletions, it is not possible for the right origin to be a tombstone.
 
 Knowing these, the condition for forward non-interleaving is easy to check. The checker loops over all pairs of characters $A$ and $B$. If $A$ is the left origin of $B$, and $B$ appears earlier in the list than all other characters for which $A$ is left origin, but $A$ and $B$ are not consecutive, then a forward non-interleaving
 violation is reported.
@@ -626,7 +626,7 @@ We see that for many properties, a violation can be found reliably with just a f
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{detection}
-  \caption{Probability that a Darner finds a violation of some property within some number of random traces checked.}
+  \caption{Probability that Darner finds a violation of some property within some number of random traces checked.}
   \label{fig:numberofseeds}
 \end{figure}
 
@@ -663,7 +663,7 @@ There are many algorithms that solve problems related to collaborative text edit
 
 \section{Conclusion}
 
-We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
+We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s weak and strong list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
 We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties.
 Our implementations resolve multiple ambiguities in previous research, and for many algorithms, ours is the first publicly available implementation. We find previously unreported convergence violations in four algorithms, violations of the weak list specification in seven, and many violations of the other properties.
 Darner supports both randomised and exhaustive checking, and we evaluate the behaviour of these two strategies, justifying our use of random over exhaustive checking. We hope Darner will help to quickly rule out broken algorithms, so future research in this area may avoid the correctness issues that have plagued this field in the past.
@@ -685,28 +685,6 @@ AI was used to assist with the development of some of the algorithms, and to sea
 
 
 \appendix
-
-\section{Counter-Examples}
-
-\subsection{Suleiman TP1 and TP2 Counter-Examples}
-
-...
-
-\subsection{GOT Counter-Examples}
-
-...
-
-\subsection{LBT Counter-Examples}
-
-...
-
-\subsection{TM1.1 Counter-Examples}
-
-...
-
-\subsection{ProseMirror Counter-Examples}
-
-...
 
 \section{Algorithm implementations} \label{sec:algorithmimplementations}
 
@@ -733,7 +711,7 @@ SOCT4 \cite{Vidot2000} further drops the reversibility requirements, so we found
 
 \subsection{GOT and GOTO} \label{sec:gotimplementation}
 
-The GOT \cite{Sun1998TOCHI} control algorithm claims to be a TP2-avoiding algorithm that does not use a server. We find this algorithm fails to converge with the transformation functions given in the same paper. The functions given in the paper do not satisfy the reversibility requirements they claim to satisfy. We tried to implement the algorithm using TTF, and were able to achieve convergence, but still could not satisfy the weak list specification. 
+The GOT \cite{Sun1998TOCHI} control algorithm claims to be a TP2-avoiding algorithm that does not use a server. We find this algorithm fails to converge with the transformation functions given in the same paper. The functions given in the paper do not satisfy the reversibility requirements they claim to satisfy. We experimented with implementing the algorithm using TTF, and were able to achieve convergence, but still could not satisfy the weak list specification. A full description of the issues with GOT is included alongside the implementation in the repository.
 
 The GOTO \cite{Sun1998CSCW} algorithm is an optimised GOT algorithm that assumes TP2-satisfying functions. We believe the algorithm is equivalent to SOCT2, only differing in what names are given to the same concepts. Therefore, we use the same implementation for GOTO and SOCT2.
 
@@ -754,6 +732,9 @@ Both algorithms work as expected. Although comparing performance is not a goal o
 
 SDT \cite{Li2004CSCW}, LBT \cite{Li2005} and ABT \cite{Li2010} are three algorithms proposed by the same authors, claiming to be TP2-avoiding and not to use a server. SDT is known not to work \cite{Oster2005Proving}, but LBT and ABT had not previously been independently evaluated. We found that LBT fails to converge, but ABT works with the transformation functions from the same paper. This makes ABT the only TP2-avoiding, non-total-order-based OT algorithm we tested for which we could not find convergence or list specification violations. 
 
+The LBT counter example can be exhibited with two clients, initially with an empty state. Client 1 performs $O_1 = \mathit{ins}(a,0)$, then $O_2 = \mathit{del}(0)$.
+Client 2 performs $O_3 = \mathit{ins}(c,0)$, then receives $O_1$, then performs $O_4=\mathit{del}(0)$. Finally, client 2 performs $O_5 = \mathit{ins}(f,1)$. Once all the remaining network messages are received, client 1 will have the state ``fc'', but client 2 will have the state ``cf''. That is a convergence violation. A full walkthrough of this trace is included in the repository.
+
 \subsection{WOOT, WOOTO and WOOTH}
 
 We found that the WOOT \cite{Oster2006WOOT} algorithm satisfies convergence and the weak and strong list specifications. Its successors, WOOTO \cite{Weiss2007} and WOOTH \cite{AhmedNacer2011}, both satisfy the same properties, the changes being performance improvements. WOOTH is not formally described in a paper, but given as open-source code.
@@ -761,6 +742,8 @@ We found that the WOOT \cite{Oster2006WOOT} algorithm satisfies convergence and 
 \subsection{TM1.1 and Randolph functions} \label{sec:tm11andrandolphfunctions}
 
 The TM1.1 transformation functions \cite{Sun2017} and Randolph et al.'s functions \cite{Randolph2015} both claim to satisfy TP2, but neither has been checked outside of its original paper. We implement both with the adOPTed algorithm, and find that both lead to convergence (including with more than two clients), indicating that they do indeed satisfy TP2. However, we find that with the TM1.1 functions, the algorithm does not satisfy the weak list specification, because it sometimes deletes a character that the user did not intend to delete.
+
+The violation occurs when there is an insertion and a deletion to the same position. In this case, both characters are deleted rather than the character that was intended to be deleted. This behaviour violates condition 1a of the weak list specification.
 
 In contrast, Darner could not find strong or weak list specification violations for Randolph et al.'s functions. The functions require comparing characters. Simply comparing character codes is not enough: it leads to convergence violations because it is not a total order, which the algorithm assumes it to be. Instead, we attach a client ID and a per-client counter to each character, which provides a total order; this is fairly common in CRDTs, but not as common in OT algorithms.
 
@@ -779,9 +762,12 @@ LogootSplit \cite{Andre2013} and LSEQ \cite{Nedelec2013} are two variants of Log
 
 \subsection{Partial persistent sequences (PPS)} \label{sec:ppsimplementation}
 
-A PPS \cite{Wu2010} represents positions using rational numbers. This idea was mentioned previously \cite{Preguica2009}, but dismissed because it requires infinite-precision floating-point numbers. Even without considering that issue, we find that the algorithm fails to converge because it does not give unique identifiers when two users concurrently insert at the same position. The two papers proposing this algorithm \cite{Wu2009, Wu2010} identify this issue and each provides a separate fix. We find that neither fix works entirely, and provide counter-examples. 
+A PPS \cite{Wu2010} represents positions using rational numbers between 0 and 1. When inserting a character between two other characters with positions $p$ and $q$,the position of the new character must be some position between $p$ and $q$. In the final state, the characters are ordered by this position. This idea was mentioned previously \cite{Preguica2009}, but dismissed because it requires infinite-precision floating-point numbers. Even without considering that issue, we find that the algorithm fails to converge because it does not give unique identifiers when two users concurrently insert at the same position. The two papers proposing this algorithm \cite{Wu2009, Wu2010} identify this issue and each provides a separate fix. We find that neither fix works entirely, and provide counter-examples.  
+
+The first fix is, when inserting between $p$ and $q$, to split that range into subranges. For example, if $p=0$ and $q=1$, and there are 10 clients, client 1 will only insert between 0 and 0.1, client 2 will only insert between 0.1 and 0.2, and so on. The problem with this is that different clients may see different ranges, which leads to their subranges overlapping. Suppose the state is ``abc'' for client 1, but only ``ac'' for client 2 (because it has not yet received the insertion for `b'). Also, suppose `a' has position 0.1, `b' has position 0.5, `c' has position 0.8. If both clients tried to insert after `a', client 1 is inserting between 0.1 and 0.8, while client 2 is inserting between 0.1 and 0.5. This means the subranges that each client sees will be different, and could overlap, leading to collisions.
 
 
+The second fix is to append digits to the end of the rational number. For example, if the client has id 1 and is trying to insert at position $0.5$, the new position will be $0.51$. The problem is that it is not clear which part is the actual position and which is the client id. With more than 10 clients, we found situations where this ambiguity meant two characters got the same position.
 
 \subsection{TreeDoc}
 
@@ -792,13 +778,18 @@ describes two kinds of ID scheme (UDIS and SDIS), each of which has a different 
 
 \subsection{RGA}
 
-In the original RGA paper \cite{Roh2009}, positions were described using S4Vectors. Later descriptions of RGA do not use S4Vectors \cite{Attiya2016}. We implemented both, and found they satisfied the same properties. Timestamped insertion trees and causal trees \cite{Grishchenko2010} are both different names for the same algorithm, both equivalent to RGA. 
+In the original RGA paper \cite{Roh2009}, positions were described using S4Vectors. Later descriptions of RGA do not use S4Vectors \cite{Attiya2016}. We implemented both, and found they satisfied the same properties. Timestamped insertion trees and causal trees \cite{Grishchenko2010} are both different names for the same algorithm, equivalent to RGA. 
 
 Kleppmann et al.~\cite{Kleppmann2019} proposed a fix to RGA to avoid interleaving behaviour. That fix was later shown to be incorrect \cite{Weidner2025Fugue}, as the algorithm no longer converged.
 
 \subsection{ProseMirror}
 
-We ported the collaborative editing algorithm from ProseMirror \cite{Haverbeke2015} into our checker. We found that the algorithm exhibits weak list specification violations due to reordering characters in certain scenarios. We provide a reproduction of this violation, calling the original ProseMirror library, in our repository.
+We ported the collaborative editing algorithm from ProseMirror \cite{Haverbeke2015} into our checker. We found that the algorithm exhibits weak list specification violations due to reordering characters in certain scenarios. We provide a reproduction of this violation, calling the original ProseMirror library, in our repository. In this example, the algorithm reorders a character, which the user initially inserted at the front of the document, to the back of the document.
+
+\subsection{Yjs and YjsMod}
+
+The convention in the Fugue paper is that the left origin cannot be a tombstone, but the right origin can. Both Yjs and YjsMod (as implemented in reference-crdts \cite{Gentle2021}) follow the opposite convention, where the left origin can be a tombstone, and the right origin cannot. In order to be consistent with the other algorithms, we switch this to the convention of the Fugue paper.
+
 \end{document}
 
 
