@@ -320,7 +320,7 @@ The model checker does not generate operations for sending messages. When to sen
 
 \subsection{Checking for convergence}
 
-Checking for convergence is very simple. The checker ensures that all network messages have been delivered by having each client/server receive operations
+Checking for convergence is very simple. The checker ensures that all messages have been delivered by having each client/server receive operations
 until there is nothing left to receive. The checker then checks that all the document states of the clients are equal, and reports a violation if not.
 
 \subsection{Checking for the strong list specification}
@@ -461,7 +461,7 @@ We only test combinations where there is a match between the claimed properties 
 \section{The Darner algorithm corpus} \label{sec:modelcheckerresults}
 
 To demonstrate the generality of Darner and its ability to find bugs, we implemented a corpus of collaborative text editing algorithms covering most research publications in this field, as well as a selection of popular open-source implementations.
-Our implementations are not optimised for performance, but rather aim to be close to the published pseudocode, making it easy to check that our implementation correctly reflects the original publication.
+Our implementations are not optimised for performance, but rather aim to be close to the published pseudocode, making it easy to check that our implementation correctly reflects the original published algorithm.
 For any violation of a property found by Darner, we additionally check by hand that the violation does indeed occur in the algorithm as originally published.
 
 In cases where an open-source implementation already exists (often as part of a larger library that also provides many other features), we develop our own implementation against Darner's API that focuses only on the collaborative text editing algorithm.
@@ -505,25 +505,25 @@ In addition to the properties shown in the table, we believe that the only funct
     \end{tabular}   
 \end{table}
 
-\subsection{Novel results}
+\subsection{Novel property violations found}
 
-This subsection summarises the novel results in \autoref{tab:algorithmproperties}. For more details, see the appendix.
+Darner found the following violations of consistency properties that, to our knowledge, have not previously been reported in the literature (see Appendix \ref{sec:algorithmimplementations} for details):
 
 \begin{itemize}
   \item
-    The GOT algorithm \cite{Sun1998TOCHI}, claiming to be a decentralised TP2-avoiding algorithm, fails to converge with the transformation functions given in the same paper. The main cause is that the transformation functions fail to satisfy the reversibility requirements which GOT requires.
+    The GOT algorithm \cite{Sun1998TOCHI}, claiming to be a decentralised TP2-avoiding algorithm, fails to converge with the transformation functions given in the same paper. The main cause is that the transformation functions fail to satisfy GOT's reversibility requirement.
   \item
-    The TM1.1 transformation functions \cite{Sun2017} claim to satisfy TP2. We could not find any TP2 violations, as the functions converged with adOPTed. However, we found the functions were not practical, because they led to weak list specification violations. In certain cases, the functions will delete an extra character the user did not intend to delete.
+    The TM1.1 transformation functions \cite{Sun2017} claim to satisfy TP2. We could not find any TP2 violations, as the functions converged with adOPTed. However, we found the functions led to weak list specification violations: in certain cases, the functions will delete an extra character that the user did not intend to delete.
   \item
     The algorithm used by the ProseMirror text editor \cite{Haverbeke2015} exhibits weak list specification violations. In certain cases, the algorithm can reorder characters without the user intending this.
   \item
     We found the LBT \cite{Li2005} algorithm did not converge. While its predecessor, SDT \cite{Li2008}, was already known not to work \cite{Oster2005Proving}, LBT had not been tested independently. In contrast, we could not find any convergence or weak or strong list specification violations for ABT \cite{Li2010}, which is LBT's successor.
   \item
-    Partial persistent sequences \cite{Wu2010} represent the position of characters using rational numbers. The algorithm requires a mechanism for ensuring every character has a unique position, even if two clients concurrently insert a character at the same position. There are two mechanisms identified in the papers \cite{Wu2009, Wu2010} that aim to solve this, both do not fully work. This leads to the algorithm exhibiting convergence violations.
+    Partial persistent sequences \cite{Wu2010} represent the position of characters using rational numbers. The algorithm requires a mechanism for ensuring every character has a unique position, even if two clients concurrently insert a character at the same position. Two mechanisms to solve this issue have been proposed \cite{Wu2009, Wu2010}, but they do not solve the problem: the algorithm nevertheless exhibits convergence violations.
   \item
     Two open source projects, Sync7 \cite{Little2024} and Diffsync \cite{Little2017}, both do not work. Sync7 fails to converge, and Diffsync fails to satisfy the weak list specification.
   \item
-    Although these are not surprising, we found many strong list specification and interleaving violations in algorithms that were not explicitly checked previously.
+    We also found many strong list specification and interleaving violations in algorithms that were not explicitly checked previously.
 \end{itemize}
 
 
