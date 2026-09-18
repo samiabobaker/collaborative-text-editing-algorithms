@@ -48,7 +48,7 @@
     Formal specifications that define what it means for a collaborative text-editing algorithm to be correct have been proposed recently, but few algorithms have been checked against these specifications, and to date there is no executable checker for them. 
     In this paper we introduce Darner, the first model checker specialised for finding violations of these specifications, supporting both randomised and exhaustive search.
     We also implement a corpus of over 50 such algorithms, covering most of the research literature and popular open-source libraries.
-    Applying Darner to this corpus reveals that 17 of these algorithms do not meet the requirements that we consider essential for a collaborative text-editing algorithm to be practically useful; of these, 11 reproduce known results and 6 are new flaws not reported previously.
+    Applying Darner to this corpus reveals that 17 of these algorithms do not meet the requirements that we consider essential for a collaborative text-editing algorithm to be practically useful; of these, 10 reproduce known results and 7 are new flaws not reported previously.
     By providing the most comprehensive survey and empirical validation to date, we hope that this paper will place the field of collaborative text editing on a more stable footing going forward.
 \end{abstract}
 
@@ -79,7 +79,7 @@ As a result, some work in this field has gained a reputation of being full of er
 To address this situation, this paper makes the following contributions:
 \begin{itemize}
     \item We introduce Darner,\footnote{Named after a family of dragonflies that hunts bugs in flight, and also after a darning needle for mending holes in textiles.} a specialised model checker for testing collaborative text editing algorithms, which includes checks for five properties: convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}.
-    \item We implement a corpus of 50 collaborative text editing algorithms covering most of the research literature and open-source libraries, and use Darner to test these algorithms against the aforementioned properties.
+    \item We implement a corpus of over 50 collaborative text editing algorithms covering most of the research literature and open-source libraries, and use Darner to test these algorithms against the aforementioned properties.
         For many of these algorithms, this is the first publicly available implementation, and the first time their properties have been independently checked.
         Our results provide, for the first time, a comprehensive survey of the collaborative text editing literature from a correctness point of view, and for several published algorithms we find novel bugs that have not been reported previously.
     \item We evaluate Darner based on its ability to reproduce known results, and we compare its performance in an exhaustive checking mode with a randomised mode that probabilistically searches for violations of consistency properties.
@@ -597,11 +597,13 @@ The Jupiter strong list specification violation is an example of a violation tha
 
 \subsection{How many seeds to use for a random search}
 
-How many traces should a random search check? \autoref{fig:numberofseeds} shows the proportion of times a violation was found within a certain number of traces for various violations. We see that for many properties, a violation can be found reliably with just a few hundred traces. This suggests that for most violations, running a randomised search should be likely to find it, even without running the search for very long.
+How many traces should a random search check?
+\autoref{fig:numberofseeds} shows, for various properties, the probability that a run of $x$ traces exhibits at least one violation of the property.
+We see that for many properties, a violation can be found reliably with just a few hundred traces. This suggests that for most violations, running a randomised search should be likely to find it, even without running the search for very long.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{detection}
-  \caption{The percentage of traces which contained violations out of a randomised test of 10,000 traces as operations changed.}
+  \caption{Probability that a Darner finds a violation of some property within some number of random traces checked.}
   \label{fig:numberofseeds}
 \end{figure}
 
@@ -622,12 +624,12 @@ Boucheneb and Imine \cite{Boucheneb2009} also obtained similar results for conve
 
 
 Previous work has also used the TLC model checker and TLA+ specification language to verify various correctness properties. 
-Oster et al.\ used this to verify convergence in the WOOT algorithm \cite{Oster2005WOOT}, exhaustively up to four clients and five characters. 
-Wei et al.\ used this to specify Jupiter, and to show that Jupiter satisfied strong eventual consistency and the weak list specification \cite{Wei2020}.
+Oster et al.\ \cite{Oster2005WOOT} used this to verify convergence in the WOOT algorithm, exhaustively up to four clients and five characters. 
+Wei et al.\ \cite{Wei2020} used this to specify Jupiter, and to show that Jupiter satisfied strong eventual consistency and the weak list specification.
 Zhang et al.\ introduced the MET framework \cite{Zhang2024}, which uses TLC to model check strong eventual consistency in CRDTs specified in TLA+, and then reuses the traces that the checker explored as test cases in a real implementation.
 
 
-Wei et al.\ also showed that Jupiter satisfied the weak list specification by proposing a new algorithm CJupiter. They showed CJupiter satisfied the weak list specification, and that the algorithm was equivalent to Jupiter \cite{Wei2018}.
+Wei et al.\ \cite{Wei2018} also showed that Jupiter satisfied the weak list specification by proposing a new algorithm CJupiter. They showed CJupiter satisfied the weak list specification, and that the algorithm was equivalent to Jupiter.
 
 
 Gomes et al.\ use the Isabelle/HOL proof assistant to prove strong eventual consistency for three CRDTs including RGA, but only for the convergence property \cite{Gomes2017}.
@@ -640,7 +642,7 @@ There are many algorithms that solve problems related to collaborative text edit
 
 We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
 We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties.
-Our implementations resolve multiple ambiguities in previous research, and for many algorithms, ours is the first publicly available implementation. We find previously unreported convergence violations in four algorithms, violations of the weak list specification in six, and many violations of the other properties.
+Our implementations resolve multiple ambiguities in previous research, and for many algorithms, ours is the first publicly available implementation. We find previously unreported convergence violations in four algorithms, violations of the weak list specification in seven, and many violations of the other properties.
 Darner supports both randomised and exhaustive checking, and we evaluate the behaviour of these two strategies, justifying our use of random over exhaustive checking. We hope Darner will help to quickly rule out broken algorithms, so future research in this area may avoid the correctness issues that have plagued this field in the past.
 
 Future work may apply more rigorous proof techniques to verify the algorithms for which Darner is unable to find a violation. 
