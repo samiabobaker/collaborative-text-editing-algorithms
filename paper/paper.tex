@@ -45,11 +45,11 @@
 
 \begin{abstract}
     Collaborative text-editing algorithms, which are used in popular software such as Google Docs and Overleaf, have a troubled history: many published algorithms violate their purported consistency guarantees, and many algorithms' claimed properties have not been independently validated, making it unclear which algorithms are safe to use.
-    Formal specifications that define what it means for a collaborative text-editing algorithm to be correct have been proposed recently, but few algorithms have been checked against these specifications, and to date there is no executable checker for these specifications. 
+    Formal specifications that define what it means for a collaborative text-editing algorithm to be correct have been proposed recently, but few algorithms have been checked against these specifications, and to date there is no executable checker for them. 
     In this paper we introduce Darner, the first model checker specialised for finding violations of these specifications, supporting both randomised and exhaustive search.
-    We also implement a corpus of over 50 such algorithms, covering most of the research literature and popular open source libraries.
-    Applying Darner to this corpus reveals that 17 of these algorithms do not meet the requirements that we consider essential for a collaborative text-editing algorithm to be practically useful; of these, 11 reproduce known results and 6 are new flaws not reported previously.
-    By providing the most comprehensive survey and empirical validation to date, we hope that this paper will place the field of collaborative text-editing on a more stable footing going forward.
+    We also implement a corpus of over 50 such algorithms, covering most of the research literature and popular open-source libraries.
+    Applying Darner to this corpus reveals that 17 of these algorithms do not meet the requirements that we consider essential for a collaborative text-editing algorithm to be practically useful; of these, 10 reproduce known results and 7 are new flaws not reported previously.
+    By providing the most comprehensive survey and empirical validation to date, we hope that this paper will place the field of collaborative text editing on a more stable footing going forward.
 \end{abstract}
 
 %% CCS Codes
@@ -61,7 +61,7 @@
 \section{Introduction}
 
 Collaborative text-editing algorithms allow multiple users on different machines to edit the same text document concurrently; they are used in popular software such as Google Docs and Overleaf.
-Since Ellis and Gibbs' seminal paper on Operational Transformation (OT) in 1989~\cite{Ellis1989}, dozens of such algorithms have been published in papers or open source implementations, and new algorithms have continued to appear in recent years.
+Since Ellis and Gibbs' seminal paper on Operational Transformation (OT) in 1989~\cite{Ellis1989}, dozens of such algorithms have been published in papers or open-source implementations, and new algorithms have continued to appear in recent years.
 Unfortunately, the field has been bedevilled by persistent correctness issues.
 Not only was the original OT paper wrong, but several subsequent attempts to fix it were also shown to simply not work \cite{Oster2005Proving}, despite having been published in peer-reviewed venues. 
 Many algorithms have been published without proof of their correctness, and some that were published with proofs also later turned out to be incorrect due to mistakes in the proofs \cite{Oster2005Proving}.
@@ -78,8 +78,8 @@ As a result, some work in this field has gained a reputation of being full of er
 
 To address this situation, this paper makes the following contributions:
 \begin{itemize}
-    \item We implement Darner --- a specialised model checker for testing collaborative text editing algorithms --- which includes checks for five properties: convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}. It is named after a family of dragonflies that hunts bugs in flight, and also after a darning needle for mending holes in textiles.
-    \item We implement a corpus of 50 collaborative text editing algorithms covering most of the research literature and open source libraries, and use Darner to test these algorithms against the aforementioned properties.
+    \item We introduce Darner,\footnote{Named after a family of dragonflies that hunts bugs in flight, and also after a darning needle for mending holes in textiles.} a specialised model checker for testing collaborative text editing algorithms, which includes checks for five properties: convergence, Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}.
+    \item We implement a corpus of over 50 collaborative text editing algorithms covering most of the research literature and open-source libraries, and use Darner to test these algorithms against the aforementioned properties.
         For many of these algorithms, this is the first publicly available implementation, and the first time their properties have been independently checked.
         Our results provide, for the first time, a comprehensive survey of the collaborative text editing literature from a correctness point of view, and for several published algorithms we find novel bugs that have not been reported previously.
     \item We evaluate Darner based on its ability to reproduce known results, and we compare its performance in an exhaustive checking mode with a randomised mode that probabilistically searches for violations of consistency properties.
@@ -125,7 +125,7 @@ We use these properties in Darner.
 
 The weak and strong list specifications describe what characters must appear in the document, and in what order, at every point in the execution.
 Firstly, a character must appear in the document if and only if an insertion operation
-of it has been seen, and a deletion operation has not been seen. The second is that if a character $a$ appears before a character $b$ in some client's document state, $a$ must appear before $b$ in every client's document
+of it has been seen, and a deletion operation has not been seen. Secondly, if a character $a$ appears before a character $b$ in some client's document state, $a$ must appear before $b$ in every client's document
 state. The difference between the two is that the weak list specification is more relaxed about the ordering of deleted characters.
 
 
@@ -146,7 +146,7 @@ for the full properties.
           The order of these elements is consistent with the list order:
           $\forall i,j. (i < j) \implies (a_i, a_j) \in lo$.
         \item
-          Elements are inserted at the specified position: if $op = ins(a, k)$, then $a = a_{min\{k, n-1\}}$.
+          Elements are inserted at the specified position: if $op = ins(a, k)$, then $a = a_{\min\{k, n-1\}}$.
       \end{enumerate}
     \item
       The list order $lo$ is transitive, irreflexive and total, and thus determines the order of all insert operations in the execution.
@@ -175,12 +175,12 @@ Backward interleaving occurs when text is written in the backward direction (typ
 Since backward insertions happen rarely in typical text editing behaviour, backward interleaving is not an important practical concern, but forward interleaving is.
 
 It has recently been shown that it is impossible for an algorithm to guarantee both forward and backward non-interleaving \cite{Weidner2025Fugue}.
-Maximal non-interleaving is a strengthening of forward non-interleaving that also disallows backward interleaving when possible, but which prioritises forward non-interleaving in cases when it is not possible to prevent both interleaving directions.
+Maximal non-interleaving is a strengthening of forward non-interleaving that also disallows backward interleaving when possible, but which prioritises forward non-interleaving in cases where it is not possible to prevent both interleaving directions.
 
 In this paper we check for forward non-interleaving as well as maximal non-interleaving, and to our knowledge Darner is the first implementation of these properties.
 We expect that an algorithm that satisfies forward non-interleaving but not maximal non-interleaving is good enough for most practical applications, but we report the results for maximal non-interleaving as well because backward insertion may be more frequent in some applications.
 
-The properties assume the algorithm uses \emph{tombstones}. This is when, rather than actually deleting an element from the document state, the algorithm simply marks the element as deleted. Marked elements are called tombstones, and are not displayed to the user when outputting the document state.
+The properties assume the algorithm uses \emph{tombstones}. That is, rather than actually deleting an element from the document state, the algorithm simply marks the element as deleted. Marked elements are called tombstones, and are not displayed to the user when outputting the document state.
 
 We quote the relevant properties below, but refer to the Fugue paper \cite{Weidner2025Fugue} for the full details.
 
@@ -192,7 +192,7 @@ We quote the relevant properties below, but refer to the Fugue paper \cite{Weidn
 
 \begin{definition}[Right Origin]
   The right origin of an element is the element directly following its insertion position at the time of insertion, in the list including tombstones. If the element was inserted by 
-  an $ins(i, x)$ call, then its right origin was at index $i+1$ at the time of this call. If $i$ is the end of the list, then its right origin is a special symbol
+  an $ins(i, x)$ call, then its right origin was at index $i+1$ at the time of this call. If the insertion is at the end of the list, then its right origin is a special symbol
   $\mathit{end}$.
 \end{definition}
 
@@ -229,7 +229,7 @@ can be used with that algorithm.
 \subsection{Inclusion Transformations}
 
 
-The first kind of transformation functions are \emph{inclusion transformations}, which are used by all control algorithms. 
+The first kind of transformation function is the \emph{inclusion transformation}, which is used by all control algorithms. 
 
 \begin{definition}[Inclusion Transformation]
   For two operations $O_1$ and $O_2$ generated from the same state, we write $O_1' = IT(O_1, O_2)$. $O_1'$ is the transformed operation
@@ -239,8 +239,8 @@ The first kind of transformation functions are \emph{inclusion transformations},
 There are two properties that have appeared in the literature for inclusion transformation functions, which are often required for the control algorithms to converge. These are TP1 and TP2~\cite{Ressel1996} (sometimes also called CP1 and CP2 respectively in the literature).
 
 \begin{property}[TP1]
-  If $O_1$ and $O_2$ are operations based on the same document state, $O_1' = IT(O_1, O_2)$, and $O_2' = IT(O_2, O_1)$, then $IT$ satisfies TP1 if 
-  $O_2' \circ O_1 = O_1' \circ O_2$. That is, for all document states, executing $O_1$ followed by $O_2'$ results in the same
+  If for all operations $O_1$ and $O_2$ based on the same document state we have $O_1' = IT(O_1, O_2)$, $O_2' = IT(O_2, O_1)$, and
+  $O_2' \circ O_1 = O_1' \circ O_2$, then $IT$ satisfies TP1. That is, for all document states, executing $O_1$ followed by $O_2'$ results in the same
   document state as executing $O_2$ followed by $O_1'$.
 \end{property}
 
@@ -282,32 +282,32 @@ Note that some papers use the terms \emph{forward} and \emph{backward transposit
 
 \section{Darner implementation} \label{sec:modelcheckerimplementation}
 
-In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the strong and weak list specifications and for the non-interleaving properties. Both Darner and the algorithm implementations are written in Python, without the use of any existing model checking tool. Darner is about 2300 lines of codes, and the algorithm corpus is about 17000 lines of code in total (averaging about 400 lines of code per algorithm).
+In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the strong and weak list specifications and for the non-interleaving properties. Both Darner and the algorithm implementations are written in Python, without the use of any existing model checking tool. Darner is about 2,300 lines of code, and the algorithm corpus is about 17,000 lines of code in total (averaging about 400 lines of code per algorithm).
 
 \subsection{Interface between algorithms and Darner}
 
-We start by describing the interface between our algorithms and Darner, which determines the assumptions Darner makes of the algorithms.
+We start by describing the interface between our algorithms and Darner, which determines the assumptions Darner makes about the algorithms.
 Our implementation represents algorithms using the \texttt{ClientDevice} and \texttt{ServerDevice} (if the algorithm uses a server) interfaces. The interfaces provide
 some mechanisms for Darner to interact with the devices.
 
 The first is the method \texttt{perform\_operation}, which allows Darner to execute a \texttt{ClientOperation} or \texttt{ServerOperation}. These operations
 include local edits to the document (such as \texttt{ClientInsertOperation} and \texttt{ClientDeleteOperation}), and also receiving operations from other devices
-(such as \texttt{ClientReceiveFromClientOperation}). By including receiving operations, Darner has control over the order in which messages are delivered to 
-which device at which time, allowing it to model a wide range of network scenarios. Not all operations have to be relevant to all algorithms; for example, we include a \texttt{ClientTimestepOperation} that is only relevant to the TIBOT and TIBOT 2.0 algorithms.
+(such as \texttt{ClientReceiveFromClientOperation}). By including receiving operations, Darner has control over which messages are delivered to 
+which device at which time, allowing it to model a wide range of network scenarios. Not all operations are relevant to all algorithms; for example, we include a \texttt{ClientTimestepOperation} that is only relevant to the TIBOT and TIBOT 2.0 algorithms.
 
-The editing operations generated by the checker insert or delete a single character at a time. Support for multi-character operations (e.g. pasting a chunk of text) could be added in future work.
+The editing operations generated by the checker insert or delete a single character at a time. Support for multi-character operations (e.g.\ pasting a chunk of text) could be added in future work.
 
 \texttt{perform\_operation} returns a list of operations seen by the client. This allows Darner to know what operations were contained in the message that the client received.
 
 A second mechanism is provided by the methods \texttt{can\_receive\_from} and \texttt{can\_receive\_from\_server}. Algorithms tend to restrict the delivery order of operations. The most common way is to use a causal order, enforced by vector clocks. We leave the choice of restriction to the algorithm, and it is exposed to Darner through these methods, which return the devices from which a client can receive.
 
 Finally, there is the method \texttt{read\_state}, which Darner can use to see the document state of the client. The state is represented by the type 
-\texttt{list[UniqueChar]}. It is simply a list of unique characters. \texttt{UniqueChar} is just a character with a unique id attached to it, which we use because many 
+\texttt{list[UniqueChar]}. It is simply a list of unique characters. \texttt{UniqueChar} is just a character with a unique ID attached to it, which we use because many 
 of the algorithms and specifications assume every character is unique.
 
 \subsection{Generating operations}
 
-Darner generally follows the following steps. It first generates an operation to be executed on one of the clients or the server. It executes that operation, and records which operations were performed on which device, what the states of the clients were after each operation, and other useful information (for example, the left and right origins of each character). It repeats this with more operations to produce a trace of the execution. After the trace is fully generated, it is passed to one of the checkers which decides whether a particular property is satisfied.
+Darner generally proceeds as follows. It first generates an operation to be executed on one of the clients or the server. It executes that operation, and records which operations were performed on which device, what the states of the clients were after each operation, and other useful information (for example, the left and right origins of each character). It repeats this with more operations to produce a trace of the execution. After the trace is fully generated, it is passed to one of the checkers which decides whether a particular property is satisfied.
 
 The possible choices for an operation to be generated are an insertion or deletion at every position in the state, or receiving a message
 from one of the other clients or server. We can then choose these operations at random, or check each one exhaustively up to a certain depth.
@@ -322,8 +322,8 @@ until there is nothing left to receive. The checker then checks that all the doc
 
 \subsection{Checking for the strong list specification}
 
-The strong list specification checker takes in a trace containing the state of each client after each operation. It also contains what operations were visible
-to each client at each point (which is determined by what is returned from \texttt{perform\_operation}). It can use this trace to check each condition given in Property \ref{prop:stronglist}.
+The strong list specification checker takes in a trace containing the state of each client after each operation. The trace also records which operations were visible
+to each client at each point (which is determined by what is returned from \texttt{perform\_operation}). Darner can use this trace to check each condition given in Property \ref{prop:stronglist}.
 
 Condition 1a is checked by maintaining an initially empty set of characters. For each client, Darner
 iterates through each local operation generated by the checker. If it was an insertion operation, the inserted character is added to the set.
@@ -335,7 +335,7 @@ to the inserted character, and reports a violation if not.
 The other conditions use the list order $\mathit{lo}$. The specification says there exists a list order, but does not specify how to construct it.
 We do this by working backwards from the conditions imposed on the list order. Either the checker successfully constructs a list order, or it finds a contradiction showing that one cannot exist, and reports a strong list specification violation.
 
-The list order is represented as a set of pairs of characters. It is initially empty. Working backwards from condition 1b, the checker adds to this set every pair of characters $(a,b)$ such that $a$ appears before $b$ in some document state. Working backwards from the requirement that $\mathit{lo}$ is transitive, the checker applies the transitive closure to the list order. For the requirement that $\mathit{lo}$ is irreflexive, this can be done by iterating through the set of pairs and checking that there are no pairs of the form $(a,a)$. If there are, we have a contradiction showing that no list order satisfying these properties exists.
+The list order is represented as a set of pairs of characters. It is initially empty. Working backwards from condition 1b, the checker adds to this set every pair of characters $(a,b)$ such that $a$ appears before $b$ in some document state. Working backwards from the requirement that $\mathit{lo}$ is transitive, the checker applies the transitive closure to the list order. The requirement that $\mathit{lo}$ is irreflexive is checked by iterating through the set of pairs and checking that there are no pairs of the form $(a,a)$. If there are, we have a contradiction showing that no list order satisfying these properties exists.
 
 The only remaining part is that $\mathit{lo}$ must be a total relation. An irreflexive, transitive, and total relation can always be constructed from an irreflexive and transitive one by arbitrarily adding pairs to make the relation total without breaking irreflexivity. Therefore, if Darner has found an irreflexive and transitive relation, then it can say an irreflexive, transitive and total list order must also exist, and the specification is satisfied.
 
@@ -364,7 +364,7 @@ Knowing these, the condition for forward non-interleaving is easy to check. The 
 violation is reported.
 
 For maximal non-interleaving, the condition for backward non-interleaving can be checked analogously. Maximal non-interleaving's third condition defines the ordering 
-of characters with the same left and right origin. Mathematically, this was included to ensure a unique ordering. It mentions an ID but does not enforce what that ID is. We leave the choice of this ID to the algorithm, as the one piece of freedom it has over the ordering of characters. For that reason, we do not check condition 3
+of characters with the same left and right origin; this was included to ensure the ordering is unique. It mentions an ID but does not prescribe what that ID is. We leave the choice of this ID to the algorithm; thus, algorithms that satisfy maximal non-interleaving still have the choice of ID as a degree of freedom over the ordering of characters. For that reason, we do not check condition 3
 of maximal non-interleaving.  
 
 \subsection{Checking properties of transformation functions}
@@ -373,114 +373,11 @@ In most of the OT literature, algorithms are split into two layers, control algo
 Some papers specify only a control algorithm but no transformation functions, or vice versa.
 Prior work has focussed on checking the TP1 and TP2 properties of transformation functions \cite{Imine2003,Jungnickel2015}.
 
-We depart from that tradition in this paper, and always test a control algorithm in conjunction with a particular set of transformation functions, because we have found that the two cannot be separated from each other so cleanly.
-For example, the TP1 and TP2 properties are only relevant for ensuring convergence, but say nothing about whether an algorithm will satisfy the strong or weak list specification.
-In \autoref{sec:tm11andrandolphfunctions}, we find two transformation functions that both satisfy TP1 and TP2 but give different properties when tested with the same control algorithm.
+We depart from that tradition in this paper, and always test a control algorithm in conjunction with a particular set of transformation functions, because we found that the two cannot be separated from each other so cleanly.
+The TP1 and TP2 properties are only relevant for ensuring convergence, but say nothing about whether an algorithm will satisfy the strong or weak list specification.
+For example, we find that TM1.1 \cite{Sun2017} and Randolph et al.'s functions \cite{Randolph2015} both satisfy TP1 and TP2, but give different properties when tested with the same control algorithm.
 In our experiments we therefore treat an OT algorithm as a pair of a control algorithm and transformation functions, sometimes testing the same control algorithm with several transformation functions, and vice versa.
 We only test combinations where there is a match between the claimed properties of the transformation functions and the claimed assumptions of the control algorithm.
-
-\section{Evaluating Darner}
-
-Because we are only checking cases, rather than writing a proof, we can never be absolutely certain that a \noviol in \autoref{tab:algorithmproperties} means that the property is satisfied. The purpose of this evaluation is to give confidence that, if Darner is unable to find property violations in the algorithm, then it is unlikely that one exists. 
-
-We use our large collection of algorithm implementations to collect data on the presence of violations, the time to find violations and to compare different search strategies. We present this data in this section. When running Darner, we have many choices over the configurations we use to search for violations. This includes: the number of operations generated, the number of clients, the number of seeds checked, whether to use random or exhaustive search and what search order to use for an exhaustive search. We investigate how changing each of these affects the likelihood of finding a violation, and we justify our use of random checking over exhaustive checking. 
-
-
-\subsection{Reproducing known properties}
-
-Darner was able to reproduce all published results about the algorithms. This is a list of known results about these algorithms Darner was able to reproduce by finding violations (within seconds) using randomised testing:
-
-\begin{itemize}
-  \item
-    Five transformations functions: Ellis \cite{Ellis1989}, Ressel \cite{Ressel1996}, Imine \cite{Imine2003}, Suleiman \cite{Suleiman1997} and SDT \cite{Li2008} were all shown to fail to satisfy TP2 \cite{Oster2005Proving} (and some do not satisfy TP1). We combined each of these functions with the adOPTed algorithm, and all produced convergence violations for three or more clients (which is when TP2 violations occur).
-  \item
-    The dOPT algorithm is known not to converge \cite{Sun1996}.
-  \item
-    Fugue is known to not satisfy maximal non-interleaving \cite{Weidner2025Fugue}.
-  \item
-    Jupiter is known to not satisfy the strong list specification \cite{Attiya2016}.
-  \item
-    The Fugue paper \cite{Weidner2025Fugue} gives a list of algorithms for which they could find forward interleaving (e.g. Logoot, LSEQ, Treedoc, WOOT) and could not find forward interleaving (e.g RGA, Yjs, Sync9). Our results are consistent with those (apart from when we were able to avoid forward interleaving by reversing the priority schemes, see \autoref{sec:doptjupiteradoptedimplementation}). 
-  \item
-    The Logoot algorithm is known to have flaws which lead it to get stuck in an infinite loop \cite{Sun2018}.
-\end{itemize}
-
-
-Similarly, when an algorithm is known to satisfy a particular property, Darner did not falsely report violations of that property. This includes Fugue \cite{Weidner2025Fugue} satisfying the strong list specification and forward non-interleaving, and FugueMax additionally satisfying maximal non-interleaving. Similarly, we found Jupiter satisfied the weak list specification, and RGA satisfied the strong list specification, which are both proven properties \cite{Wei2018, Attiya2016}.  
-
-
-\subsection{How commonly violations appear}
-
-\autoref{fig:violationrate} show how the percentage of violations in a set of 10000 traces changes when the number of operations generated by the checker changes. This is useful because it suggests what depth an exhaustive search would need to be run at; if we know a violation does not appear until a certain depth, then doing an exhaustive search below that depth is not useful. Similarly, it suggests what number of operations to generate when doing a randomised search. We pick a set of algorithms for each property. There is no guarantee that the patterns here will apply to every single one of these algorithms, but these figures do illustrate some of the behaviours that are possible, that we should consider when choosing a search strategy.
-
-\begin{figure*}
-  \caption[width=\textwidth]{The percentage of traces which contained violations out of a randomised test of 10000 traces as operations changed, for a selection of algorithms and properties.}
-  \includegraphics{violation_rate}
-  \label{fig:violationrate}
-\end{figure*}
-
-We observe that some of the violations (such as convergence violations in dOPT, or forward non-interleaving violations in TreeDoc) appear very commonly. The violations appear at less than 10 operations, and once the number of operations are large enough, the violations can appear nearly always.
-
-Other violations (such as the strong list specification violations) do not appear as commonly. They do not appear at all when there are less than 10 operations, and may still be unlikely above that. These are violations which require a more specific set of operations to be exhibited, so Darner does not find them as often. For example, a maximal non-interleaving violation (that is not also a forward non-interleaving violations) may require the operations to include both include forward interleaving and backward interleaving.  These tell us also that running an exhaustive search below 10 operations is likely to miss many of these violations.
-
-We also experimented with how the number of clients changes how often violations appear, but we found no clear effect. Mainly, we find that some violations only appear when there are more than two clients (such as TP2 violations), but beyond that there is no clear effect. Because there is no limit to how an algorithm can behave however, there may be violations where this is not the case. One exceptional case we found was in PPS where violations could only appear with greater than 10 clients (see \autoref{sec:ppsimplementation}).
-
-\subsection{What depth to do an exhaustive search}
-
-The previous section suggests that the minimum depth to check the strong list specification at should be above 10 because violations sometimes do not appear below that. Running an exhaustive search at those depths is infeasible, as shown by \autoref{fig:exhaustivesearchcost}. Running an exhaustive search at 10 operations would take multiple years. Parallelisation and more efficient checking algorithms can reduce this, but it will not change the asymptotic behaviour. 
-
-\begin{figure}
-  \includegraphics[width=\columnwidth]{depth_cost}
-  \caption{The time taken to run an exhaustive search of convergence violations for the RGA algorithm at different depths.}
-  \label{fig:exhaustivesearchcost}
-\end{figure}
-
-\subsection{Comparing random and exhaustive search}
-
-Because of the time cost of doing an exhaustive search, we instead do a randomised search. \autoref{fig:successrate} aims to show that randomised search is a suitable alternative for exhaustive search. For all algorithm, property pairs for which we found a violation, we run a search for each of these violations and measure how long it took to find it. We find that while randomised testing is able to find all the violations, all of the exhuastive search strategies are only able to find a fraction of the violations, and taking exponentially longer to do so. 
-
-We considered multiple search strategies for exhaustive search; the first is breadth-first search vs depth-first search, and the second is a deterministic search order vs a randomised (but still exhaustive) search order. The motive behind using a randomised exhaustive search is that a deterministic search order tends to search through many `uninteresting' cases first, such as all operations being on one client. This means that the search can spend a long time looking through cases which are unlikely to contain bug. Randomised exhaustive search randomises the order of siblings in the search tree. The advantage of a depth-first search is that it is guaranteed to check large number of operations, whereas a breadth-first will spend a long time before reaching the maximum number of operations. The issue with a depth-first is that it can spend a long time searching through subtrees that are not likely to contain any violations. We observe that none of these alterations produced a clear improvement in the success rate of the search.
-
-\begin{figure}
-  \includegraphics[width=\columnwidth]{time_to_violation}
-  \caption{The percentage of violations found by each search strategy after different execution times. Both random and exhaustive searches use a trace length of 15 operations.}
-  \label{fig:successrate}
-\end{figure}
-
-The Jupiter strong list specification violations is an example of a violation that random search found, but exhaustive search could not within a reasonable amount of time. There were no examples of violations we could find through exhaustive search, but not through randomised. It may be worth considering in future work whether there are heuristics, which would help a randomised or exhaustive search to find certain properties faster.
-
-\subsection{How many seeds to do a random search for}
-
-There is a question of how many traces to run a random search for. \autoref{fig:numberofseeds} shows the proportion of times a violation was found within a certain number of traces for various violations. We see that, even when running the randomised search for a short amount of time, it is still likely to find a violation. This acts as evidence that for most violations, running a randomised search should be likely to find it, even without running the search for very long.
-
-\begin{figure}
-  \includegraphics[width=\columnwidth]{detection}
-  \caption{The percentage of traces which contained violations out of a randomised test of 10000 traces as operations changed.}
-  \label{fig:numberofseeds}
-\end{figure}
-
-
-
-\section{Results of model checking} \label{sec:modelcheckerresults}
-
-To demonstrate the generality of Darner and its ability to find bugs, we implemented a corpus of collaborative text editing algorithms covering most research publications in this field, as well as a selection of popular open-source implementations.
-We are making this corpus available as open source along with Darner to facilitate the further study of these algorithms.
-Our implementations are not optimised for performance, but rather aim to be close to the published pseudocode, making it easy to check that our implementation correctly reflects the original publication.
-For any violations of a property found by Darner we additionally check by hand that the violation does indeed occur in the algorithm as originally published.
-
-In cases where an open source implementation already exists (often as part of a larger library that also provides many other features) we develop our own implementation against the Darner's API that focuses only on the collaborative text editing algorithm.
-If Darner finds a violation of a property, we replay the same scenario against the original implementation to ensure the behaviour is consistent.
-
-\subsection{Properties of each algorithm}
-
-\autoref{tab:algorithmproperties} shows the properties we found for every algorithm we implemented. The properties are: convergence, Attiya et al.'s weak and strong list specifications, and the forward and maximal non-interleaving properties (titled \emph{Forward} and \emph{Max}). It also includes which algorithms assume all clients are online (\emph{AllOnline}) --- see \autoref{sec:assumptions}. When there is a choice of transformation functions,
-we choose transformation functions that would substantiate or disprove prior claims about the functions. For rows with no transformation functions, we used the transformation functions from the same paper as the control algorithm.
-
-In our opinion, convergence and the weak list specification are minimal requirements for a collaborative text editing algorithm to be useful in practice.
-Forward non-interleaving is also important, although algorithms differ on how frequently interleaving occurs in realistic editing scenarios (something we do not aim to quantify in this paper); an algorithm in which forward interleaving is rare but not impossible may still be acceptable in practice.
-Whether an algorithm satisfies the strong list specification and/or maximal non-interleaving is less important in practice, but we include them in our analysis as they are well-defined properties of theoretical interest, and they could be important for some applications.
-
-A common pattern we found across OT algorithms is that they exhibited interleaving in one direction, but not the other. Flipping the priority scheme flipped which direction of interleaving was exhibited. In these cases, we choose the direction that leads to forward non-interleaving being satisfied.
 
 \begin{table*}
   \centering
@@ -499,7 +396,7 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
         & \textbf{Max}~\cite{Weidner2025Fugue}
         & \textbf{AllOnline} \\
         \midrule
-        \multirow{10}{*}{\rotatebox[origin=c]{90}{\textit{Total-order-based OT}}}
+        \multirow{11}{*}{\rotatebox[origin=c]{90}{\textit{Total-order-based OT}}}
           & COT \cite{Sun2009} + TP1-satisfying functions \cite{Kleppmann2023} & \noviol & \noviol & \newviol & \newviol & \newviol & \Circle \\
           & EasySync (Etherpad) \cite{AppJet2011} & \noviol & \noviol & \newviol & \newviol & \newviol & \Circle \\
           & Jupiter \cite{Nichols1995} + TP1-satisfying functions \cite{Kleppmann2023} & \noviol & \noviol & \knownviol & \noviol & \knownviol & \Circle \\
@@ -512,32 +409,32 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
           & TIBOT \cite{Li2004ICPADS} & \noviol & \noviol & \newviol & \noviol & \newviol & \CIRCLE \\
           & TIBOT 2.0 \cite{Xu2014} & \noviol & \noviol & \newviol & \noviol & \newviol & \CIRCLE \\
         \midrule
-        \multirow{18}{*}{\rotatebox[origin=c]{90}{\textit{Causal-order-based OT}}}
+        \multirow{15}{*}{\rotatebox[origin=c]{90}{\textit{Causal-order-based OT}}}
           & ABT \cite{Li2010} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
           & AdOPTed \cite{Ressel1996} + Ellis \cite{Ellis1989} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed + IMOR \cite{Imine2003} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed + Randolph \cite{Randolph2015} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
-          & AdOPTed + Ressel \cite{Ressel1996} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed + Suleiman \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & AdOPTed + TM1.1 \cite{Sun2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
-          & AdOPTed + Tombstone \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + IMOR \cite{Imine2003} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Randolph \cite{Randolph2015} & \noviol & \noviol & \noviol & \newviol & \newviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Ressel \cite{Ressel1996} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + Suleiman \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + TM1.1 \cite{Sun2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
+          & AdOPTed \cite{Ressel1996} + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & dOPT + Ellis \cite{Ellis1989} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
           & GOT \cite{Sun1998TOCHI} & \newviol & \newviol & \newviol & \knownviol & \knownviol & \Circle \\
-          & GOTO + TTF \cite{Sun1998CSCW} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & GOTO \cite{Sun1998CSCW} + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & LBT \cite{Li2005} & \newviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
           & SDT \cite{Li2008} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
           & SOCT2 \cite{Suleiman1997} + Suleiman functions \cite{Suleiman1997} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
           & SOCT2 + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
         \midrule
-        \multirow{21}{*}{\rotatebox[origin=c]{90}{\textit{CRDT}}}
+        \multirow{24}{*}{\rotatebox[origin=c]{90}{\textit{CRDT}}}
           & Automerge \cite{Automerge2026} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & Collabs \cite{Weidner2023} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & Diamond Types (Eg-Walker) \cite{Gentle2025} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
           & Diffsync \cite{Little2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
           & Fugue \cite{Weidner2025Fugue} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & FugueMax \cite{Weidner2025Fugue} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
-          & Logoot \cite{Weiss2009} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & Logoot (fixed) \cite{Weiss2009} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
+          & Logoot (original) \cite{Weiss2009} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
+          & Logoot (fixed) \cite{Weiss2010} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & LogootSplit \cite{Andre2013} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & Loro \cite{Loro2026} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & LSEQ \cite{Nedelec2013} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
@@ -557,12 +454,35 @@ A common pattern we found across OT algorithms is that they exhibited interleavi
         \bottomrule
     \end{tabular}
 \end{table*}
-\subsection{Properties of transformation functions}
 
+\section{The Darner algorithm corpus} \label{sec:modelcheckerresults}
+
+To demonstrate the generality of Darner and its ability to find bugs, we implemented a corpus of collaborative text editing algorithms covering most research publications in this field, as well as a selection of popular open-source implementations.
+We are making this corpus available as open source along with Darner to facilitate the further study of these algorithms.\footnote{URL omitted for anonymous review}
+Our implementations are not optimised for performance, but rather aim to be close to the published pseudocode, making it easy to check that our implementation correctly reflects the original publication.
+For any violation of a property found by Darner, we additionally check by hand that the violation does indeed occur in the algorithm as originally published.
+
+In cases where an open-source implementation already exists (often as part of a larger library that also provides many other features), we develop our own implementation against Darner's API that focuses only on the collaborative text editing algorithm.
+If Darner finds a violation of a property, we replay the same scenario against the original implementation to ensure the behaviour is consistent.
+
+\subsection{Properties of each algorithm}
+
+\autoref{tab:algorithmproperties} shows the list of algorithms we implemented in our corpus, and the results we found from model checking each algorithm using Darner.
+The properties are: convergence, Attiya et al.'s weak and strong list specifications, and the forward and maximal non-interleaving properties (titled \emph{Forward} and \emph{Max}). It also includes which algorithms assume all clients are online (\emph{AllOnline}) --- see \autoref{sec:assumptions}. When there is a choice of transformation functions,
+we choose transformation functions that would substantiate or disprove prior claims about the functions. For rows with no transformation functions, we used the transformation functions from the same paper as the control algorithm.
+For space reasons, the property violations we found with specific algorithms are detailed in an appendix.
+
+In our opinion, convergence and the weak list specification are minimal requirements for a collaborative text editing algorithm to be useful in practice.
+Forward non-interleaving is also important, although algorithms differ on how frequently interleaving occurs in realistic editing scenarios (something we do not aim to quantify in this paper); an algorithm in which forward interleaving is rare but not impossible may still be acceptable in practice.
+Whether an algorithm satisfies the strong list specification and/or maximal non-interleaving is less important in practice, but we include them in our analysis as they are well-defined properties of theoretical interest, and they could be important for some applications.
+
+A common pattern we found across OT algorithms is that they exhibited interleaving in one direction, but not the other. Flipping the priority scheme flipped which direction of interleaving was exhibited. In these cases, we choose the direction that leads to forward non-interleaving being satisfied.
+
+\subsection{Properties of transformation functions}
 
 \autoref{tab:tfproperties} shows the properties of published transformation functions. It is important to note that these properties are only relevant to convergence, and make no guarantees about anything else. To determine these properties, we run Darner with the adOPTed algorithm, which is a TP2-requiring control algorithm. If no convergence violations are found on two clients, then we say the functions satisfy TP1. If no convergence violations are found on three or more clients, then we say they satisfy TP2. 
 
-In addition to the table, we believe that the only functions that explicitly satisfy the reversibility requirements are the tombstone transformation functions \cite{Oster2006TTF}. The functions provided alongside GOT claim to satisfy the reversibility requirements, but we show that this is false.
+In addition to the properties shown in the table, we believe that the only functions that explicitly satisfy the reversibility requirements are the tombstone transformation functions \cite{Oster2006TTF}. The functions provided alongside GOT claim to satisfy the reversibility requirements, but we show that this is false.
 
 \begin{table}
   \caption{Various transformation functions and their properties. Key: \noviol=The checker could not find violations for this property. \knownviol=The checker
@@ -589,7 +509,7 @@ In addition to the table, we believe that the only functions that explicitly sat
 
 Some algorithms assume the existence of a server that imposes a total order on all operations, requiring a client to communicate with the server before the operation can be processed by any other client.
 For fault tolerance, the server can be replaced with a consensus protocol providing a replicated log, such as Raft \cite{Ongaro2014}.
-Algorithms that make this assumption are listed under the heading \emph{Centralised OT} in \autoref{tab:algorithmproperties}.
+Algorithms that make this assumption are listed in the category \emph{Total-order-based OT} in \autoref{tab:algorithmproperties}.
 Some work \cite{Sun2020arxiv} differentiates between a transformation-based server and a non-transformation-based server, based on whether or not the server actually performs any transformations. In our opinion this is not a meaningful distinction, because any algorithm with a transformation-based server can be implemented with a non-transformation-based server, by having the server simply serialise the operations and the clients simulate what the server would do.  
 
 Sometimes this assumption is made implicitly.
@@ -599,9 +519,95 @@ Some TP2-avoiding algorithms do so by assuming totally ordered delivery, which h
 Three algorithms we considered (SOCT4 \cite{Vidot2000}, TIBOT \cite{Li2004ICPADS}, and TIBOT 2.0 \cite{Xu2014}) even assume that all clients are online, and stop making progress if one or more clients become unavailable.
 While a server-based algorithm can be made fault-tolerant using a consensus protocol, that is not the case for these algorithms, making them fundamentally unable to tolerate faults.
 
-\autoref{tab:algorithmproperties} includes information about the assumptions made by the algorithms.
-We call algorithms that do not assume a server or consensus protocol \emph{decentralised}, since they can operate in a peer-to-peer network under network partitions.
-All CRDT algorithms studied in this paper are decentralised.
+OT algorithms that do not assume a server or consensus protocol, as well as the CRDT algorithms studied in this paper, instead make a weaker assumption of \emph{causally ordered delivery}.
+This model allows concurrent operations to be delivered in any order.
+It can be efficiently implemented over peer-to-peer networks (e.g.\ using vector clocks), and even during network partitions it allows any users to continue collaborating if they are still able to communicate.
+
+\section{Evaluation}
+
+Because we only check a finite number of cases, rather than writing a proof, a \noviol{} in \autoref{tab:algorithmproperties} does not guarantee that the property is satisfied. The purpose of this evaluation is to give confidence that, if Darner is unable to find property violations in the algorithm, then it is unlikely that one exists. 
+
+We use our large collection of algorithm implementations to collect data on the presence of violations and the time to find them, and to compare different search strategies. When running Darner, we have many choices over the configurations we use to search for violations. These include the number of traces generated, the number of operations per trace, the number of clients, whether to use random or exhaustive search, and what search order to use for an exhaustive search.
+We use a seed to initialise a pseudorandom generator on each execution trace, which is used for all random choices, allowing us to reproduce each trace deterministically from that seed.
+We investigate how the configuration affects the likelihood of finding a violation, and we justify our use of random checking over exhaustive checking. 
+
+\begin{figure*}
+  \includegraphics[width=\textwidth]{violation_rate}
+  \caption{The percentage of traces containing property violations out of a randomised test of 10,000 traces with a varying number of operations per trace, for a selection of algorithms and properties.}
+  \label{fig:violationrate}
+\end{figure*}
+
+\subsection{Reproducing known properties}
+
+Darner was able to reproduce all published consistency properties of the algorithms tested, including the following violations, found within seconds using randomised testing:
+
+\begin{itemize}
+  \item
+    Five transformation functions: Ellis \cite{Ellis1989}, Ressel \cite{Ressel1996}, Imine \cite{Imine2003}, Suleiman \cite{Suleiman1997} and SDT \cite{Li2008} were all shown not to satisfy TP2 \cite{Oster2005Proving} (and some do not satisfy TP1). We combined each of these functions with the adOPTed algorithm, and all produced convergence violations for $\ge 3$ clients (which is when TP2 is relevant).
+  \item
+    The dOPT algorithm is known not to converge \cite{Sun1996}.
+  \item
+    Fugue does not satisfy maximal non-interleaving \cite{Weidner2025Fugue}.
+  \item
+    Jupiter is known not to satisfy the strong list specification \cite{Attiya2016}.
+  \item
+    The Fugue paper \cite{Weidner2025Fugue} gives a list of algorithms for which the authors could find forward interleaving (e.g.\ Logoot, LSEQ, Treedoc, WOOT) and could not find forward interleaving (e.g.\ RGA, Yjs, Sync9). Our results are consistent with those (apart from when we were able to avoid forward interleaving by reversing the priority schemes, see \autoref{sec:doptjupiteradoptedimplementation}). 
+  \item
+    The Logoot algorithm is known to have flaws which lead it to get stuck in an infinite loop \cite{Sun2018}.
+\end{itemize}
+
+
+Similarly, when an algorithm is known to satisfy a particular property, Darner did not falsely report violations of that property. This includes Fugue \cite{Weidner2025Fugue} satisfying the strong list specification and forward non-interleaving, and FugueMax additionally satisfying maximal non-interleaving. Similarly, we found Jupiter satisfies the weak list specification, and RGA satisfies the strong list specification, which are both proven properties \cite{Wei2018, Attiya2016}.  
+
+
+\subsection{How commonly violations appear}
+
+\autoref{fig:violationrate} shows how the percentage of property-violating traces changes as a function of the number of operations per trace. This data is useful because it suggests what depth an exhaustive search would need to be run at; if we know a violation does not appear until a certain depth, then doing an exhaustive search below that depth will not find violations. Similarly, it suggests what number of operations to generate when doing a randomised search. We pick a set of algorithms for each property. There is no guarantee that these patterns will apply to every one of these algorithms, but these figures do illustrate some of the behaviours that are possible, and that we should consider when choosing a search strategy.
+
+We observe that some of the violations (such as convergence violations in dOPT, or forward non-interleaving violations in TreeDoc) appear very commonly. The violations appear at fewer than 10 operations, and once the number of operations is large enough, violations appear nearly always.
+
+Other violations (such as the strong list specification violations) do not appear as commonly. They do not appear at all when there are fewer than 10 operations, and may still be unlikely above that. Violating these properties requires a more specific combination of operations, so Darner does not find them as often. For example, a maximal non-interleaving violation (that is not also a forward non-interleaving violation) may require the trace to include both forward insertions and backward insertions. Running an exhaustive search with fewer than 10 operations per trace may miss these violations.
+
+We also measured whether the number of clients changes how often violations appear. We found that some violations only appear when there are more than two clients (such as TP2 violations), but increasing the number of clients beyond three has no clear effect in most algorithms. An exception is PPS, where violations appeared only with more than 10 clients (see \autoref{sec:ppsimplementation}).
+
+\subsection{What depth to use for exhaustive search}
+
+The previous section suggests that the minimum depth at which the strong list specification should be checked is above 10, because violations sometimes do not appear below that. Running an exhaustive search to that depth would take years of CPU time (see \autoref{fig:exhaustivesearchcost}), which exceeds our available resources. We therefore focus on randomised search.
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{depth_cost}
+  \caption{The time taken to run an exhaustive search of convergence violations for the RGA algorithm at different depths, with extrapolation.}
+  \label{fig:exhaustivesearchcost}
+\end{figure}
+
+\subsection{Comparing random and exhaustive search}
+
+\autoref{fig:successrate} demonstrates the effectiveness of randomised search compared to exhaustive search. For all (algorithm, property) pairs for which we found a violation, we run a search and measure how long it takes to find the first violation. We find that randomised search finds a violation orders of magnitude faster than exhaustive search.
+% NOTE: I think it's not correct to say that exhaustive search was only able to find a fraction of the violations -- if you had enough compute time, presumably it would be able to find all violations. It just takes much longer.
+
+We considered multiple search strategies for exhaustive search: breadth-first vs.\ depth-first search, and deterministic vs.\ randomised (but still exhaustive) search order. The motive behind using a randomised exhaustive search is that a deterministic search order tends to search through many `uninteresting' cases first, such as all operations being on one client. This means that the search can spend a long time testing cases that are unlikely to trigger bugs. Randomised exhaustive search randomises the order of siblings in the search tree. The advantage of a depth-first search is that it is guaranteed to check a large number of operations, whereas a breadth-first search will spend a long time before reaching the maximum number of operations. The issue with a depth-first search is that it can spend a long time searching through subtrees that are not likely to contain any violations. We observe that none of these alterations produced a clear improvement in the success rate of the search.
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{time_to_violation}
+  \caption{The percentage of violations found by each search strategy after different execution times. Both random and exhaustive searches use a trace length of 15 operations.}
+  \label{fig:successrate}
+\end{figure}
+
+The Jupiter strong list specification violation is an example of a violation that random search found, but exhaustive search could not within a reasonable amount of time. There were no examples of violations that we could find through exhaustive search but not through randomised search. It may be worth considering in future work whether there are heuristics that would help a randomised or exhaustive search to find certain properties faster.
+
+\subsection{How many seeds to use for a random search}
+
+How many traces should a random search check?
+\autoref{fig:numberofseeds} shows, for various properties, the probability that a run of $x$ traces exhibits at least one violation of the property.
+We see that for many properties, a violation can be found reliably with just a few hundred traces. This suggests that for most violations, running a randomised search should be likely to find it, even without running the search for very long.
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{detection}
+  \caption{Probability that a Darner finds a violation of some property within some number of random traces checked.}
+  \label{fig:numberofseeds}
+\end{figure}
+
+
 
 \section{Related work}
 
@@ -609,47 +615,46 @@ All CRDT algorithms studied in this paper are decentralised.
 This section reviews the existing efforts to verify collaborative text-editing algorithms. None of these check as many algorithms as we do, and none check for either the strong list specification or the non-interleaving properties.
 
 
-Imine et al. used the automated theorem prover SPIKE to verify TP1 and TP2 properties of various transformation functions \cite{Imine2003, Oster2005Proving, Imine2006}. SPIKE found counter examples in many published transformation functions at the time. The work only considers transformation functions in isolation, without any control algorithm. 
+Imine et al.~\cite{Imine2003, Oster2005Proving, Imine2006} use the automated theorem prover SPIKE to verify TP1 and TP2 properties of various transformation functions, finding violations in five. The work only considers transformation functions in isolation, without any control algorithm. 
 It therefore only establishes convergence, and not any of the other properties we check. 
-It also does not actually execute the functions, but makes deductions based on the provided specification. 
-This led to them falsely proving functions satisfied TP2; the same authors found the proof was incorrect because of an error in their specification. 
-They also produced similar counter examples using the UPPAAL model checker \cite{Boucheneb2009}, which was also only used to check for convergence.
+% NOTE: commented out the following because it's a bit unfair -- a specification error can happen to anyone, and I don't think we would be immune to it.
+% It also does not actually execute the functions, but makes deductions based on the provided specification. 
+% This led to them falsely proving functions satisfied TP2; the same authors found the proof was incorrect because of an error in their specification. 
+Boucheneb and Imine \cite{Boucheneb2009} also obtained similar results for convergence using the UPPAAL model checker.
 
 
 Previous work has also used the TLC model checker and TLA+ specification language to verify various correctness properties. 
-Oster et al. used this to verify convergence in the WOOT algorithm \cite{Oster2005WOOT}, exhaustively up to four sites and five characters. 
-Wei et al. used this to specify Jupiter, and to show that Jupiter satisfied strong eventual consistency and the weak list specification \cite{Wei2020}.
-Zhang et al. introduced a MET framework \cite{Zhang2024} which uses TLC to model check strong eventual consistency in CRDTs specified in TLA+, and then reuses the traces that the checker explored as test cases in a real implementation.
+Oster et al.\ \cite{Oster2005WOOT} used this to verify convergence in the WOOT algorithm, exhaustively up to four clients and five characters. 
+Wei et al.\ \cite{Wei2020} used this to specify Jupiter, and to show that Jupiter satisfied strong eventual consistency and the weak list specification.
+Zhang et al.\ introduced the MET framework \cite{Zhang2024}, which uses TLC to model check strong eventual consistency in CRDTs specified in TLA+, and then reuses the traces that the checker explored as test cases in a real implementation.
 
 
-Wei et al. also showed that Jupiter satisfied the weak list specification, by proposing a new algorithm CJupiter. They showed CJupiter satisfied the weak list specification, and that the algorithm was equivalent to Jupiter \cite{Wei2018}.
+Wei et al.\ \cite{Wei2018} also showed that Jupiter satisfied the weak list specification by proposing a new algorithm CJupiter. They showed CJupiter satisfied the weak list specification, and that the algorithm was equivalent to Jupiter.
 
 
-Gomes et al. use the Isabelle/HOL proof assistant to prove strong eventual consistency for three CRDTS including RGA, but only for the convergence property \cite{Gomes2017}.
+Gomes et al.\ use the Isabelle/HOL proof assistant to prove strong eventual consistency for three CRDTs including RGA, but only for the convergence property \cite{Gomes2017}.
 
+Replication Benchmarker \cite{Urso2016} is a collection of collaborative text editing algorithm implementations, but it is oriented towards benchmarking rather than model checking, and it covers far fewer algorithms.
 
-There are many algorithms that solve related problems to collaborative text-editing, but were too different to include in our implementations. Collaborative XML editing \cite{Davis2002, Martin2010report}, graphics editing \cite{Sun2002}, tree editing \cite{Molli2003, Jungnickel2015}, JSON editing \cite{Jungnickel2016} and rich-text editing \cite{Litt2022} all apply these ideas to different kinds of documents, often using the same algorithms. Darner can only model plain text, and the properties are only well-defined on plain text, so we leave these out. 
+There are many algorithms that solve problems related to collaborative text editing: collaborative XML editing \cite{Davis2002, Martin2010report}, graphics editing \cite{Sun2002}, tree editing \cite{Molli2003, Jungnickel2015}, JSON editing \cite{Jungnickel2016, Kleppmann2017} and rich-text editing \cite{Litt2022} all apply these ideas to different kinds of documents, often using similar algorithms. At present, Darner only models plain text and properties that are well-defined on plain text, and we leave an extension to other document types to future work.
 
 \section{Conclusion}
 
-We presented Darner --- a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against the majority of collaborative text-editing algorithms. 
-We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text-editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties. Earlier collection of algorithm implementations exist \cite{Urso2016}, but ours covers many more. 
-Our implementations resolve multiple ambiguities in previous research, and for many algorithms, are the first publicly available implementations of these algorithms. We find 6 previously unreported property violations.
-Darner supports both randomised and exhaustive checking and we evaluate the behaviour of these two strategies, and justify our use of random over exhaustive checking. We hope Darner helps to quickly rule out broken algorithms, so future research in this area avoids many of the correctness issues that have plagued work in the past.
+We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s strong and weak list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
+We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties.
+Our implementations resolve multiple ambiguities in previous research, and for many algorithms, ours is the first publicly available implementation. We find previously unreported convergence violations in four algorithms, violations of the weak list specification in seven, and many violations of the other properties.
+Darner supports both randomised and exhaustive checking, and we evaluate the behaviour of these two strategies, justifying our use of random over exhaustive checking. We hope Darner will help to quickly rule out broken algorithms, so future research in this area may avoid the correctness issues that have plagued this field in the past.
 
-Future work may apply more rigorous formal verification techniques on the algorithms Darner is unable to find a violation for. 
-Our work can never guarantee a property is satisfied in all cases, which a formal proof, written in a proof assistant for example, could. 
-Also, our work does not check for deletions with non-interleaving. Further consideration of how the non-interleaving properties apply to algorithms that do not use tombstones should be done in future work. The performance properties of algorithms are also something that should be investigated in future work. 
-An algorithm may be correct but impractical due to performance concerns.
-Comparing performance fairly has been difficult, as it depends on what level of performance optimisations are applied by the implementation \cite{Gentle2025}. Documenting these performance optimisations and developing fair approaches of comparing them should be considered in future work.
-
+Future work may apply more rigorous proof techniques to verify the algorithms for which Darner is unable to find a violation. 
+Also, our work does not check for deletions with non-interleaving; future work should investigate how the non-interleaving properties apply to algorithms that do not use tombstones.
+Performance characteristics of these algorithms would also be interesting to study, though this is challenging as much depends on the data structure optimisations used by particular implementations \cite{Gentle2025}.
 
 
 %% AI Disclosure
 
 \section*{AI Disclosure}
 
-AI was used to assist during development of some of the algorithms, and to search through papers for algorithm specifications, definitions and claims about algorithms. Most of the code was hand-written, and any AI-generated code was carefully checked. AI was not used in any of the model checking logic. Beyond small fixes (grammar and spelling), AI was not used to generate any of the text in this paper. 
+AI was used to assist with the development of some of the algorithms, and to search through papers for algorithm specifications, definitions, and claims about algorithms. Most of the code was hand-written, and any AI-generated code was carefully checked. AI was not used in any of the model checking logic. Beyond small grammar and spelling fixes, AI was not used to generate any of the text in this paper. 
 
 %% Bibliography
 \bibliographystyle{ACM-Reference-Format}
@@ -660,23 +665,23 @@ AI was used to assist during development of some of the algorithms, and to searc
 
 \section{Counter-Examples}
 
-\subsection{Suleiman TP1 and TP2 Counter Examples}
+\subsection{Suleiman TP1 and TP2 Counter-Examples}
 
 ...
 
-\subsection{GOT Counter Examples}
+\subsection{GOT Counter-Examples}
 
 ...
 
-\subsection{LBT Counter Examples}
+\subsection{LBT Counter-Examples}
 
 ...
 
-\subsection{TM1.1 Counter Examples}
+\subsection{TM1.1 Counter-Examples}
 
 ...
 
-\subsection{ProseMirror Counter Examples}
+\subsection{ProseMirror Counter-Examples}
 
 ...
 
@@ -694,7 +699,7 @@ The adOPTed algorithm \cite{Ressel1996} is another algorithm based on dOPT. It d
 
 \subsection{SOCT2, SOCT3 and SOCT4}
 
-SOCT2 \cite{Suleiman1997} is an OT algorithm requiring TP2-satisfying functions. The paper gives transformation functions, but Darner finds these do not satisfy TP2 (or even TP1), as they lead to divergence with adOPTed with both two and three clients. That aligns with known results \cite{Oster2005Proving}. Previous open source implementations \cite{Urso2016} have made the algorithm work using the tombstone transformation functions (TTF) \cite{Oster2006TTF}. We also find that this works. SOCT2 also requires functions satisfying the reversibility requirements (though they use the terms forwards/backwards transposition rather than inclusion/exclusion), which TTF claims to satisfy.
+SOCT2 \cite{Suleiman1997} is an OT algorithm requiring TP2-satisfying functions. The paper gives transformation functions, but Darner finds these do not satisfy TP2 (or even TP1), as they lead to divergence with adOPTed with both two and three clients. That aligns with known results \cite{Oster2005Proving}. Previous open-source implementations \cite{Urso2016} have made the algorithm work using the tombstone transformation functions (TTF) \cite{Oster2006TTF}. We also find that this works. SOCT2 also requires functions satisfying the reversibility requirements (though they use the terms forward/backward transposition rather than inclusion/exclusion), which TTF claims to satisfy.
 
 
 SOCT3 \cite{Vidot2000} is based on SOCT2, with the main change being that the delivery of operations is now serialised by introducing a sequencer (essentially a server). This means that SOCT3 is now TP2-avoiding, and claims to work with transformation functions that satisfy TP1 and the reversibility requirements, but not TP2. We could not find any functions that satisfy this specific set of conditions to test the algorithm with, so we tested it with the original SOCT2 transformation functions (which do not work), and the tombstone
@@ -718,23 +723,23 @@ We find that both algorithms work with the TP1 functions we used for Jupiter. Bo
 
 \subsection{POT and COT}
 
-POT \cite{Xu2016} and COT \cite{Sun2009} are another pair of TP2-avoiding algorithms. They claim to not use a server, but they require operations to be delivered in the same total order on all clients, so we categorise them as centralised as per \autoref{sec:assumptions}.
+POT \cite{Xu2016} and COT \cite{Sun2009} are another pair of TP2-avoiding algorithms. They claim not to use a server, but they require operations to be delivered in the same total order on all clients, so we categorise them as centralised as per \autoref{sec:assumptions}.
 
-Both algorithms work as expected. Although comparing performance is not a goal of this paper, we observe that the COT algorithm uses a very slow recursive algorithm -- too slow to model check even a few hundred cases. Memoisation (as suggested in the paper) was therefore necessary for model checking (and in any practical implementation).
+Both algorithms work as expected. Although comparing performance is not a goal of this paper, we observe that the COT algorithm uses a very slow recursive algorithm --- too slow to model check even a few hundred cases. Memoisation (as suggested in the paper) was therefore necessary for model checking (and in any practical implementation).
 
 \subsection{SDT, ABT and LBT}
 
-SDT \cite{Li2004CSCW}, LBT \cite{Li2005} and ABT \cite{Li2010} are three algorithms proposed by the same authors, claiming to be TP2-avoiding and not use a server. SDT is known not to work \cite{Oster2005Proving}, but LBT and ABT had not previously been independently evaluated. We found that LBT fails to converge, but ABT works with the transformation functions from the same paper. This makes ABT the only TP2-avoiding, non-total-order-based OT algorithm we tested for which we could not find convergence or list specification violations. 
+SDT \cite{Li2004CSCW}, LBT \cite{Li2005} and ABT \cite{Li2010} are three algorithms proposed by the same authors, claiming to be TP2-avoiding and not to use a server. SDT is known not to work \cite{Oster2005Proving}, but LBT and ABT had not previously been independently evaluated. We found that LBT fails to converge, but ABT works with the transformation functions from the same paper. This makes ABT the only TP2-avoiding, non-total-order-based OT algorithm we tested for which we could not find convergence or list specification violations. 
 
 \subsection{WOOT, WOOTO and WOOTH}
 
-We found that the WOOT \cite{Oster2006WOOT} algorithm satisfies convergence and the weak and strong list specifications. Its successors, WOOTO \cite{Weiss2007} and WOOTH \cite{AhmedNacer2011}, both satisfy the same properties, the changes being performance improvements. WOOTH is not formally described in a paper, but given as open source code.
+We found that the WOOT \cite{Oster2006WOOT} algorithm satisfies convergence and the weak and strong list specifications. Its successors, WOOTO \cite{Weiss2007} and WOOTH \cite{AhmedNacer2011}, both satisfy the same properties, the changes being performance improvements. WOOTH is not formally described in a paper, but given as open-source code.
 
 \subsection{TM1.1 and Randolph functions} \label{sec:tm11andrandolphfunctions}
 
 The TM1.1 transformation functions \cite{Sun2017} and Randolph et al.'s functions \cite{Randolph2015} both claim to satisfy TP2, but neither has been checked outside of its original paper. We implement both with the adOPTed algorithm, and find that both lead to convergence (including with more than two clients), indicating that they do indeed satisfy TP2. However, we find that with the TM1.1 functions, the algorithm does not satisfy the weak list specification, because it sometimes deletes a character that the user did not intend to delete.
 
-In contrast, Darner could not find strong or weak list specification violations for Randolph et al.'s functions. The functions require comparing characters. Simply checking by character code is not enough. It leads to convergence violations because it is not a total ordering (which the algorithm assumes it is). Instead, we attach a client ID and a per-client counter to each character, which provides a total order; this is fairly common in CRDTs, but not as common in OT algorithms.
+In contrast, Darner could not find strong or weak list specification violations for Randolph et al.'s functions. The functions require comparing characters. Simply comparing character codes is not enough: it leads to convergence violations because it is not a total order, which the algorithm assumes it to be. Instead, we attach a client ID and a per-client counter to each character, which provides a total order; this is fairly common in CRDTs, but not as common in OT algorithms.
 
 \subsection{Logoot}
 
@@ -742,16 +747,16 @@ The Logoot \cite{Weiss2009} algorithm is known to have bugs \cite{Sun2018}, whic
 by lowering the base to $2^4$, violations start to appear. This is because the bugs require two random numbers to be equal, and with BASE=$2^{64}$ this happens with very low probability. Reducing the collision probability to an acceptable level would require setting BASE to a value that is too great to be practical.
 
 
-The first bug leads to divergence; this bug was fixed in a later description of the algorithm \cite{Weiss2010}. The other causes the algorithm to get stuck in an infinite loop. Previous work has found that many of the fixes to this bug in open source implementations \cite{Urso2016, Chen2017} introduce divergence bugs
+The first bug leads to divergence; this bug was fixed in a later description of the algorithm \cite{Weiss2010}. The other causes the algorithm to get stuck in an infinite loop. Previous work has found that many of the fixes to this bug in open-source implementations \cite{Urso2016, Chen2017} introduce divergence bugs
 elsewhere. We implemented both of those fixes and found they do not work. We were able to slightly modify one of these fixes \cite{Chen2017}, and with that, we were unable to reproduce the issue.
 
 \subsection{LogootSplit and LSEQ}
 
-LogootSplit \cite{Andre2013} and LSEQ \cite{Nedelec2013} are two variants of Logoot. LSEQ is simply a change to the allocation strategy, so all the issues with Logoot apply to LSEQ as well. LogootSplit is a bigger change, and we found it does not have the same bugs as Logoot. LogootSplit has three variants -- LogootSplitNaive, LogootSplitString and LogootSplitAVL. We only implement LogootSplitNaive; the differences between the three are only in the data structures used to improve performance.
+LogootSplit \cite{Andre2013} and LSEQ \cite{Nedelec2013} are two variants of Logoot. LSEQ is simply a change to the allocation strategy, so all the issues with Logoot apply to LSEQ as well. LogootSplit is a bigger change, and we found it does not have the same bugs as Logoot. LogootSplit has three variants --- LogootSplitNaive, LogootSplitString and LogootSplitAVL. We only implement LogootSplitNaive; the differences between the three are only in the data structures used to improve performance.
 
 \subsection{Partial persistent sequences (PPS)} \label{sec:ppsimplementation}
 
-A PPS \cite{Wu2010} represents positions using rational numbers. This idea was mentioned previously \cite{Preguica2009}, but dismissed because it requires infinite-precision floating point numbers. Even without considering that issue, we find that the algorithm fails to converge because it does not give unique identifiers when two users concurrently insert at the same position. The two papers proposing this algorithm \cite{Wu2009, Wu2010} identify this issue and each provide a separate fix. We find that neither fix works entirely, and provide counter-examples. 
+A PPS \cite{Wu2010} represents positions using rational numbers. This idea was mentioned previously \cite{Preguica2009}, but dismissed because it requires infinite-precision floating-point numbers. Even without considering that issue, we find that the algorithm fails to converge because it does not give unique identifiers when two users concurrently insert at the same position. The two papers proposing this algorithm \cite{Wu2009, Wu2010} identify this issue and each provides a separate fix. We find that neither fix works entirely, and provide counter-examples. 
 
 
 
@@ -766,7 +771,7 @@ describes two kinds of ID scheme (UDIS and SDIS), each of which has a different 
 
 In the original RGA paper \cite{Roh2009}, positions were described using S4Vectors. Later descriptions of RGA do not use S4Vectors \cite{Attiya2016}. We implemented both, and found they satisfied the same properties. Timestamped insertion trees and causal trees \cite{Grishchenko2010} are both different names for the same algorithm, both equivalent to RGA. 
 
-Kleppmann et al. \cite{Kleppmann2019} proposed a fix to RGA to avoid interleaving behaviour. That fix was later shown to be totally wrong \cite{Weidner2025Fugue} as the algorithm no longer converged.
+Kleppmann et al.~\cite{Kleppmann2019} proposed a fix to RGA to avoid interleaving behaviour. That fix was later shown to be incorrect \cite{Weidner2025Fugue}, as the algorithm no longer converged.
 
 \subsection{ProseMirror}
 
