@@ -369,6 +369,7 @@ CELLS: dict[str, tuple[str, str, str]] = {
     "LoroClient": ("fugue", "site", BEFORE),
     "RGAClient": ("rga", "lamport", BEFORE),
     "Sync9Client": ("fugue", "site", BEFORE),
+    "TWCPeerClient": ("rga", "oplamport", BEFORE),
     "YjsClient": ("yata", "site", BEFORE),
     "YjsModClient": ("fuguemax", "site", BEFORE),
 }
