@@ -422,7 +422,7 @@ We only test combinations where there is a match between the claimed properties 
           & AdOPTed \cite{Ressel1996} + TM1.1 \cite{Sun2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
           & AdOPTed \cite{Ressel1996} + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & dOPT + Ellis \cite{Ellis1989} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
-          & GOT \cite{Sun1998TOCHI} & \newviol & \newviol & \newviol & \knownviol & \knownviol & \Circle \\
+          & GOT \cite{Sun1998TOCHI} & \newviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
           & GOTO \cite{Sun1998CSCW} + TTF \cite{Oster2006TTF} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & LBT \cite{Li2005} & \newviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
           & SDT \cite{Li2008} & \knownviol & \knownviol & \knownviol & \knownviol & \knownviol & \Circle \\
@@ -665,7 +665,7 @@ There are many algorithms that solve problems related to collaborative text edit
 
 We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence and the weak list specification, the other properties we checked for (Attiya et al.'s strong list specification \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
 We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties.
-Our implementations resolve multiple ambiguities in previous research, and for many algorithms, ours is the first publicly available implementation. We find previously unreported convergence violations in four algorithms, violations of the weak list specification in seven, and many violations of the other properties.
+Our implementations resolve multiple ambiguities in previous research, and for many algorithms, ours is the first publicly available implementation. We find previously unreported convergence violations in four algorithms, violations of the weak list specification in six, and many violations of the other properties.
 Darner supports both randomised and exhaustive checking, and we evaluate the behaviour of these two strategies, justifying our use of random over exhaustive checking. We hope Darner will help to quickly rule out broken algorithms, so future research in this area may avoid the correctness issues that have plagued this field in the past.
 
 Future work may apply more rigorous proof techniques to verify the algorithms for which Darner is unable to find a violation. 
