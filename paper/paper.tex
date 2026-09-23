@@ -786,6 +786,10 @@ In the original RGA paper \cite{Roh2009}, positions were described using S4Vecto
 
 Kleppmann et al.~\cite{Kleppmann2019} proposed a fix to RGA to avoid interleaving behaviour. That fix was later shown to be incorrect \cite{Weidner2025Fugue}, as the algorithm no longer converged.
 
+\subsection{Diamond Types and Eg-walker}
+
+Our Diamond Types implementation follows the FugueMax right-origin rule, as does the pseudocode in the extended Eg-walker paper \cite{Gentle2025}. The TypeScript reference implementation linked from that paper\footnote{\url{https://github.com/josephg/eg-walker-reference}} instead uses Fugue's right-origin rule, with the FugueMax alternative commented out, although its README says its ordering should match YjsMod and FugueMax. The Diamond Types row in \autoref{tab:algorithmproperties} therefore uses FugueMax ordering.
+
 \subsection{ProseMirror}
 
 We ported the collaborative editing algorithm from ProseMirror \cite{Haverbeke2015} into our checker. We found that the algorithm exhibits weak list specification violations due to reordering characters in certain scenarios. We provide a reproduction of this violation, calling the original ProseMirror library, in our repository. In this example, the algorithm reorders a character, which the user initially inserted at the front of the document, to the back of the document.
