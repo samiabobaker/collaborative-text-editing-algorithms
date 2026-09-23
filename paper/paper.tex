@@ -450,7 +450,7 @@ We only test combinations where there is a match between the claimed properties 
           & Sync7 \cite{Little2024} & \newviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
           & Sync9 \cite{Toomim2019} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & TreeDoc \cite{Preguica2009} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
-          & Weidner's Text without CRDTs \cite{Weidner2025without} & \noviol & \noviol & \noviol & \noviol & \newviol & \Circle \\
+          & Weidner's Text without CRDTs \cite{Weidner2025without} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & WOOT \cite{Oster2006WOOT}, WOOTO \cite{Weiss2007}, WOOTH \cite{AhmedNacer2011} & \noviol & \noviol & \noviol & \knownviol & \knownviol & \Circle \\
           & Yjs \cite{Nicolaescu2015} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & YjsMod \cite{Gentle2021} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
@@ -768,6 +768,10 @@ The first fix is, when inserting between $p$ and $q$, to split that range into s
 
 
 The second fix is to append digits to the end of the rational number. For example, if the client has id 1 and is trying to insert at position $0.5$, the new position will be $0.51$. The problem is that it is not clear which part is the actual position and which is the client id. With more than 10 clients, we found situations where this ambiguity meant two characters got the same position.
+
+\subsection{Text without CRDTs}
+
+We implemented both the server-based and Lamport-ordered peer-to-peer variants described by Weidner \cite{Weidner2025without}. The CRDT row in \autoref{tab:algorithmproperties} refers to the peer-to-peer variant; both variants gave the same results for the properties checked. The blog notes that the Lamport-ordered variant has the same list order as RGA, so its maximal non-interleaving violation is a known result.
 
 \subsection{TreeDoc}
 
