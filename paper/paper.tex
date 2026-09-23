@@ -523,7 +523,7 @@ Darner found the following violations of consistency properties that, to our kno
   \item
     Two open source projects, Sync7 \cite{Little2024} and Diffsync \cite{Little2017}, both do not work. Sync7 fails to converge, and Diffsync fails to satisfy the weak list specification.
   \item
-    We also found many strong list specification and interleaving violations in algorithms that were not explicitly checked previously.
+    We also found many strong list specification and interleaving violations in algorithms that were not explicitly checked previously. For example, Loro exhibits maximal non-interleaving violations despite its documentation listing this property as a supported feature (see \autoref{sec:loroimplementation}).
 \end{itemize}
 
 
@@ -793,6 +793,10 @@ Our Diamond Types implementation follows the FugueMax right-origin rule, as does
 \subsection{ProseMirror}
 
 We ported the collaborative editing algorithm from ProseMirror \cite{Haverbeke2015} into our checker. We found that the algorithm exhibits weak list specification violations due to reordering characters in certain scenarios. We provide a reproduction of this violation, calling the original ProseMirror library, in our repository. In this example, the algorithm reorders a character, which the user initially inserted at the front of the document, to the back of the document.
+
+\subsection{Loro} \label{sec:loroimplementation}
+
+Loro's documentation \cite{Loro2026} lists ``Fugue / Maximal non-interleaving'' as a supported feature. However, its text implementation uses Fugue's ordering rather than FugueMax's. We reproduced maximal non-interleaving violations in the published Loro library as well as our port. This is the known limitation of Fugue's ordering, so we do not mark the violation as new in \autoref{tab:algorithmproperties}.
 
 \subsection{Yjs and YjsMod}
 
