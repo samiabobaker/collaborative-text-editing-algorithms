@@ -17,8 +17,8 @@ from unique_char.uniquechar import UniqueChar
 class DiffsyncClient(ClientDevice):
     """A peer holding a commit graph and the text its heads merge to.
 
-    The algorithm works over strings, so each character is encoded as the
-    character whose code point is its identifier. The diff is then sensitive to
+    The algorithm works over strings, so each character is encoded as its
+    identifier relative to the start of this execution. The diff is then sensitive to
     exactly the distinctions the checkers care about, since two encoded texts
     are equal precisely when they are the same sequence of characters.
 
@@ -33,6 +33,7 @@ class DiffsyncClient(ClientDevice):
     minigit: DiffsyncMiniGit
     text: list[UniqueChar]
     char_map: dict[int, UniqueChar]
+    character_offset: int
     clients: list[DiffsyncClient]
     message_buffer: dict[int, list[DiffsyncMessage]]
 
@@ -41,6 +42,7 @@ class DiffsyncClient(ClientDevice):
         self.minigit = DiffsyncMiniGit()
         self.text = []
         self.char_map = {}
+        self.character_offset = UniqueChar.now
         self.clients = []
         self.message_buffer = {}
 
@@ -50,10 +52,10 @@ class DiffsyncClient(ClientDevice):
             self.message_buffer[client.client_id] = []
 
     def __text_to_str(self) -> str:
-        return "".join(chr(character.id) for character in self.text)
+        return "".join(chr(character.id - self.character_offset) for character in self.text)
 
     def __str_to_text(self, s: str) -> list[UniqueChar]:
-        return [self.char_map[ord(character)] for character in s]
+        return [self.char_map[ord(character) + self.character_offset] for character in s]
 
     def perform_operation(self, operation: ClientOperation) -> list[ClientInsertOperation | ClientDeleteOperation]:
         match operation:
