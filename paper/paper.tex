@@ -663,7 +663,7 @@ There are many algorithms that solve problems related to collaborative text edit
 
 \section{Conclusion}
 
-We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence and the weak list specification, the other properties we checked for (Attiya et al.'s strong list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
+We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence and the weak list specification, the other properties we checked for (Attiya et al.'s strong list specification \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
 We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties.
 Our implementations resolve multiple ambiguities in previous research, and for many algorithms, ours is the first publicly available implementation. We find previously unreported convergence violations in four algorithms, violations of the weak list specification in seven, and many violations of the other properties.
 Darner supports both randomised and exhaustive checking, and we evaluate the behaviour of these two strategies, justifying our use of random over exhaustive checking. We hope Darner will help to quickly rule out broken algorithms, so future research in this area may avoid the correctness issues that have plagued this field in the past.
@@ -808,7 +808,7 @@ The convention in the Fugue paper is that the left origin cannot be a tombstone,
 
 \subsection{Anchor based CRDTs}
 
-We find that some CRDTS (such as Fugue, FugueMax, RGA, Sync9, Yjs, YjsMod) have a similar design. We include in the repository an origin order checker, which is an investigation into the similarities and differences between the behaviours of these algorithms.
+We find that some CRDTs (such as Fugue, FugueMax, RGA, Sync9, Yjs, YjsMod) have a similar design. We include in the repository an origin order checker, which is an investigation into the similarities and differences between the behaviours of these algorithms.
 
 \end{document}
 
