@@ -38,7 +38,7 @@ class TWCPeerClient(ClientDevice):
 
     def __init__(self, client_id: int):
         self.client_id = client_id
-        self.clock = 0
+        self.clock = 0  # Counts insertions and deletions.
         self.state = TWCIdList()
         self.operations: dict[tuple[int, int], TWCPeerMessage] = {}
         self.clients: list[TWCPeerClient] = []
@@ -75,6 +75,8 @@ class TWCPeerClient(ClientDevice):
 
     def perform_local_insert(self, operation: ClientInsertOperation) -> None:
         before_id = self.state.at_present(operation.position - 1) if operation.position else None
+        # As in TWCClient, the allocator supplies opaque unique IDs. Only Lamport
+        # timestamps determine replay order.
         update = TWCInsertionOperation(allocate_update_id(), before_id, allocate_element_id(), operation.character)
         self.__local_update(update, operation)
 
