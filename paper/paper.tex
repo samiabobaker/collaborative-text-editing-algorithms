@@ -47,8 +47,8 @@
 
 \begin{abstract}
     Collaborative text-editing algorithms, which are used in popular software such as Google Docs and Overleaf, have a troubled history: many published algorithms violate their purported consistency guarantees, and many algorithms' claimed properties have not been independently validated, making it unclear which algorithms are safe to use.
-    Formal specifications that define what it means for a collaborative text-editing algorithm to be correct have been proposed recently, but few algorithms have been checked against these specifications, and to date there is no executable checker for them. 
-    In this paper we introduce Darner, the first model checker specialised for finding violations of these specifications, supporting both randomised and exhaustive search.
+    Formal specifications that define what it means for a collaborative text-editing algorithm to be correct have been proposed recently, but few algorithms have been checked against these specifications.
+    In this paper we introduce Darner, a specialised model checker that combines checks for these specifications, supporting both randomised and exhaustive search.
     We also implement a corpus of over 50 such algorithms, covering most of the research literature and popular open-source libraries.
     Applying Darner to this corpus reveals that 17 of these algorithms do not meet the requirements that we consider essential for a collaborative text-editing algorithm to be practically useful; of these, 10 reproduce known results and 7 are new flaws not reported previously.
     By providing the most comprehensive survey and empirical validation to date, we hope that this paper will place the field of collaborative text editing on a more stable footing going forward.
@@ -72,7 +72,7 @@ To add to the confusion, for decades there was no formal specification of what i
 The main property algorithms focussed on was convergence (i.e., all replicas eventually end up in the same state), but convergence alone is not sufficient to be useful: for example, a text editor could drop or reorder characters, resulting in garbled text, while still converging.
 The CCI model from 1996 \cite{Sun1996} relies on a notion of ``intention preservation'' that is too vague to be checkable.
 It was only in 2016 that Attiya et al.~\cite{Attiya2016} proposed the first formal specification of collaborative text editing, which in 2025 was extended with a further important property, non-interleaving \cite{Weidner2025Fugue}.
-However, executable checkers for these specifications are not available, and only a few algorithms have been evaluated against these formal specifications so far.
+However, only a few algorithms have been evaluated against these formal specifications so far.
 As a result, there is a large collection of algorithms for collaborative text editing, historical and new, whose correctness properties are unknown.
 
 This problem is exacerbated by the fact that for many algorithms, no implementation is publicly available, and the descriptions of the algorithms in papers are sometimes complex, vague, and/or incomplete, making it difficult to independently check them for correctness.
@@ -284,7 +284,7 @@ Note that some papers use the terms \emph{forward} and \emph{backward transposit
 
 \section{Darner implementation} \label{sec:modelcheckerimplementation}
 
-In this section, we describe our implementation of Darner. To our knowledge, this is the first automated checker for the weak and strong list specifications and for the non-interleaving properties. Both Darner and the algorithm implementations are written in Python, without the use of any existing model checking tool. Darner is about 2,300 lines of code, and the algorithm corpus is about 17,000 lines of code in total (averaging about 400 lines of code per algorithm).
+In this section, we describe our implementation of Darner. To our knowledge, Darner is the first tool to combine checks for the weak and strong list specifications and the non-interleaving properties. Both Darner and the algorithm implementations are written in Python, without the use of any existing model checking tool. Darner is about 2,300 lines of code, and the algorithm corpus is about 17,000 lines of code in total (averaging about 400 lines of code per algorithm).
 We are releasing both Darner and its corpus as open source.\footnote{\url{\artifacturl}}
 
 \subsection{Interface between algorithms and Darner}
@@ -663,7 +663,7 @@ There are many algorithms that solve problems related to collaborative text edit
 
 \section{Conclusion}
 
-We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s weak and strong list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
+We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. It combines executable checks for convergence, Attiya et al.'s weak and strong list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}. For most of the algorithms in our corpus, this is the first evaluation against the list specifications and non-interleaving properties.
 We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties.
 Our implementations resolve multiple ambiguities in previous research, and for many algorithms, ours is the first publicly available implementation. We find previously unreported convergence violations in four algorithms, violations of the weak list specification in seven, and many violations of the other properties.
 Darner supports both randomised and exhaustive checking, and we evaluate the behaviour of these two strategies, justifying our use of random over exhaustive checking. We hope Darner will help to quickly rule out broken algorithms, so future research in this area may avoid the correctness issues that have plagued this field in the past.
