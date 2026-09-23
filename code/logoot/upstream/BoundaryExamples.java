@@ -8,7 +8,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-/** Fixtures for the unmodified coast-team allocator and identifier classes. */
+/** Fixtures for the unmodified coast-team allocator and identifier classes.
+ * BoundaryList handles the case that hung our Python port. BoundaryStrategy has
+ * a separate infinite loop at 4 bits; this does not demonstrate a failure at 64 bits.
+ * Run with check_boundary.py, which stops the intentional infinite loop.
+ */
 public class BoundaryExamples {
     private static class Site implements TimestampedDocument {
         private final int id;

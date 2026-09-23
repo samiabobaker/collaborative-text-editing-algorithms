@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from logoot.logootdocument import LogootDocument, LogootIdentifier, LogootPosition, position_less_than
 
-# The coast-team comparisons run the original Java classes. See upstream/README.md.
+# The coast-team comparisons run the original Java classes. See upstream/check_boundary.py.
 
 
 class SiteOrderingError(ValueError):

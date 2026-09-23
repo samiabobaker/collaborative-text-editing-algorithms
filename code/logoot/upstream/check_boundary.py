@@ -1,4 +1,13 @@
-"""Compile and run the Boundary fixtures against a pinned upstream checkout."""
+"""Run the original coast-team Boundary allocators. Requires Python and a JDK (tested with Java 17).
+
+From the repository root:
+    git clone https://github.com/coast-team/replication-benchmarker.git /tmp/replication-benchmarker
+    git -C /tmp/replication-benchmarker checkout e3f6f534cd0d37f2c9e7b3288cd6f92b3b4784cc
+    python code/logoot/upstream/check_boundary.py /tmp/replication-benchmarker
+
+Set JAVA_HOME if the JDK is not on PATH. The runner stops the intentional infinite
+loop in a separate process; BoundaryExamples.java explains why it cannot terminate.
+"""
 
 import argparse
 import os
