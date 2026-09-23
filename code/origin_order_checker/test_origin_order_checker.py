@@ -9,6 +9,7 @@ from algorithm_setup.algorithm_setup import (
     loro_setup,
     rga_setup,
     sync9_setup,
+    twc_peer_setup,
     yjs_setup,
     yjsmod_setup,
 )
@@ -44,6 +45,7 @@ def test_algorithms_match_their_declared_cells():
         loro_setup,
         rga_setup,
         sync9_setup,
+        twc_peer_setup,
         yjs_setup,
         yjsmod_setup,
     ]:
@@ -119,6 +121,7 @@ def test_both_anchorings_are_declared_and_hold():
         loro_setup,
         rga_setup,
         sync9_setup,
+        twc_peer_setup,
         yjs_setup,
         yjsmod_setup,
     ]:
