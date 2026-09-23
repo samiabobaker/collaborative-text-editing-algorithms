@@ -521,7 +521,7 @@ Darner found the following violations of consistency properties that, to our kno
   \item
     Partial persistent sequences \cite{Wu2010} represent the position of characters using rational numbers. The algorithm requires a mechanism for ensuring every character has a unique position, even if two clients concurrently insert a character at the same position. Two mechanisms to solve this issue have been proposed \cite{Wu2009, Wu2010}, but they do not solve the problem: the algorithm nevertheless exhibits convergence violations.
   \item
-    Two open source projects, Sync7 \cite{Little2024} and Diffsync \cite{Little2017}, both do not work. Sync7 fails to converge, and Diffsync fails to satisfy the weak list specification.
+    We found convergence violations in Sync7 \cite{Little2024} and weak list specification violations in Diffsync \cite{Little2017}.
   \item
     We also found many strong list specification and interleaving violations in algorithms that were not explicitly checked previously. For example, Loro exhibits maximal non-interleaving violations despite its documentation listing this property as a supported feature (see \autoref{sec:loroimplementation}).
 \end{itemize}
@@ -746,6 +746,10 @@ The TM1.1 transformation functions \cite{Sun2017} and Randolph et al.'s function
 The violation occurs when there is an insertion and a deletion to the same position. In this case, both characters are deleted rather than the character that was intended to be deleted. This behaviour violates condition 1a of the weak list specification.
 
 In contrast, Darner could not find strong or weak list specification violations for Randolph et al.'s functions. The functions require comparing characters. Simply comparing character codes is not enough: it leads to convergence violations because it is not a total order, which the algorithm assumes it to be. Instead, we attach a client ID and a per-client counter to each character, which provides a total order; this is fairly common in CRDTs, but not as common in OT algorithms.
+
+\subsection{Diffsync}
+
+Darner's convergence results led us to identify a bug in Diffsync \cite{Little2017}: replicas could merge the same set of commits in different orders and obtain different document states. We fixed this by sorting the merge heads, a one-line change. Our evaluation uses the corrected version, which still exhibits weak list specification violations.
 
 \subsection{Logoot}
 
