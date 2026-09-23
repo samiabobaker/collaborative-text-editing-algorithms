@@ -589,7 +589,7 @@ Similarly, when an algorithm is known to satisfy a particular property, Darner d
 
 We observe that some of the violations (such as convergence violations in dOPT, or forward non-interleaving violations in TreeDoc) appear very commonly. The violations appear at fewer than 10 operations, and once the number of operations is large enough, violations appear nearly always.
 
-Other violations (such as the strong list specification violations) do not appear as commonly. They do not appear at all when there are fewer than 10 operations, and may still be unlikely above that. Violating these properties requires a more specific combination of operations, so Darner does not find them as often. For example, a maximal non-interleaving violation (that is not also a forward non-interleaving violation) may require the trace to include both forward insertions and backward insertions. Running an exhaustive search with fewer than 10 operations per trace may miss these violations.
+Other violations (such as the strong list specification violations) do not appear as commonly. They do not appear at all when there are fewer than 6 operations, and only appear very rarely when there are fewer than 10 operations. Even with more than 10 operations, the violations are unlikely. Violating these properties requires a more specific combination of operations, so Darner does not find them as often. For example, a maximal non-interleaving violation (that is not also a forward non-interleaving violation) may require the trace to include both forward insertions and backward insertions. Running an exhaustive search with fewer than 10 operations per trace may miss these violations.
 
 We also measured whether the number of clients changes how often violations appear. We found that some violations only appear when there are more than two clients (such as TP2 violations), but increasing the number of clients beyond three has no clear effect in most algorithms. An exception is PPS, where violations appeared only with more than 10 clients (see \autoref{sec:ppsimplementation}).
 
@@ -648,7 +648,7 @@ Boucheneb and Imine \cite{Boucheneb2009} also obtained similar results for conve
 
 Previous work has also used the TLC model checker and TLA+ specification language to verify various correctness properties. 
 Oster et al.\ \cite{Oster2005WOOT} used this to verify convergence in the WOOT algorithm, exhaustively up to four clients and five characters. 
-Wei et al.\ \cite{Wei2020} used this to specify Jupiter, and to show that Jupiter satisfied strong eventual consistency and the weak list specification.
+Wei et al.\ \cite{Wei2020} used this to specify Jupiter, and to show that Jupiter satisfied strong eventual consistency and the weak list specification. To our knowledge, their TLA+ definition of the weak list specification is the only other executable checker of this property, but it still does not cover the strong list specification or the non-interleaving properties.
 Zhang et al.\ introduced the MET framework \cite{Zhang2024}, which uses TLC to model check strong eventual consistency in CRDTs specified in TLA+, and then reuses the traces that the checker explored as test cases in a real implementation.
 
 
@@ -663,13 +663,13 @@ There are many algorithms that solve problems related to collaborative text edit
 
 \section{Conclusion}
 
-We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence, the other properties we checked for (Attiya et al.'s weak and strong list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
+We presented Darner, a model checker specialised for testing properties of collaborative text editing algorithms. Apart from convergence and the weak list specification, the other properties we checked for (Attiya et al.'s strong list specifications \cite{Attiya2016}, forward non-interleaving, and maximal non-interleaving \cite{Weidner2025Fugue}) did not previously have executable checkers, and this is the first time these properties have been checked against most collaborative text-editing algorithms. 
 We provide a corpus of implementations covering most of the research literature and open-source libraries on collaborative text editing, and test these with Darner to produce a set of results documenting which algorithms satisfy which properties.
 Our implementations resolve multiple ambiguities in previous research, and for many algorithms, ours is the first publicly available implementation. We find previously unreported convergence violations in four algorithms, violations of the weak list specification in seven, and many violations of the other properties.
 Darner supports both randomised and exhaustive checking, and we evaluate the behaviour of these two strategies, justifying our use of random over exhaustive checking. We hope Darner will help to quickly rule out broken algorithms, so future research in this area may avoid the correctness issues that have plagued this field in the past.
 
 Future work may apply more rigorous proof techniques to verify the algorithms for which Darner is unable to find a violation. 
-Also, our work does not check for deletions with non-interleaving; future work should investigate how the non-interleaving properties apply to algorithms that do not use tombstones.
+Also, our work does not check for deletions with non-interleaving; future work should investigate how the non-interleaving properties apply to algorithms that do not use tombstones. Our preliminary exploration of this is included in the repository.
 Performance characteristics of these algorithms would also be interesting to study, though this is challenging as much depends on the data structure optimisations used by particular implementations \cite{Gentle2025}.
 
 
@@ -805,6 +805,10 @@ Loro's documentation \cite{Loro2026} lists ``Fugue / Maximal non-interleaving'' 
 \subsection{Yjs and YjsMod}
 
 The convention in the Fugue paper is that the left origin cannot be a tombstone, but the right origin can. Both Yjs and YjsMod (as implemented in reference-crdts \cite{Gentle2021}) follow the opposite convention, where the left origin can be a tombstone, and the right origin cannot. In order to be consistent with the other algorithms, we switch this to the convention of the Fugue paper.
+
+\subsection{Anchor based CRDTs}
+
+We find that some CRDTS (such as Fugue, FugueMax, RGA, Sync9, Yjs, YjsMod) have a similar design. We include in the repository an origin order checker, which is an investigation into the similarities and differences between the behaviours of these algorithms.
 
 \end{document}
 
