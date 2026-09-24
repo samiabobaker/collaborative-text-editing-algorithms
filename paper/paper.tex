@@ -102,7 +102,7 @@ Similarly, the use of these algorithms for file types other than plain text (suc
 \subsection{Introduction to collaborative text editing}
 
 The goal of a collaborative text-editing algorithm is to allow several users to edit a shared text document in real time. When a user makes a change to the
-document, network messages are sent to their collaborators so that they also see this change. We consider two types of changes: $\mathit{ins}(i, x)$ means the character $x$ is inserted in the document at index $i$, and $\mathit{del}(i)$ means the character at index $i$ is deleted.
+document, network messages are sent to their collaborators so that they also see this change. We consider two types of changes: $\mathit{ins}(x, i)$ means the character $x$ is inserted in the document at index $i$, and $\mathit{del}(i)$ means the character at index $i$ is deleted.
 
 These algorithms must have a responsive user interface even if the network is slow. Thus, when a user makes a change, it should be applied instantly to their local copy of the document, without waiting for any network round-trips. When a client receives a message about another client's change, the state of their document may be different from the document on which those changes were originally performed.
 In particular, an index may now refer to a different position in the text.
@@ -191,13 +191,13 @@ We quote the relevant properties below, but refer to the Fugue paper \cite{Weidn
 
 \begin{definition}[Left Origin]
   The left origin of an element is the element directly preceding its insertion position at the time of insertion. If the element was inserted by 
-  an $ins(i, x)$ call, then its left origin was at index $i-1$ immediately prior to this call. If $i=0$, then its left origin is a special symbol
+  an $ins(x, i)$ call, then its left origin was at index $i-1$ immediately prior to this call. If $i=0$, then its left origin is a special symbol
   $\mathit{start}$.
 \end{definition}
 
 \begin{definition}[Right Origin]
   The right origin of an element is the element directly following its insertion position at the time of insertion, in the list including tombstones. If the element was inserted by 
-  an $ins(i, x)$ call, then its right origin was at index $i$ immediately prior to this call. If the insertion is at the end of the list, then its right origin is a special symbol
+  an $ins(x, i)$ call, then its right origin was at index $i$ immediately prior to this call. If the insertion is at the end of the list, then its right origin is a special symbol
   $\mathit{end}$.
 \end{definition}
 
@@ -226,7 +226,7 @@ We quote the relevant properties below, but refer to the Fugue paper \cite{Weidn
 This section gives an overview of the common terminology and properties used by OT algorithms.
 
 The idea of OT is to transform incoming remote operations with respect to concurrent operations that have already been applied locally. For example, if a client receives a
-$del(3)$ operation, but it has already applied a concurrent $ins(2,x)$, then the original character has shifted one to the right so the deletion is now transformed to $del(4)$. The functions
+$del(3)$ operation, but it has already applied a concurrent $ins(x,2)$, then the original character has shifted one to the right so the deletion is now transformed to $del(4)$. The functions
 that describe these transformations are called transformation functions. Transformation functions are paired with a control algorithm, which determines when and how to call these 
 transformation functions. The intent is that the control algorithm makes certain assumptions about the properties of the transformation functions, and any functions that satisfy these properties
 can be used with that algorithm.
@@ -238,7 +238,7 @@ The first kind of transformation function is the \emph{inclusion transformation}
 
 \begin{definition}[Inclusion Transformation]
   For two operations $O_1$ and $O_2$ generated from the same state, we write $O_1' = IT(O_1, O_2)$. $O_1'$ is the transformed operation
-  of $O_1$, now taking into account the effects of $O_2$. For example, $del(4) = IT(del(3), ins(2, x))$.
+  of $O_1$, now taking into account the effects of $O_2$. For example, $del(4) = IT(del(3), ins(x, 2))$.
 \end{definition}
 
 There are two properties that have appeared in the literature for inclusion transformation functions, which are often required for the control algorithms to converge. These are TP1 and TP2~\cite{Ressel1996} (sometimes also called CP1 and CP2 respectively in the literature).
