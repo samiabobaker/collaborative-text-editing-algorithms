@@ -50,7 +50,7 @@
     Formal specifications that define what it means for a collaborative text-editing algorithm to be correct have been proposed recently, but few algorithms have been checked against these specifications, and to date there is no executable checker for them. 
     In this paper we introduce Darner, the first model checker specialised for finding violations of these specifications, supporting both randomised and exhaustive search.
     We also implement a corpus of over 50 such algorithms, covering most of the research literature and popular open-source libraries.
-    Applying Darner to this corpus reveals that 17 of these algorithms do not meet the requirements that we consider essential for a collaborative text-editing algorithm to be practically useful; of these, 10 reproduce known results and 7 are new flaws not reported previously.
+    Applying Darner to this corpus reveals that 17 of these algorithms do not meet the requirements that we consider essential for a collaborative text-editing algorithm to be practically useful; of these, 10 reproduce known results and 7 reveal flaws not reported previously.
     By providing the most comprehensive survey and empirical validation to date, we hope that this paper will place the field of collaborative text editing on a more stable footing going forward.
 \end{abstract}
 
@@ -76,7 +76,7 @@ However, executable checkers for these specifications are not available, and onl
 As a result, there is a large collection of algorithms for collaborative text editing, historical and new, whose correctness properties are unknown.
 
 This problem is exacerbated by the fact that for many algorithms, no implementation is publicly available, and the descriptions of the algorithms in papers are sometimes complex, vague, and/or incomplete, making it difficult to independently check them for correctness.
-As a result, some work in this field has gained a reputation of being full of errors, too complicated, and not worth trying to understand.
+As a result, some work in this field has gained a reputation for being full of errors, too complicated, and not worth trying to understand.
 
 To address this situation, this paper makes the following contributions:
 \begin{itemize}
@@ -87,13 +87,13 @@ To address this situation, this paper makes the following contributions:
     \item We evaluate Darner based on its ability to reproduce known results, and we compare its performance in an exhaustive checking mode with a randomised mode that probabilistically searches for violations of consistency properties.
 \end{itemize}
 
-As with any model checker, Darner can only explore a finite state space to establish that either an algorithm does not satisfy some property, or that it satisfies the property within bounded executions.
+As with any model checker, Darner can only explore a finite state space to establish either that an algorithm does not satisfy some property, or that it satisfies the property within bounded executions.
 Making any guarantees about unbounded executions would require a formal proof.
 However, the advantage of Darner is that adding new algorithms and checking them against our properties is quick and easy, making it possible to quickly rule out algorithms that are obviously broken.
 We hope that Darner and our algorithm corpus will therefore become a standard part of future research on collaborative editing algorithms, allowing formal verification efforts to focus on those algorithms that have been shown by Darner to be plausible.
 
 The scope of this paper is focussed on the correctness of collaborative text editing with single-character insertions and deletions, and it includes both the OT and the CRDT family of algorithms.
-We leave an evaluation of algorithm performance, and additional features (such as multi-character operations \cite{Lv2016}, undo \cite{Ressel1999}, move \cite{Kleppmann2020}, and rich text \cite{Litt2022}) for future work.
+We leave an evaluation of algorithm performance and additional features (such as multi-character operations \cite{Lv2016}, undo \cite{Ressel1999}, move \cite{Kleppmann2020}, and rich text \cite{Litt2022}) for future work.
 Similarly, the use of these algorithms for file types other than plain text (such as graphics editing \cite{Sun2002}, JSON \cite{Kleppmann2017}, and XML \cite{Davis2002}) is beyond the scope of this paper.
 
 
@@ -120,12 +120,12 @@ an operation $O_b$ is causally dependent on $O_a$, then $O_a$ must be executed b
 of the user must be preserved.
 While the first two properties are well-defined, the meaning of ``intention'' in this model is unclear, making it impossible to formally check compliance with the CCI model.
 
-\subsubsection{Weak and Strong List Specification}
+\subsubsection{Weak and Strong List Specifications}
 
 The weak and strong list specifications of Attiya et al.~\cite{Attiya2016} are precise correctness properties for collaborative text editing (or, more generally, a list object supporting insertion and deletion at arbitrary positions) that go beyond convergence and causality preservation.
 We use these properties in Darner.
 
-The weak and strong list specifications describe what characters must appear in the document, constraining the order, at every point in the execution.
+The weak and strong list specifications describe which characters must appear in the document, and constrain their order, at every point in the execution.
 Firstly, a character must appear in the document if and only if an insertion operation
 of it has been seen, and a deletion operation has not been seen. Secondly, if a character $a$ appears before a character $b$ in some client's document state, $a$ must appear before $b$ in every client's document
 state. The difference between the two is that the weak list specification is more relaxed about the ordering relative to deleted characters.
@@ -262,7 +262,7 @@ if it does not assume TP2.
 
 A few algorithms additionally use \emph{exclusion transformations}, which are the inverse of $IT$.
 
-\begin{definition}[Exclusion Transformations]
+\begin{definition}[Exclusion Transformation]
   For two operations $O_1$ and $O_2$ where $O_2$ is generated from the resulting state of $O_1$, we write $O_2' = ET(O_2, O_1)$. $O_2'$ is the transformed operation of $O_2$,
   now excluding the effects of $O_1$.
 \end{definition}
@@ -432,7 +432,7 @@ We only test combinations where there is a match between the claimed properties 
         \multirow{24}{*}{\rotatebox[origin=c]{90}{\textit{CRDT}}}
           & Automerge \cite{Automerge2026} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & Collabs \cite{Weidner2023} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
-          & Diamond Types (Eg-Walker) \cite{Gentle2025} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
+          & Diamond Types (Eg-walker) \cite{Gentle2025} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
           & Diffsync \cite{Little2017} & \noviol & \newviol & \newviol & \newviol & \newviol & \Circle \\
           & Fugue \cite{Weidner2025Fugue} & \noviol & \noviol & \noviol & \noviol & \knownviol & \Circle \\
           & FugueMax \cite{Weidner2025Fugue} & \noviol & \noviol & \noviol & \noviol & \noviol & \Circle \\
@@ -692,7 +692,7 @@ This section supplements \autoref{tab:algorithmproperties} with additional findi
 
 \subsection{dOPT, Jupiter and adOPTed} \label{sec:doptjupiteradoptedimplementation}
 
-dOPT \cite{Ellis1989} is the original OT algorithm, which is well known not to work. The transformation functions proposed in the same paper satisfy neither TP1 nor TP2. Furthermore, the algorithm has an issue which manifests because it calls its inclusion transformations with two operations that were not generated from the same state when two clients are out of sync by more than one operation. Similar issues are referred to in the literature as the dOPT puzzle \cite{Sun1998CSCW}. The original paper does mention the correctness issues and claims that the problem lies in the priority scheme, which decides which character should appear first when there are two concurrent insertions at the same location. They propose an alternative priority scheme, but this is also known not to work \cite{Sun1998CSCW}, so we do not implement it.
+dOPT \cite{Ellis1989} is the original OT algorithm, which is well known not to work. The transformation functions proposed in the same paper satisfy neither TP1 nor TP2. Furthermore, the algorithm has an issue which manifests because it calls its inclusion transformations with two operations that were not generated from the same state when two clients are out of sync by more than one operation. Similar issues are referred to in the literature as the dOPT puzzle \cite{Sun1998CSCW}. The original paper does mention the correctness issues and claims that the problem lies in the priority scheme, which decides which character should appear first when there are two concurrent insertions at the same location. The authors propose an alternative priority scheme, but this is also known not to work \cite{Sun1998CSCW}, so we do not implement it.
 
 The Jupiter algorithm \cite{Nichols1995} is based on dOPT and uses a server, and claims to fix its issues. Darner finds that this algorithm converges and satisfies the weak list specification (which matches proofs of these properties \cite{Wei2018}). The paper does not fully specify transformation functions, so we use a set of transformation functions that were formally proven to satisfy TP1 \cite{Kleppmann2023}. The paper also does not fully specify the behaviour of the server, but this is clarified in later papers \cite{Xu2014}. We were able to satisfy forward non-interleaving with this algorithm by swapping the server and client roles in the transformation functions.
 
@@ -766,16 +766,16 @@ LogootSplit \cite{Andre2013} and LSEQ \cite{Nedelec2013} are two variants of Log
 
 \subsection{Partial persistent sequences (PPS)} \label{sec:ppsimplementation}
 
-A PPS \cite{Wu2010} represents positions using rational numbers between 0 and 1. When inserting a character between two other characters with positions $p$ and $q$,the position of the new character must be some position between $p$ and $q$. In the final state, the characters are ordered by this position. This idea was mentioned previously \cite{Preguica2009}, but dismissed because it requires arbitrary-precision rationals. Even without considering that issue, we find that the algorithm fails to converge because it does not give unique identifiers when two users concurrently insert at the same position. The two papers proposing this algorithm \cite{Wu2009, Wu2010} identify this issue and each provides a separate fix. We find that neither fix works entirely, and provide counterexamples.  
+A PPS \cite{Wu2010} represents positions using rational numbers between 0 and 1. When inserting a character between two other characters with positions $p$ and $q$, the position of the new character must be some value between $p$ and $q$. In the final state, the characters are ordered by this position. This idea was mentioned previously \cite{Preguica2009}, but dismissed because it requires arbitrary-precision rationals. Even without considering that issue, we find that the algorithm fails to converge because it does not give unique identifiers when two users concurrently insert at the same position. The two papers proposing this algorithm \cite{Wu2009, Wu2010} identify this issue and each provides a separate fix. We find that neither fix works entirely, and provide counterexamples.  
 
-The first fix is, when inserting between $p$ and $q$, to split that range into subranges. For example, if $p=0$ and $q=1$, and there are 10 clients, client 1 will only insert between 0 and 0.1, client 2 will only insert between 0.1 and 0.2, and so on. The problem with this is that different clients may see different ranges, which leads to their subranges overlapping. Suppose the state is ``abc'' for client 2, but only ``ac'' for client 1 (because it has not yet received the insertion for `b'). Also, suppose `a' has position 0.1, `b' has position 0.5, `c' has position 0.8. If both clients tried to insert after `a', client 1 is inserting between 0.1 and 0.8, while client 2 is inserting between 0.1 and 0.5. This means the subranges that each client sees will be different, and could overlap, leading to collisions.
+The first fix is, when inserting between $p$ and $q$, to split that range into subranges. For example, if $p=0$ and $q=1$, and there are 10 clients, client 1 will only insert between 0 and 0.1, client 2 will only insert between 0.1 and 0.2, and so on. The problem with this is that different clients may see different ranges, which leads to their subranges overlapping. Suppose the state is ``abc'' for client 2, but only ``ac'' for client 1 (because it has not yet received the insertion for `b'). Also, suppose `a' has position 0.1, `b' has position 0.5, and `c' has position 0.8. If both clients try to insert after `a', client 1 is inserting between 0.1 and 0.8, while client 2 is inserting between 0.1 and 0.5. This means the subranges that each client sees will be different, and could overlap, leading to collisions.
 
 
-The second fix is to append digits to the end of the rational number. For example, if the client has id 1 and is trying to insert at position $0.5$, the new position will be $0.51$. The problem is that it is not clear which part is the actual position and which is the client id. With more than 10 clients, we found situations where this ambiguity meant two characters were assigned the same position.
+The second fix is to append digits to the end of the rational number. For example, if the client has ID 1 and is trying to insert at position $0.5$, the new position will be $0.51$. The problem is that it is not clear which part is the actual position and which is the client ID. With more than 10 clients, we found situations where this ambiguity meant two characters were assigned the same position.
 
 \subsection{Text without CRDTs}
 
-We implemented both the server-based and Lamport-ordered peer-to-peer variants described by Weidner \cite{Weidner2025without}. The CRDT row in \autoref{tab:algorithmproperties} refers to the peer-to-peer variant; both variants gave the same results for the properties checked. The blog notes that the Lamport-ordered variant has the same list order as RGA, so its maximal non-interleaving violation is a known result.
+We implemented both the server-based and Lamport-ordered peer-to-peer variants described by Weidner \cite{Weidner2025without}. The CRDT row in \autoref{tab:algorithmproperties} refers to the peer-to-peer variant; both variants gave the same results for the properties checked. The blog post notes that the Lamport-ordered variant has the same list order as RGA, so its maximal non-interleaving violation is a known result.
 
 \subsection{TreeDoc}
 
@@ -800,13 +800,13 @@ We ported the collaborative editing algorithm from ProseMirror \cite{Haverbeke20
 
 \subsection{Loro} \label{sec:loroimplementation}
 
-Loro's documentation \cite{Loro2026} lists ``Fugue / Maximal non-inter\-leaving'' as a supported feature. However, its text implementation uses Fugue's ordering rather than FugueMax's. We reproduced maximal non-interleaving violations in the published Loro library as well as our port. This is the known limitation of Fugue's ordering, so we do not mark the violation as new in \autoref{tab:algorithmproperties}.
+Loro's documentation \cite{Loro2026} lists ``Fugue / Maximal non-inter\-leaving'' as a supported feature. However, its text implementation uses Fugue's ordering rather than FugueMax's. We reproduced maximal non-interleaving violations in the published Loro library as well as our port. This is a known limitation of Fugue's ordering, so we do not mark the violation as new in \autoref{tab:algorithmproperties}.
 
 \subsection{Yjs and YjsMod}
 
 The convention in the Fugue paper is that the left origin cannot be a tombstone, but the right origin can. Both Yjs and YjsMod (as implemented in reference-crdts \cite{Gentle2021}) follow the opposite convention, where the left origin can be a tombstone, and the right origin cannot. In order to be consistent with the other algorithms, we switch this to the convention of the Fugue paper.
 
-\subsection{Anchor based CRDTs}
+\subsection{Anchor-based CRDTs}
 
 We find that some CRDTs (such as Fugue, FugueMax, RGA, Sync9, Yjs, YjsMod) have a similar design. We include in the repository an origin order checker, which is an investigation into the similarities and differences between the behaviours of these algorithms.
 
