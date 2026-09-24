@@ -76,7 +76,7 @@ However, executable checkers for these specifications are not available, and onl
 As a result, there is a large collection of algorithms for collaborative text editing, historical and new, whose correctness properties are unknown.
 
 This problem is exacerbated by the fact that for many algorithms, no implementation is publicly available, and the descriptions of the algorithms in papers are sometimes complex, vague, and/or incomplete, making it difficult to independently check them for correctness.
-As a result, some work in this field has gained a reputation for being full of errors, too complicated, and not worth trying to understand.
+As a result, some work in this field has gained a reputation for being full of errors, too complicated, and not worth trying to understand \cite{Gentle2011,Levien2019}.
 
 To address this situation, this paper makes the following contributions:
 \begin{itemize}
@@ -128,8 +128,11 @@ We use these properties in Darner.
 The weak and strong list specifications describe which characters must appear in the document, and constrain their order, at every point in the execution.
 Firstly, a character must appear in the document if and only if an insertion operation
 of it has been seen, and a deletion operation has not been seen. Secondly, if a character $a$ appears before a character $b$ in some client's document state, $a$ must appear before $b$ in every client's document
-state. The difference between the two is that the weak list specification is more relaxed about the ordering relative to deleted characters.
+state.
 
+The difference between the two is that the weak list specification is more relaxed about the ordering relative to deleted characters.
+For example, say a document initially reads $x$, and then three clients concurrently modify it: the first inserts $a$ before $x$ to produce $ax$, the second inserts $b$ after $x$ to produce $xb$, and the third deletes $x$ to produce an empty document.
+When these edits are merged, the weak list specification allows the final state to be either $ab$ or $ba$, whereas the strong list specification allows only $ab$.
 
 We quote the relevant parts of these specifications here, but refer to the original paper \cite{Attiya2016}
 for the full properties.
@@ -753,12 +756,12 @@ Darner's convergence results led us to identify a bug in Diffsync \cite{Little20
 
 \subsection{Logoot}
 
-The Logoot \cite{Weiss2009} algorithm is known to have bugs \cite{Sun2018}, which we were able to reproduce. The algorithm has a BASE parameter, which affects how easy it is to reproduce the issue. We were not able to reproduce them with BASE set to $2^{64}$, but
-by lowering the base to $2^4$, violations start to appear. This is because the bugs require two random numbers to be equal, and with BASE=$2^{64}$ this happens with very low probability. Reducing the collision probability to an acceptable level would require setting BASE to a value that is too great to be practical.
-
+The Logoot \cite{Weiss2009} algorithm is known to have bugs \cite{Sun2018}, which we were able to reproduce.
+The algorithm has a BASE parameter, and the bugs occur when two random numbers in the range from 0 to $\textrm{BASE} - 1$ are equal.
+The probability of violations thus depends on the choice of BASE; they are common when $\mathrm{BASE} = 2^4$, but did not occur in our tests with $\mathrm{BASE} = 2^{64}$.
 
 The first bug leads to divergence; this bug was fixed in a later description of the algorithm \cite{Weiss2010}. The other causes the algorithm to get stuck in an infinite loop. Previous work has found that many of the fixes to this bug in open-source implementations \cite{Urso2016, Chen2017} introduce divergence bugs
-elsewhere. We implemented both of those fixes and found they do not work. We were able to slightly modify one of these fixes \cite{Chen2017}, and with that, we were unable to reproduce the issue.
+elsewhere. We implemented both of those fixes and found they do not work. We were able to slightly modify one of these fixes \cite{Chen2017}, and with that, we were no longer able to produce violations of the weak or strong list specification.
 
 \subsection{LogootSplit and LSEQ}
 
