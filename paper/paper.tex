@@ -191,13 +191,13 @@ We quote the relevant properties below, but refer to the Fugue paper \cite{Weidn
 
 \begin{definition}[Left Origin]
   The left origin of an element is the element directly preceding its insertion position at the time of insertion. If the element was inserted by 
-  an $ins(i, x)$ call, then its left origin was at index $i-1$ at the time of this call. If $i=0$, then its left origin is a special symbol
+  an $ins(i, x)$ call, then its left origin was at index $i-1$ immediately prior to this call. If $i=0$, then its left origin is a special symbol
   $\mathit{start}$.
 \end{definition}
 
 \begin{definition}[Right Origin]
   The right origin of an element is the element directly following its insertion position at the time of insertion, in the list including tombstones. If the element was inserted by 
-  an $ins(i, x)$ call, then its right origin was at index $i+1$ at the time of this call. If the insertion is at the end of the list, then its right origin is a special symbol
+  an $ins(i, x)$ call, then its right origin was at index $i$ immediately prior to this call. If the insertion is at the end of the list, then its right origin is a special symbol
   $\mathit{end}$.
 \end{definition}
 
