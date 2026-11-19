@@ -1,4 +1,11 @@
-\documentclass[sigplan,10pt,review,anonymous]{acmart}
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage[hyphens]{url}
 \def\sectionautorefname{Section}
 \def\subsectionautorefname{Section}
 \usepackage{makecell}
@@ -19,29 +26,27 @@
 
 \graphicspath{{figures/}}
 
-% acmart creates the shared `theorem` counter (numbered within section) in an
-% \AtEndPreamble hook, so defer this to make Property share it with Definition.
-\AtEndPreamble{\newtheorem{property}[theorem]{Property}}
+% Definitions and properties share one counter.
+\newtheorem{property}{Property}
+\theoremstyle{definition}
+\newtheorem{definition}[property]{Definition}
 
-\setcopyright{cc}
-\acmConference[EuroSys'27]{European Conference on Computer Systems}{April 19--23, 2027}{Rabat, Morocco}
+\usepackage[hidelinks]{hyperref}
 
 \hyphenation{Prose-Mirror}
 
 \begin{document}
 
 
-\title{Darner: A model checker for collaborative text editing algorithms}
+\title{Darner: A model checker for collaborative text editing algorithms\\
+{\normalsize (Regular Paper)}}
 
-%% Authors
+%% Authors (anonymised for double-blind review; uncomment for camera-ready)
 
-\author{Sami Abobaker}
+\author{\IEEEauthorblockN{Anonymous Author(s)}}
+% \author{\IEEEauthorblockN{Sami Abobaker, Aryan Shah, Musaab Khan, Martin Kleppmann}}
 
-\author{Aryan Shah}
-
-\author{Musaab Khan}
-
-\author{Martin Kleppmann}
+\maketitle
 
 %% Abstract
 
@@ -58,7 +63,7 @@
 
 %% Keywords
 
-\maketitle
+
 
 \section{Introduction}
 
@@ -685,7 +690,7 @@ AI was used to assist with the development of some of the algorithms, and to sea
 % TODO: acknowledgements. Thank Matthew Weidner for feedback
 
 %% Bibliography
-\bibliographystyle{ACM-Reference-Format}
+\bibliographystyle{IEEEtran}
 \bibliography{references}
 
 \clearpage
